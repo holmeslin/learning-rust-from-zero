@@ -110,11 +110,23 @@ let n: i32 = line.parse().expect("請輸入整數");
 - 「執行結果」只放程式自己印出來的內容；示範 panic 時，連同 panic 訊息一起貼（stdout 在前、stderr 在後）。panic 訊息的第一行 `thread 'main' (數字) panicked at src/main.rs:行:欄:` 裡，括號中的數字每次執行都不同，所以這種區塊一律寫「執行結果（某一次）：」，並在文中說明。行號與欄號以讀者照抄、放進 `cargo new` 專案的 `src/main.rs` 為準。
 - 展示編譯錯誤或警告時，訊息用 ```` ```text ```` 貼出 Rust 1.99 實際的訊息（路徑統一寫 `src/main.rs`，結尾的 `error: aborting due to…` 與 `For more information…` 可以省略），通常只貼 `error[E....]` 那幾行和箭頭指的位置就好；只貼前面幾行時，要在文中說明後面還有補充。
 - 終端機指令用 ```` ```bash ````，`Cargo.toml` 內容用 ```` ```toml ````（這兩種不會被驗證）。
-- 第一部只用 std。第二部用到的 crate 版本統一鎖在 checkcode 的共用 `Cargo.toml`，不得自行加 crate。
+- 第一部只用 std；第二部可以用 crate，見下一節「第二部使用 crate」。
 - 不要用 `ignore` 逃避驗證：能寫成完整程式就寫成完整程式。
 - 浮點數範例避開 3.14、2.718 這類常數（clippy `approx_constant` 會直接報錯），改用 2.5、1.5 之類的值。
 - `#[derive(Debug)]` 的 struct，每個欄位都要在程式裡被讀到（印出整個 struct 不算），否則 rustc 會報 `dead_code`。
 - 中文一個字算兩欄寬，`println!` 的字串太長會被 rustfmt 拆成多行；訊息寫短一點。
+
+## 第二部使用 crate
+
+第二部（第 13 章起）的範例可以用下列 crate，也只能用這些：`tokio`、`tokio-util`、`clap`、`axum`、`tower`、`http-body-util`、`serde`、`serde_json`、`tracing`、`rand`、`uuid`、`thiserror`、`anyhow`、`rusqlite`（bundled）。
+
+- **照常寫 ```` ```rust ````，不用加標註。** checkcode 看程式裡有沒有出現 `<crate>::`（連字號換成底線，例如 `tokio::`、`serde_json::`、`http_body_util::`；`use tokio::time::sleep;` 和 `#[tokio::main]` 都算）：有的話，這個區塊就放進共用依賴 package 一起編譯，沒有的話照第一部的方式單檔編譯。清單外的 crate（例如 `reqwest::`）不會被認出來，單檔編譯時找不到 crate，區塊直接失敗。
+- 區塊要用到 crate 的名字，一定要寫成 `crate名::` 的路徑形式（`use tokio::spawn;` 或 `tokio::spawn(...)`）。`use tokio as t;` 這種別名寫法不會被認出來。
+- rustfmt、clippy（`-D warnings` 與 `clippy-allow.txt` 放行清單）、結束碼、`stdin`、`no_run`、`warn`、`test`、`compile_fail=E....` 的規則跟 std 區塊完全相同；一個區塊失敗不會影響其他區塊。
+- Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。
+- 版本統一鎖在 `tools/checkcode/deps/Cargo.toml`，`Cargo.lock` 一併提交。新增 feature 或升級版本：改該檔，執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`，再把 `Cargo.lock` 一起提交。不得在書中另外加清單外的 crate。
+- 該檔的 `[lints.clippy]` 必須與 `tools/checkcode/clippy-allow.txt` 一致；改放行清單時兩邊一起改（checkcode 的測試會檢查）。
+- 第一次編譯所有 crate 需要幾分鐘（`rusqlite` 的 bundled 要有 C 編譯器），之後會使用 `tools/checkcode/deps/target` 裡的快取。CI 也快取這個目錄。
 
 ## 正確性
 
