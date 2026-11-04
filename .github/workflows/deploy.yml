@@ -26,7 +26,10 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: tools/checkcode
+          # deps 是第二部 crate 範例共用的依賴 package，checkcode 會在這裡的 target 編譯。
+          workspaces: |
+            tools/checkcode
+            tools/checkcode/deps
 
       - name: Install mdBook
         run: |

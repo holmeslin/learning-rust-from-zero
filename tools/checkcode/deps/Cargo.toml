@@ -1,0 +1,44 @@
+# 第二部（第 13 章起）範例共用的依賴設定。checkcode 把每個用到 crate 的區塊放成這個 package 的一個 bin，
+# 一次批次編譯。書中只能用這裡列出的 crate，版本統一鎖在這裡，Cargo.lock 一併提交。
+# 新增或升級：改本檔，執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`，把 Cargo.lock 一起提交。
+[package]
+name = "book-deps"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+anyhow = "1.0.104"
+axum = "0.8.9"
+clap = { version = "4.6.7", features = ["derive"] }
+http-body-util = "0.1.5"
+rand = "0.10.3"
+rusqlite = { version = "0.41.1", features = ["bundled"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["full"] }
+tokio-util = "0.7.20"
+tower = { version = "0.5.3", features = ["util"] }
+tracing = "0.1.44"
+uuid = { version = "1.29.0", features = ["v4"] }
+
+# 不產生除錯資訊：跟單檔編譯（clippy-driver）一致，連結也比較快。
+[profile.dev]
+debug = false
+strip = "none"
+
+# 警告都算失敗（跟單檔編譯的 -D warnings 一致）。
+[lints.rust]
+warnings = "deny"
+
+# 必須與 ../clippy-allow.txt 一致（checkcode 的測試會檢查）。
+[lints.clippy]
+needless_return = "allow"
+manual_range_contains = "allow"
+assign_op_pattern = "allow"
+vec_init_then_push = "allow"
+needless_range_loop = "allow"
+while_let_on_iterator = "allow"
+ptr_arg = "allow"
+single_match = "allow"
