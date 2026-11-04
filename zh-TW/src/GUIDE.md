@@ -172,7 +172,7 @@
 | --- | --- |
 | 第 1 章 | `cargo new`/`cargo run`、`println!` 與 `{}`、註解（`//`、`/* */`）、`let`/`let mut`、型別標註 `let x: i32`、變數必須初始化、shadowing、運算子與複合賦值（沒有 `++`）、`if` 與 `if` 運算式、讀輸入與 `parse` 固定句型、`loop`（含 `break` 帶值）/`while`/`for` 範圍、`continue` 與巢狀迴圈、純量型別與 `i32::MAX`、整數溢位、`as`、`char`、跳脫字元與 raw string、未使用變數警告與 `_x` |
 | 第 2 章 | `const`/`static`（不可變）、函式與參數（每個參數都要標型別、參數預設不可變）、回傳值與最後一個運算式、陳述式 vs 運算式（分號）、early `return`、`()`、tuple 與用 tuple 回傳多個值、解構與 `_`、陣列 `[T; N]` 與 `{:?}`、`usize` 索引與越界 panic、`for x in 陣列`、遞迴、`String` 初探（`String::from`、`push_str`、`len`，只在同一個函式內使用） |
-| 第 3 章 | 所有權規則、stack 與 heap、drop、move、`clone`、`Copy`、傳參數與回傳值時的所有權轉移 |
+| 第 3 章 | 沒有 GC 的記憶體管理、stack 與 heap、所有權三條規則與作用域、drop（區塊結束、函式結束、重新指定值）、move 與 E0382、`.clone()`、`Copy` 型別（整數、`bool`、`char`、元素都是 `Copy` 的 tuple 與陣列、字串字面值）、傳參數時 move、用回傳值（含 tuple）交還所有權。還沒有 `&` |
 | 第 4 章 | `&` 與 `&mut`、借用規則、NLL、懸置參照、`*`、`&str`、`&[T]`、`&mut [T]` |
 | 第 5 章 | `struct`、欄位初始化簡寫、更新語法、tuple struct、`#[derive(Debug)]`、`impl` 與方法、`&self`/`&mut self`/`self`、關聯函式與 `new`、自動參照 |
 | 第 6 章 | `enum` 與帶資料的 variant、`match` 與窮盡性、`_`、`Option`、`if let`、`let else`、match guard、`\|` 與範圍模式、解構、slice pattern、`matches!`、let chains、enum 的方法 |
@@ -208,6 +208,7 @@
 | 第 2 章第 11 集 | `println!("{:?}", 陣列)`（tuple、`()` 也能這樣印；也可寫成 `{x:?}`） | `Debug` 第 8 章 |
 | 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章 |
 | 第 2 章第 15 集 | `s.len()`（`String` 與陣列都能用）、`s.push_str("...")`、`String::from("...")` | 方法第 5 章 |
+| 第 3 章第 7 集 | `s.clone()`（寫法同上，是方法呼叫） | 方法第 5 章；`Clone` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 
@@ -252,6 +253,10 @@ let n: i32 = line.parse().expect("請輸入整數");
 | `for x in 陣列` | 第 2 章第 13 集 | 用索引 `for i in 0..N` |
 | 遞迴 | 第 2 章第 14 集 | 用迴圈 |
 | `String` | 第 2 章第 15 集 | 只用字串字面值；`String` 傳進函式、指定給別的變數屬第 3 章 |
+| `String` 指定給別的變數（move）、move 之後不能再用（E0382） | 第 3 章第 5、6 集 | 只在 `main` 裡用同一個變數；整數等 `Copy` 型別不受限 |
+| `.clone()` | 第 3 章第 7 集 | 重新寫一次 `String::from(...)`，或調整順序 |
+| `Copy` 型別的概念 | 第 3 章第 8 集 | 只說「整數可以直接複製」，不談哪些型別是 `Copy` |
+| `String` 傳進函式、從函式回傳 | 第 3 章第 9、10 集 | 全部寫在 `main` 裡；回傳新建立的 `String` 要等到第 10 集 |
 | 參照 `&` | 第 4 章第 1 集 | 用 `clone` 或用回傳值交還所有權 |
 | `&mut` | 第 4 章第 3 集 | 回傳新的值 |
 | `&str` 參數、slice | 第 4 章第 8～11 集 | 參數用 `&String` 或陣列參照 |
@@ -307,6 +312,8 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 書中用語 | 不要用 | 英文 |
 | --- | --- | --- |
 | 所有權 | 擁有權 | ownership |
+| 擁有者 | 所有者、持有者 | owner |
+| 作用域 | 域 | scope |
 | 借用 | 租借 | borrowing |
 | 參照 | 引用 | reference |
 | 解參照 | 解引用 | dereference |
@@ -328,7 +335,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 預設 | 默認 | default |
 | 程式 | 程序 | program |
 
-`trait`、crate、`struct`、`enum`、`match`、slice、`Future`、`async`、variant 保留英文。
+`trait`、crate、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop 保留英文。
 
 排版：
 
