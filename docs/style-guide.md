@@ -66,6 +66,7 @@
 | 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章 |
 | 第 2 章第 15 集 | 方法呼叫 `s.len()`（`String` 與陣列都能用）、`s.push_str("...")`；`String::from("...")` | 方法第 5 章 |
 | 第 3 章第 7 集 | 方法呼叫 `s.clone()`（寫法同上） | 方法第 5 章；`Clone` 第 8 章 |
+| 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 
@@ -119,6 +120,12 @@ let n: i32 = line.parse().expect("請輸入整數");
 - `push_str` 的參數至少要兩個字元：`s.push_str("！")` 這種只有一個字元的字串，會被 clippy `single_char_add_str` 擋下，而 `push` 第 7 章才教。
 - 記憶體、所有權的示意圖放在 ```` ```text ```` 區塊，只用 ASCII 符號（`[ ]`、`--->`）加中文標註，不用方框線字元（中英文字寬不同，對不齊）。示意圖不是程式輸出，前面不寫「執行結果：」。
 - 概念用語 move、drop 保留英文、不加反引號；程式裡真的會寫出來的名稱（`.clone()`、`Copy`、`Drop`）才加反引號。
+- 借用相關的範例：
+  - 第 4 章第 10 集起，只需要讀的字串參數一律寫 `&str`，不寫 `&String`（clippy `ptr_arg` 放行，只是讓第 2～9 集教 `&String` 用）；要改動的才寫 `&mut String`。
+  - 第 7 章第 4 集之前，不寫 `for x in &a`、`for x in slice` 這種走訪參照的迴圈，改用 `for i in 0..a.len()` 加索引（clippy `needless_range_loop` 已放行）。
+  - 回傳參照的函式只放一個參照參數（第 4、5 章）；示範 E0106 時，用沒有參數的 `fn dangle() -> &String`。
+  - 展示借用錯誤的 `compile_fail` 區塊，要讓參照在衝突「之後」還被用到，否則 NLL 會讓它編譯成功。
+  - 展示錯誤時，盡量別讓訊息夾帶無關的警告：變數沒被改到就不要寫 `mut`（`unused_mut`），被指定的值要讀過一次（`unused_assignments`），貼出來的訊息才乾淨。
 
 ## 第二部使用 crate
 
