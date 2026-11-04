@@ -76,23 +76,33 @@ help: consider changing this to be mutable
 
 ```rust
 fn main() {
-    let mut s = String::new();
-    println!("長度 {}", s.len());
-    s.push_str("哈囉");
-    println!("長度 {}", s.len());
+    let s = String::from("哈囉");
+    println!("{}", s.len());
 }
 ```
 
 執行結果：
 
 ```text
-長度 0
-長度 6
+6
 ```
 
 「哈囉」兩個字，`len` 是 6。怎麼數字元，第 7 章會學到。
 
-陣列也有 `len`，寫法一樣，回傳的是元素的個數：有三個元素的陣列 `scores`，`scores.len()` 就是 3。
+陣列也有 `len`，寫法一樣，回傳的是元素的個數：
+
+```rust
+fn main() {
+    let scores = [85, 92, 78];
+    println!("{}", scores.len());
+}
+```
+
+執行結果：
+
+```text
+3
+```
 
 ### 字串字面值不是 `String`
 
@@ -128,17 +138,12 @@ help: try using a conversion method
 
 ### 跟 Go 比一比
 
-Go 的字串不能改，`s += ", world"` 其實是做出一個新字串，再讓 `s` 指向它。Rust 的 `String` 可以原地增長：`push_str` 直接改動原本那個，所以才需要 `mut`。
-
-另一個差別是 Rust 有兩種字串型別：寫死的字面值，以及可以增長的 `String`。Go 只有一種 `string`，不用分。
-
-`len` 的結果則兩邊一樣：Go 的 `len(s)` 也是位元組數。
+Go 的字串不能改，`s += ", world"` 其實是做出一個新字串，再讓 `s` 指向它。Rust 的 `String` 可以原地增長：`push_str` 直接改動原本那個，所以才需要 `mut`。另一個差別是 Rust 有兩種字串型別：寫死的字面值，以及可以增長的 `String`。Go 只有一種 `string`，不用分。`len` 的結果則兩邊一樣：Go 的 `len(s)` 也是位元組數。
 
 ## 重點整理
 
 - `String` 是可以增長的文字，用 `String::from("...")` 建立；`String::new()` 是空的。
-- `s.push_str("...")` 把文字接到後面，`s` 要用 `let mut`；`s.len()` 回傳位元組數，不是字元數；陣列的 `len` 是元素個數。
-- 方法呼叫的寫法先照抄，第 5 章解釋。
+- `s.push_str("...")` 把文字接到後面，`s` 要用 `let mut`；`s.len()` 回傳位元組數，不是字元數；陣列的 `len` 是元素個數。方法呼叫的寫法先照抄，第 5 章解釋。
 - 字串字面值（型別 `&str`，第 4 章介紹）不是 `String`；要 `String` 就寫 `String::from`。
 - 這一集只在 `main` 裡使用 `String`；傳給函式、指定給別的變數的規則，第 3 章介紹。
 - Go 的字串不可變，Rust 的 `String` 可以原地改；兩邊的 `len` 都是位元組數。

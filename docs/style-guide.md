@@ -65,6 +65,7 @@
 | 第 2 章第 11 集 | `println!("{:?}", 陣列)`（tuple、`()` 也能這樣印；也可寫成 `{x:?}`） | `Debug` 第 8 章 |
 | 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章 |
 | 第 2 章第 15 集 | 方法呼叫 `s.len()`（`String` 與陣列都能用）、`s.push_str("...")`；`String::from("...")` | 方法第 5 章 |
+| 第 3 章第 7 集 | 方法呼叫 `s.clone()`（寫法同上） | 方法第 5 章；`Clone` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 
@@ -115,6 +116,9 @@ let n: i32 = line.parse().expect("請輸入整數");
 - 浮點數範例避開 3.14、2.718 這類常數（clippy `approx_constant` 會直接報錯），改用 2.5、1.5 之類的值。
 - `#[derive(Debug)]` 的 struct，每個欄位都要在程式裡被讀到（印出整個 struct 不算），否則 rustc 會報 `dead_code`。
 - 中文一個字算兩欄寬，`println!` 的字串太長會被 rustfmt 拆成多行；訊息寫短一點。
+- `push_str` 的參數至少要兩個字元：`s.push_str("！")` 這種只有一個字元的字串，會被 clippy `single_char_add_str` 擋下，而 `push` 第 7 章才教。
+- 記憶體、所有權的示意圖放在 ```` ```text ```` 區塊，只用 ASCII 符號（`[ ]`、`--->`）加中文標註，不用方框線字元（中英文字寬不同，對不齊）。示意圖不是程式輸出，前面不寫「執行結果：」。
+- 概念用語 move、drop 保留英文、不加反引號；程式裡真的會寫出來的名稱（`.clone()`、`Copy`、`Drop`）才加反引號。
 
 ## 第二部使用 crate
 
