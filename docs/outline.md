@@ -7,7 +7,7 @@ Rust 1.99 · edition 2024 · 繁中 · 給會寫 Go 的 Rust 新手 · 一集一
 # 第一部
 
 ## 第 1 章 基礎
-01 安裝 Rust（rustup）· 02 第一個程式（`cargo new`、`cargo run`、`fn main`、`println!` 固定句型）· 03 變數與 `{}` 佔位符 · 04 註解 · 05 預設不可變與 `let mut` · 06 變數必須初始化（沒有零值）· 07 shadowing · 08 算術運算子（整數除法、`%`）· 09 複合賦值（沒有 `++`）· 10 比較與邏輯運算子 · 11 `if`（條件不加括號、只能是 `bool`）· 12 `if` 是運算式 · 13 讀取輸入（stdin 固定句型）· 14 文字轉數字（`parse` + `expect` 固定句型）· 15 綜合練習 · 16 `loop` 與 `break`（含 `break` 帶值）· 17 `while` · 18 `for` 與範圍 `0..n`、`0..=n` · 19 `continue` 與巢狀迴圈 · 20 純量型別（`i32` `i64` `u8` `usize` `f64` `bool` `char`）· 21 整數溢位（debug 會 panic，跟 Go 比一比）· 22 型別轉換 `as` · 23 `char` 與字串字面值 · 24 跳脫字元與 raw string · 25 未使用變數警告與 `_x`
+01 安裝 Rust（rustup）· 02 第一個程式（`cargo new`、`cargo run`、`fn main`、`println!` 固定句型、註解）· 03 變數與 `{}` 佔位符 · 04 預設不可變與 `let mut` · 05 變數必須初始化（沒有零值）· 06 shadowing · 07 運算子：跟 Go 差在哪（沒有 `++`、複合賦值、整數除法、沒有隱式轉型）· 08 `if` 與 `if` 是運算式 · 09 讀取輸入（stdin 固定句型）· 10 文字轉數字（`parse` + `expect` 固定句型）· 11 綜合練習 · 12 `loop` 與 `break` 帶值 · 13 `while` · 14 `for`、範圍與 `continue`（含巢狀迴圈）· 15 純量型別（`i32` `i64` `u8` `usize` `f64` `bool` `char`）· 16 整數溢位（debug 會 panic，跟 Go 比一比）· 17 型別轉換 `as` · 18 `char`、跳脫字元與 raw string · 19 未使用變數警告與 `_x`
 
 邊界：`match` 留到第 6 章，本章不教。浮點範例避開 3.14、2.718（clippy `approx_constant`）。
 
