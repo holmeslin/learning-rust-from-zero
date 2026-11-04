@@ -54,7 +54,7 @@ fn main() {
 Hello, world!
 ```
 
-`cargo run` 會先編譯再執行。第一次執行時，終端機在程式輸出之前還會多出幾行 `Compiling`、`Finished`、`Running` 的訊息，那是 cargo 在報告進度。本書的「執行結果」只列程式自己印出來的部分。
+`cargo run` 會先編譯再執行。在程式輸出之前，終端機還會多出 `Compiling`、`Finished`、`Running` 這幾行訊息（程式沒改過、不用重新編譯時，就不會有 `Compiling`），那是 cargo 在報告進度。本書的「執行結果」只列程式自己印出來的部分。
 
 ### 先照抄的骨架
 
