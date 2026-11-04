@@ -170,7 +170,7 @@
 
 | 讀完 | 主要內容 |
 | --- | --- |
-| 第 1 章 | `cargo new`/`cargo run`、`println!` 與 `{}`、`let`/`let mut`、變數必須初始化、shadowing、運算子與複合賦值、`if` 與 `if` 運算式、讀輸入與 `parse` 固定句型、`loop`（含 `break` 帶值）/`while`/`for` 範圍、`continue`、純量型別、整數溢位、`as`、`char`、跳脫字元與 raw string、`_x` |
+| 第 1 章 | `cargo new`/`cargo run`、`println!` 與 `{}`、註解（`//`、`/* */`）、`let`/`let mut`、型別標註 `let x: i32`、變數必須初始化、shadowing、運算子與複合賦值（沒有 `++`）、`if` 與 `if` 運算式、讀輸入與 `parse` 固定句型、`loop`（含 `break` 帶值）/`while`/`for` 範圍、`continue` 與巢狀迴圈、純量型別與 `i32::MAX`、整數溢位、`as`、`char`、跳脫字元與 raw string、未使用變數警告與 `_x` |
 | 第 2 章 | `const`/`static`（不可變）、函式、參數型別、回傳值與尾端運算式、陳述式 vs 運算式、early `return`、`()`、tuple 與解構、陣列與 `usize` 索引、`for` 走訪陣列、遞迴、`String` 初探 |
 | 第 3 章 | 所有權規則、stack 與 heap、drop、move、`clone`、`Copy`、傳參數與回傳值時的所有權轉移 |
 | 第 4 章 | `&` 與 `&mut`、借用規則、NLL、懸置參照、`*`、`&str`、`&[T]`、`&mut [T]` |
@@ -204,6 +204,7 @@
 | 第 1 章第 9 集 | 讀一行輸入（見下方） | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章 |
 | 第 1 章第 10 集 | 文字轉數字（見下方） | `FromStr` 第 8 章；`expect` 第 9 章 |
 | 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章 |
+| 第 1 章第 15 集 | `i32::MIN`、`i32::MAX`（`u8::MAX` 等） | 關聯常數第 5 章 |
 | 第 2 章第 11 集 | `println!("{:?}", 陣列)` | `Debug` 第 8 章 |
 | 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章 |
 | 第 2 章第 15 集 | `s.len()`、`s.push_str("...")`、`String::from("...")` | 方法第 5 章 |
@@ -218,7 +219,7 @@ std::io::stdin().read_line(&mut line).expect("讀取失敗");
 let line = line.trim();
 ```
 
-把文字轉成整數（型別可換成 `i64`、`u32`、`f64` 等已教過的型別）：
+把文字轉成整數（型別可換成已教過的數字型別：第 1 章第 15 集之前只用 `i32`、`i64`，第 15 集起才可換成 `u8`、`usize`、`f64` 等）：
 
 ```rust,ignore
 let n: i32 = line.parse().expect("請輸入整數");
@@ -230,14 +231,16 @@ let n: i32 = line.parse().expect("請輸入整數");
 
 | 內容 | 第一次正式教 | 在那之前 |
 | --- | --- | --- |
+| 型別標註 `let x: i32 = 5;` | 第 1 章第 3 集（整數型別只提 `i32`、`i64`） | 不標型別，讓編譯器推斷 |
 | `let mut`、重新賦值 | 第 1 章第 4 集 | 每個變數只用 `let` 建立一次，不改值 |
 | shadowing | 第 1 章第 6 集 | 取新的變數名稱 |
 | `+=` 等複合賦值 | 第 1 章第 7 集 | 寫成 `x = x + 1` |
 | `if` 當成值 | 第 1 章第 8 集 | 用 `let mut` 再在 `if` 裡賦值 |
 | 讀輸入、`parse` | 第 1 章第 9、10 集 | 用寫死的值 |
 | 任何迴圈 | 第 1 章第 12 集 | 不要出需要重複的題目 |
-| `for` 範圍 | 第 1 章第 14 集 | 用 `loop` 或 `while` |
+| `for` 範圍、`continue` | 第 1 章第 14 集 | 用 `loop` 或 `while`；跳過這一圈用 `if` 包起來 |
 | `f64`、`as` | 第 1 章第 15、17 集 | 只用整數；整數除法會捨去小數 |
+| `_x`、`_i`（`_` 開頭的變數名稱） | 第 1 章第 19 集 | 不要留下未使用的變數 |
 | `const` | 第 2 章第 1 集 | 用一般變數 |
 | 自訂函式 | 第 2 章第 2～4 集 | 全部寫在 `main` 裡 |
 | tuple | 第 2 章第 8 集 | 用多個變數 |
