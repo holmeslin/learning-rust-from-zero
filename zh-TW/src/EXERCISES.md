@@ -661,4 +661,906 @@ fn main() {
 
 ## 第 4 章
 
-（第 4 章寫完後補上。）
+這一章開始有借用了，所以「改到能編譯」的題目，能用的改法變多，但這些題要練的是借用本身，不是讓程式編譯成功就好。用 `.clone()` 複製一份、或是退回第 3 章的做法（用回傳值或 tuple 把所有權還回來），雖然能編譯，卻避開了借用，**不算**練到，除非題目明講要 `clone`。每題的「批改重點」會說明這題要練哪一種寫法。
+
+這一章的題目一律不用 `struct`、`Vec`、`match`；會回傳參照的函式，只有一個參照參數。
+
+### 第 4 章第 1 集：參照 `&`
+
+狀態：不出題
+
+不出題原因：
+- 這集在認識 `&` 的寫法、`&String` 型別，以及「參照不擁有資料」；單看 `let r = &s;` 沒有可以改的錯誤，硬出題只會變成「照抄一個 `&`」。
+- 「把函式改成借用」從第 2 集開始有題目可練，建議讀者繼續往下讀。
+
+### 第 4 章第 2 集：借用不轉移所有權
+
+狀態：可用
+
+練習目標：
+- 把「拿走所有權、再還回來」的函式，改成只借用：參數改成 `&String`，呼叫端傳 `&`。
+- 看出借用之後，呼叫端不必再接回所有權，原本的變數可以一直用。
+
+題目：
+1. 起始程式 1 能編譯，但要靠 tuple 把兩個 `String` 還回來。請把 `longer_len` 改成借用，回傳值只剩長度，輸出要跟下方一樣。
+2. 起始程式 2 編譯不過。請用借用改到能編譯，輸出要跟下方一樣。
+
+執行範例：
+
+題 1 的起始程式：
+
+```rust
+fn longer_len(a: String, b: String) -> (String, String, usize) {
+    let n = if a.len() > b.len() { a.len() } else { b.len() };
+    (a, b, n)
+}
+
+fn main() {
+    let a = String::from("哈囉");
+    let b = String::from("Rust 世界");
+    let (a, b, n) = longer_len(a, b);
+    println!("{a} 和 {b} 比較，較長的有 {n} 個位元組");
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+哈囉 和 Rust 世界 比較，較長的有 11 個位元組
+```
+
+題 2 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0382
+fn shout(text: String) {
+    println!("{text}！");
+}
+
+fn main() {
+    let word = String::from("加油");
+    shout(word);
+    shout(word);
+}
+```
+
+題 2 改好之後的輸出：
+
+```text
+加油！
+加油！
+```
+
+批改重點：
+- 題 1：參數改成 `&String`，函式回傳型別只剩 `usize`；`main` 呼叫 `longer_len(&a, &b)`，用 `let n = ...` 接住就好，不再需要 tuple 和重新接回 `a`、`b`。仍然回傳 tuple、或在呼叫時 `clone`，都沒有練到借用。
+- 題 2：參數改成 `&String`，兩次呼叫都寫 `shout(&word)`。第 3 章這題是用 `clone` 解的，這一章的重點是不用複製、只借用；用 `clone` 不算。
+- 兩題都要說得出為什麼呼叫之後 `a`、`word` 還能用：傳進去的是參照，所有權沒有搬家。
+
+提示方向：
+1. 函式只是想讀這些 `String`，真的需要把所有權拿走嗎？參數型別換成什麼，就變成「借來看」？
+2. 參數寫了 `&String`，呼叫的地方也要跟著寫 `&`。
+3. 題 1：函式不再把 `a`、`b` 交還，回傳值還需要放什麼？
+
+參考答案：
+
+題 1：
+
+```rust
+fn longer_len(a: &String, b: &String) -> usize {
+    if a.len() > b.len() { a.len() } else { b.len() }
+}
+
+fn main() {
+    let a = String::from("哈囉");
+    let b = String::from("Rust 世界");
+    let n = longer_len(&a, &b);
+    println!("{a} 和 {b} 比較，較長的有 {n} 個位元組");
+}
+```
+
+題 2：
+
+```rust
+fn shout(text: &String) {
+    println!("{text}！");
+}
+
+fn main() {
+    let word = String::from("加油");
+    shout(&word);
+    shout(&word);
+}
+```
+
+### 第 4 章第 3 集：可變參照 `&mut`
+
+狀態：可用
+
+練習目標：
+- 用 `&mut` 讓函式修改傳進來的 `String`，並同時寫對三個地方：變數用 `let mut`、參數型別 `&mut String`、呼叫端 `&mut`。
+- 分辨 `&`（只能讀）和 `&mut`（可以改）。
+
+題目：
+1. 起始程式編譯不過。請改到能編譯，輸出要跟下方一樣。
+2. 寫一個函式 `shout(s: &mut String)`，在 `String` 的尾端加上 `！！！`。`main` 裡建立 `String::from("加油")`，呼叫 `shout` 兩次，最後印出結果。
+
+執行範例：
+
+題 1 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0596
+fn add_suffix(text: &String) {
+    text.push_str("，謝謝");
+}
+
+fn main() {
+    let mut text = String::from("你好");
+    add_suffix(&text);
+    println!("{text}");
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+你好，謝謝
+```
+
+題 2 的輸出：
+
+```text
+加油！！！！！！
+```
+
+批改重點：
+- 題 1：函式參數 `&String` 改成 `&mut String`，修好之後會冒出第二個錯誤，呼叫端也要改成 `add_suffix(&mut text)`（`let mut text` 本來就有）。要說得出：`&` 只能讀，要改就得借出 `&mut`。用回傳 `String` 的做法，或 `clone` 一份來改，都沒有練到 `&mut`。
+- 題 2：函式簽名是 `&mut String`，裡面 `s.push_str("！！！")`；`main` 的 `String` 要用 `let mut`，兩次呼叫都寫 `shout(&mut word)`。函式不需要回傳值。
+- 題 2 的 `push_str` 參數至少要兩個字元，所以固定寫 `！！！`。
+
+提示方向：
+1. 第一個錯誤訊息說 `text` 是 `&` 參照，不能當成可變的來借。`help` 建議把型別改成什麼？
+2. 改了函式簽名之後，呼叫端傳 `&text` 就不對了，要傳哪一種參照？
+3. 題 2：`let mut`、`&mut String`、`&mut word`，三個地方是不是都寫了？
+
+參考答案：
+
+題 1：
+
+```rust
+fn add_suffix(text: &mut String) {
+    text.push_str("，謝謝");
+}
+
+fn main() {
+    let mut text = String::from("你好");
+    add_suffix(&mut text);
+    println!("{text}");
+}
+```
+
+題 2：
+
+```rust
+fn shout(s: &mut String) {
+    s.push_str("！！！");
+}
+
+fn main() {
+    let mut word = String::from("加油");
+    shout(&mut word);
+    shout(&mut word);
+    println!("{word}");
+}
+```
+
+### 第 4 章第 4 集：借用規則：多個 `&` 或一個 `&mut`
+
+狀態：可用
+
+練習目標：
+- 認得 E0499（同時兩個 `&mut`）、E0502（`&mut` 還活著時，擁有者又去讀）。
+- 不用 `clone`，靠調整順序或減少參照的數量，讓借用不重疊。
+
+題目：
+1. 起始程式 1 編譯不過。請改到能編譯，輸出要跟下方一樣，不要用 `clone`。
+2. 起始程式 2 編譯不過。請改到能編譯，輸出要跟下方一樣，不要用 `clone`。
+
+執行範例：
+
+題 1 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0499
+fn main() {
+    let mut s = String::from("Rust");
+    let a = &mut s;
+    let b = &mut s;
+    a.push_str(" 很");
+    b.push_str("好玩");
+    println!("{s}");
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+Rust 很好玩
+```
+
+題 2 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0502
+fn main() {
+    let mut cart = String::from("牛奶");
+    let editor = &mut cart;
+    println!("改之前：{cart}");
+    editor.push_str("、雞蛋");
+    println!("改之後：{cart}");
+}
+```
+
+題 2 改好之後的輸出：
+
+```text
+改之前：牛奶
+改之後：牛奶、雞蛋
+```
+
+批改重點：
+- 題 1：兩個 `&mut` 不能同時活著。改法有兩種都算對：讓 `a` 在 `let b = &mut s;` 之前先用完（兩行 `push_str` 各接在各自的 `let` 後面），或是只留一個 `&mut`、用它呼叫兩次 `push_str`。要說得出 E0499 的意思：同一時間只能有一個 `&mut`。
+- 題 2：把「改之前」那行 `println!` 移到 `let editor = &mut cart;` 之前。要說得出原因：`editor` 這個 `&mut` 還要用，在它活著的期間，擁有者 `cart` 連讀都不行。
+- 兩題都不該出現 `clone`；題 2 用 `clone` 的話，會得到一份跟 `cart` 無關的複本，沒有練到借用規則。
+
+提示方向：
+1. 錯誤訊息裡 `first mutable borrow occurs here` 和 `later used here` 各指著哪一行？兩個借用為什麼重疊？
+2. 題 1：第一個 `&mut` 最後一次用到是哪一行？第二個借用能不能等它用完才開始？
+3. 題 2：`editor` 在哪一行之後才開始用？想印 `cart`，應該排在 `editor` 建立之前還是之後？
+
+參考答案：
+
+題 1：
+
+```rust
+fn main() {
+    let mut s = String::from("Rust");
+    let a = &mut s;
+    a.push_str(" 很");
+    let b = &mut s;
+    b.push_str("好玩");
+    println!("{s}");
+}
+```
+
+題 2：
+
+```rust
+fn main() {
+    let mut cart = String::from("牛奶");
+    println!("改之前：{cart}");
+    let editor = &mut cart;
+    editor.push_str("、雞蛋");
+    println!("改之後：{cart}");
+}
+```
+
+### 第 4 章第 5 集：參照用完就結束（NLL）
+
+狀態：可用
+
+練習目標：
+- 看懂借用在「最後一次使用」就結束，會用調整順序讓 `&` 先用完、再去改。
+
+題目：
+1. 起始程式編譯不過。請只調整程式的順序（不要新增變數、不要用 `clone`），讓程式能編譯，輸出要跟下方一樣。
+
+執行範例：
+
+起始程式（編譯不過）：
+
+```rust,compile_fail=E0502
+fn main() {
+    let mut s = String::from("Rust");
+    let r = &s;
+    s.push_str(" 書");
+    println!("借來看：{r}");
+    println!("改完之後：{s}");
+}
+```
+
+改好之後的輸出：
+
+```text
+借來看：Rust
+改完之後：Rust 書
+```
+
+批改重點：
+- 把 `println!("借來看：{r}");` 移到 `s.push_str(" 書");` 之前。要說得出原因：`r` 最後一次使用的那一行，就是借用結束的地方；它必須排在 `push_str` 之前。
+- 把 `let r = &s;` 改成 `let r = s.clone();` 也能編譯，但輸出裡 `r` 是複本，沒有練到 NLL，不算對。
+- 不用把 `println!("改完之後：{s}");` 移動，它在 `r` 用完之後，本來就沒有問題。
+
+提示方向：
+1. 錯誤訊息的 `immutable borrow later used here`，指的是哪一行？
+2. `r` 的借用，到哪一行就不需要了？`push_str` 應該排在那一行的前面還是後面？
+
+參考答案：
+
+```rust
+fn main() {
+    let mut s = String::from("Rust");
+    let r = &s;
+    println!("借來看：{r}");
+    s.push_str(" 書");
+    println!("改完之後：{s}");
+}
+```
+
+### 第 4 章第 6 集：懸置參照
+
+狀態：可用
+
+練習目標：
+- 認得 E0106（回傳區域變數的參照）和 E0597（參照活得比被借的值久）。
+- 知道改法：回傳擁有的值，或把值建立在夠外層的地方。
+
+題目：
+1. 起始程式 1 編譯不過。請改到能編譯，輸出要跟下方一樣。不要加 `'static`（那不是這題要的）。
+2. 起始程式 2 編譯不過。請改到能編譯，輸出要跟下方一樣，`String::from` 只能出現一次。
+
+執行範例：
+
+題 1 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0106
+fn make_greeting() -> &String {
+    let mut s = String::from("哈囉");
+    s.push_str("，世界");
+    &s
+}
+
+fn main() {
+    let greeting = make_greeting();
+    println!("{greeting}");
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+哈囉，世界
+```
+
+題 2 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0597
+fn main() {
+    let view = {
+        let name = String::from("小明");
+        &name
+    };
+    println!("{view}");
+}
+```
+
+題 2 改好之後的輸出：
+
+```text
+小明
+```
+
+批改重點：
+- 題 1：回傳型別改成 `String`，最後一行回傳 `s`（沒有 `&`、沒有分號），所有權交給呼叫端。要說得出原因：`s` 是函式裡的區域變數，`}` 就 drop 了，不能把指著它的參照交出去。加 `'static` 對區域變數仍然會失敗，不算改好。
+- 題 2：把 `let name = String::from("小明");` 搬到區塊的外面，讓 `name` 活得比 `view` 久；區塊本身可以拿掉。要說得出：`name` 在區塊的 `}` 就被 drop，`view` 卻還要用，所以不行。
+- 兩題都不要靠 `clone` 繞過去。
+
+提示方向：
+1. 題 1：函式裡建立的 `String`，要怎麼交給呼叫端？第 3 章第 10 集用過的辦法是什麼？
+2. 題 2：`name` 在哪一個 `}` 被 drop？`view` 最後一次用到是哪一行？
+3. 題 2：`name` 應該建立在哪一層，才會比 `view` 活得久？
+
+參考答案：
+
+題 1：
+
+```rust
+fn make_greeting() -> String {
+    let mut s = String::from("哈囉");
+    s.push_str("，世界");
+    s
+}
+
+fn main() {
+    let greeting = make_greeting();
+    println!("{greeting}");
+}
+```
+
+題 2：
+
+```rust
+fn main() {
+    let name = String::from("小明");
+    let view = &name;
+    println!("{view}");
+}
+```
+
+### 第 4 章第 7 集：解參照 `*`
+
+狀態：可用
+
+練習目標：
+- 知道對 `&mut` 的數字做運算、對參照的值做比較，要先用 `*` 取出指向的值。
+
+題目：
+1. 起始程式 1 編譯不過。請改到能編譯，輸出要跟下方一樣。
+2. 起始程式 2 編譯不過。請改到能編譯，輸出要跟下方一樣。
+
+執行範例：
+
+題 1 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0368
+fn add_ten(n: &mut i32) {
+    n += 10;
+}
+
+fn main() {
+    let mut score = 5;
+    add_ten(&mut score);
+    println!("{score}");
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+15
+```
+
+題 2 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0308
+fn is_big(n: &i32) -> bool {
+    n > 100
+}
+
+fn main() {
+    let x = 150;
+    let y = 30;
+    println!("{} {}", is_big(&x), is_big(&y));
+}
+```
+
+題 2 改好之後的輸出：
+
+```text
+true false
+```
+
+批改重點：
+- 題 1：`*n += 10;`。要說得出 `n` 是參照，不是數字，要改它指向的值，得先 `*`。改成回傳新的值不算，這題要練的是 `&mut` 加 `*`。
+- 題 2：`*n > 100`。要說得出 `&i32` 跟 `i32` 是不同的型別，要比較就得先解參照；函式簽名維持 `&i32`，不要改成 `i32`。
+- 用 `.clone()` 或改成回傳新的值蒙混過關，不算練到這一集的借用。
+
+提示方向：
+1. 錯誤訊息的 `help` 建議在哪個變數前面補上什麼符號？
+2. `n` 的型別是 `&mut i32`（或 `&i32`），而你要運算、比較的是它指向的 `i32`。從參照拿出值的符號是哪一個？
+
+參考答案：
+
+題 1：
+
+```rust
+fn add_ten(n: &mut i32) {
+    *n += 10;
+}
+
+fn main() {
+    let mut score = 5;
+    add_ten(&mut score);
+    println!("{score}");
+}
+```
+
+題 2：
+
+```rust
+fn is_big(n: &i32) -> bool {
+    *n > 100
+}
+
+fn main() {
+    let x = 150;
+    let y = 30;
+    println!("{} {}", is_big(&x), is_big(&y));
+}
+```
+
+### 第 4 章第 8 集：字串 slice `&str`
+
+狀態：可用
+
+練習目標：
+- 會用 `&s[起..迄]` 取出字串的一段，並寫出回傳 `&str` 的函式。
+- 知道 slice 還要用的時候，不能改原本的 `String`。
+
+題目：
+1. 寫一個函式 `inner(s: &String) -> &str`，去掉第一個和最後一個位元組，回傳中間的部分（只考慮 ASCII 字元）。`main` 裡用 `String::from("[hello]")` 呼叫，印出結果。
+2. 起始程式編譯不過。請只調整程式的順序，讓程式能編譯，輸出要跟下方一樣，不要用 `clone`。
+
+執行範例：
+
+題 1 的輸出：
+
+```text
+hello
+```
+
+題 2 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0502
+fn main() {
+    let mut title = String::from("hello world");
+    let first = &title[0..5];
+    title.push_str("!!");
+    println!("第一個字：{first}");
+    println!("全部：{title}");
+}
+```
+
+題 2 改好之後的輸出：
+
+```text
+第一個字：hello
+全部：hello world!!
+```
+
+批改重點：
+- 題 1：回傳型別 `&str`，函式裡是 `&s[1..s.len() - 1]`；只有一個參照參數 `s`，不需要任何額外標註。`main` 要傳 `&s`。不能先建立新的 `String` 再回傳參照（那是第 6 集的懸置參照）。
+- 題 2：把「第一個字」那行 `println!` 移到 `title.push_str("!!");` 之前。要說得出：`first` 是對 `title` 的借用，還要用的時候，不能去改 `title`。`first` 改成 `title.clone()` 的複本，沒有練到 slice 是借用。
+
+提示方向：
+1. 題 1：想取中間的一段，範圍的起點和終點各是多少？終點可以用 `s.len()` 減掉什麼來算？
+2. 題 2：`first` 最後一次用在哪一行？`push_str` 應該排在它前面還是後面？
+
+參考答案：
+
+題 1：
+
+```rust
+fn inner(s: &String) -> &str {
+    &s[1..s.len() - 1]
+}
+
+fn main() {
+    let s = String::from("[hello]");
+    println!("{}", inner(&s));
+}
+```
+
+題 2：
+
+```rust
+fn main() {
+    let mut title = String::from("hello world");
+    let first = &title[0..5];
+    println!("第一個字：{first}");
+    title.push_str("!!");
+    println!("全部：{title}");
+}
+```
+
+### 第 4 章第 9 集：字串字面值就是 `&str`
+
+狀態：可用
+
+練習目標：
+- 知道字串字面值（`&str`）不能增長，要增長就得有自己擁有的 `String`。
+
+題目：
+1. 起始程式編譯不過。請改到能編譯，輸出要跟下方一樣。
+
+執行範例：
+
+起始程式（編譯不過）：
+
+```rust,compile_fail=E0599
+fn main() {
+    let mut note = "借用";
+    note.push_str("與切片");
+    println!("{note}");
+}
+```
+
+改好之後的輸出：
+
+```text
+借用與切片
+```
+
+批改重點：
+- 把 `"借用"` 換成 `String::from("借用")`，其他不用動；`let mut` 要保留，因為 `push_str` 會改動這個 `String`。要說得出：字串字面值是 `&str`，沒有 `push_str`，要能增長就得用 `String`。
+- 這題沒有借用可以閃躲，也不該出現 `clone`。
+
+提示方向：
+1. 錯誤訊息說 `&str` 上找不到 `push_str`。字面值是哪一種型別？
+2. 哪一種型別有 `push_str`，而且是自己擁有文字的？第 2 章第 15 集用什麼寫法建立它？
+
+參考答案：
+
+```rust
+fn main() {
+    let mut note = String::from("借用");
+    note.push_str("與切片");
+    println!("{note}");
+}
+```
+
+### 第 4 章第 10 集：參數用 `&str` 而不是 `&String`
+
+狀態：可用
+
+練習目標：
+- 把只需要讀的字串參數從 `&String` 改成 `&str`，讓字面值、`String` 都能傳進去。
+- 會寫參數是 `&str` 的函式，並用不同來源的字串呼叫它。
+
+題目：
+1. 起始程式編譯不過。請把函式改成借用 `&str`，讓 `main` 兩種呼叫都能編譯，輸出要跟下方一樣。
+2. 寫一個函式 `is_long(text: &str) -> bool`，字串超過 6 個位元組就回傳 `true`。`main` 裡用 `String::from("哈囉世界")` 和字面值 `"Rust"` 各呼叫一次，印出兩個結果。
+
+執行範例：
+
+題 1 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0308
+fn count_bytes(s: &String) -> usize {
+    s.len()
+}
+
+fn main() {
+    let owned = String::from("哈囉");
+    println!("{}", count_bytes(&owned));
+    println!("{}", count_bytes("Rust"));
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+6
+4
+```
+
+題 2 的輸出：
+
+```text
+true
+false
+```
+
+批改重點：
+- 題 1：只改函式的參數型別，`&String` 換成 `&str`；`main` 一行都不用動。不要改成 `String`（那會拿走所有權）或在呼叫端 `String::from("Rust")`（那是繞過去，不是改函式）。要說得出：`&str` 能收字面值、`&String` 和 slice，`&String` 只能收 `String` 的參照。
+- 題 2：參數型別是 `&str`，`main` 裡傳 `&owned`（`&String` 會自動轉成 `&str`）和 `"Rust"`；不需要 `clone`。
+
+提示方向：
+1. 錯誤訊息說要的是 `&String`、給的是 `&str`。哪一個型別比較通用，連字面值都收？
+2. 題 1：函式裡面 `s.len()` 要不要改？
+
+參考答案：
+
+題 1：
+
+```rust
+fn count_bytes(s: &str) -> usize {
+    s.len()
+}
+
+fn main() {
+    let owned = String::from("哈囉");
+    println!("{}", count_bytes(&owned));
+    println!("{}", count_bytes("Rust"));
+}
+```
+
+題 2：
+
+```rust
+fn is_long(text: &str) -> bool {
+    text.len() > 6
+}
+
+fn main() {
+    let owned = String::from("哈囉世界");
+    println!("{}", is_long(&owned));
+    println!("{}", is_long("Rust"));
+}
+```
+
+### 第 4 章第 11 集：陣列 slice `&[T]`
+
+狀態：可用
+
+練習目標：
+- 讓函式用 `&[T]` 接收任意長度的陣列，也能只傳其中一段。
+
+題目：
+1. 起始程式編譯不過。請改到能編譯，輸出要跟下方一樣。
+2. 寫一個函式 `average(nums: &[i32]) -> i32`，回傳平均值（整數除法，直接捨去小數）。`main` 裡用 `[80, 90, 70, 60]` 呼叫一次，再只傳前兩個元素呼叫一次，印出兩個結果。
+
+執行範例：
+
+題 1 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0308
+fn largest(nums: &[i32; 3]) -> i32 {
+    let mut best = nums[0];
+    for i in 1..3 {
+        if nums[i] > best {
+            best = nums[i];
+        }
+    }
+    best
+}
+
+fn main() {
+    let a = [3, 9, 4];
+    let b = [7, 2, 8, 5, 1];
+    println!("{}", largest(&a));
+    println!("{}", largest(&b));
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+9
+8
+```
+
+題 2 的輸出：
+
+```text
+75
+85
+```
+
+批改重點：
+- 題 1：參數改成 `&[i32]`，迴圈的終點也要從寫死的 `3` 改成 `nums.len()`，否則 `b` 的後兩個元素會被漏掉。要說得出：`[i32; 3]` 的長度是型別的一部分，`&[i32]` 才什麼長度都收。
+- 題 2：參數 `&[i32]`，用 `nums.len()` 取長度，總和除以 `nums.len() as i32`；呼叫時傳 `&scores`、`&scores[0..2]`。
+- 用 `.clone()` 蒙混過關不算練到借用（兩題都一樣）。
+
+提示方向：
+1. 錯誤訊息說 `expected an array with a size of 3, found one with a size of 5`，意思是要的是長度 3 的陣列，給的是長度 5。哪一種參數型別，不把長度寫進去？
+2. 題 1：迴圈的終點如果還寫 `3`，換成長度是 5 的陣列會怎樣？函式裡可以用什麼拿到長度？
+3. 題 2：`len()` 回傳的是 `usize`，要跟 `i32` 的總和相除，需要怎麼轉換？（第 1 章第 17 集）
+
+參考答案：
+
+題 1：
+
+```rust
+fn largest(nums: &[i32]) -> i32 {
+    let mut best = nums[0];
+    for i in 1..nums.len() {
+        if nums[i] > best {
+            best = nums[i];
+        }
+    }
+    best
+}
+
+fn main() {
+    let a = [3, 9, 4];
+    let b = [7, 2, 8, 5, 1];
+    println!("{}", largest(&a));
+    println!("{}", largest(&b));
+}
+```
+
+題 2：
+
+```rust
+fn average(nums: &[i32]) -> i32 {
+    let mut total = 0;
+    for i in 0..nums.len() {
+        total += nums[i];
+    }
+    total / nums.len() as i32
+}
+
+fn main() {
+    let scores = [80, 90, 70, 60];
+    println!("{}", average(&scores));
+    println!("{}", average(&scores[0..2]));
+}
+```
+
+### 第 4 章第 12 集：`&mut [T]`
+
+狀態：可用
+
+練習目標：
+- 用 `&mut [T]` 讓函式修改陣列的元素（整個陣列或其中一段）。
+- 知道參數是 `&[T]` 就改不了，要改成 `&mut [T]`，呼叫端也要跟著改。
+
+題目：
+1. 起始程式編譯不過。請改到能編譯，輸出要跟下方一樣。
+2. 寫一個函式 `add_to_all(nums: &mut [i32], delta: i32)`，把每個元素都加上 `delta`。`main` 裡建立 `[1, 2, 3, 4, 5]`，先對整個陣列加 `10`，再只對索引 3 起的部分加 `100`，最後印出陣列。
+
+執行範例：
+
+題 1 的起始程式（編譯不過）：
+
+```rust,compile_fail=E0594
+fn reset_negatives(nums: &[i32]) {
+    for i in 0..nums.len() {
+        if nums[i] < 0 {
+            nums[i] = 0;
+        }
+    }
+}
+
+fn main() {
+    let mut data = [5, -3, 8, -1];
+    reset_negatives(&data);
+    println!("{data:?}");
+}
+```
+
+題 1 改好之後的輸出：
+
+```text
+[5, 0, 8, 0]
+```
+
+題 2 的輸出：
+
+```text
+[11, 12, 13, 114, 115]
+```
+
+批改重點：
+- 題 1：函式參數改成 `&mut [i32]`，呼叫端改成 `reset_negatives(&mut data)`（`let mut data` 本來就有）。要說得出：`&[T]` 只能讀，要改元素就得借出 `&mut [T]`。改成回傳新陣列不算，這題要練的是 `&mut [T]`。
+- 題 2：函式簽名 `&mut [i32]`，裡面用索引迴圈 `nums[i] += delta`；呼叫時 `add_to_all(&mut a, 10)` 和 `add_to_all(&mut a[3..], 100)`。要說得出：兩次呼叫是依序進行，前一個 `&mut` 用完才借下一個，所以不會有 E0499。
+- 用 `.clone()` 或改成回傳新的值蒙混過關，不算練到這一集的借用。
+
+提示方向：
+1. 第一個錯誤訊息說 `nums[_]` 在 `&` 參照後面，不能指定新值。`help` 建議把型別改成什麼？
+2. 改了函式簽名之後，呼叫端的 `&data` 還對嗎？
+3. 題 2：只改一段，要借出的是整個陣列，還是它的一段？範圍的寫法在第 11 集看過。
+
+參考答案：
+
+題 1：
+
+```rust
+fn reset_negatives(nums: &mut [i32]) {
+    for i in 0..nums.len() {
+        if nums[i] < 0 {
+            nums[i] = 0;
+        }
+    }
+}
+
+fn main() {
+    let mut data = [5, -3, 8, -1];
+    reset_negatives(&mut data);
+    println!("{data:?}");
+}
+```
+
+題 2：
+
+```rust
+fn add_to_all(nums: &mut [i32], delta: i32) {
+    for i in 0..nums.len() {
+        nums[i] += delta;
+    }
+}
+
+fn main() {
+    let mut a = [1, 2, 3, 4, 5];
+    add_to_all(&mut a, 10);
+    add_to_all(&mut a[3..], 100);
+    println!("{a:?}");
+}
+```
