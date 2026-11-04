@@ -1,0 +1,10 @@
+# 書中刻意放行的 clippy lint：初學階段會先寫成 Go 風格，之後才教慣用寫法。
+# 一行一個，不加 `clippy::` 前綴。第二部的共用 Cargo.toml 加入後，[lints.clippy] 要與本檔同步。
+needless_return
+manual_range_contains
+assign_op_pattern
+vec_init_then_push
+needless_range_loop
+while_let_on_iterator
+ptr_arg
+single_match

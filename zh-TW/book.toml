@@ -1,0 +1,20 @@
+[book]
+title = "從零開始學 Rust"
+authors = ["Holmes Lin"]
+language = "zh-TW"
+
+[rust]
+edition = "2024"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/holmeslin/learning-rust-from-zero"
+edit-url-template = "https://github.com/holmeslin/learning-rust-from-zero/edit/main/zh-TW/{path}"
+site-url = "/learning-rust-from-zero/zh-TW/"
+
+[output.html.playground]
+runnable = true
+
+[output.html.print]
+page-break = false
