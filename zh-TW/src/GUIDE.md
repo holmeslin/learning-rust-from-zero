@@ -173,7 +173,7 @@
 | 第 1 章 | `cargo new`/`cargo run`、`println!` 與 `{}`、註解（`//`、`/* */`）、`let`/`let mut`、型別標註 `let x: i32`、變數必須初始化、shadowing、運算子與複合賦值（沒有 `++`）、`if` 與 `if` 運算式、讀輸入與 `parse` 固定句型、`loop`（含 `break` 帶值）/`while`/`for` 範圍、`continue` 與巢狀迴圈、純量型別與 `i32::MAX`、整數溢位、`as`、`char`、跳脫字元與 raw string、未使用變數警告與 `_x` |
 | 第 2 章 | `const`/`static`（不可變）、函式與參數（每個參數都要標型別、參數預設不可變）、回傳值與最後一個運算式、陳述式 vs 運算式（分號）、early `return`、`()`、tuple 與用 tuple 回傳多個值、解構與 `_`、陣列 `[T; N]` 與 `{:?}`、`usize` 索引與越界 panic、`for x in 陣列`、遞迴、`String` 初探（`String::from`、`push_str`、`len`，只在同一個函式內使用） |
 | 第 3 章 | 沒有 GC 的記憶體管理、stack 與 heap、所有權三條規則與作用域、drop（區塊結束、函式結束、重新指定值）、move 與 E0382、`.clone()`、`Copy` 型別（整數、`bool`、`char`、元素都是 `Copy` 的 tuple 與陣列、字串字面值）、傳參數時 move、用回傳值（含 tuple）交還所有權。還沒有 `&` |
-| 第 4 章 | `&` 與 `&mut`、借用規則、NLL、懸置參照、`*`、`&str`、`&[T]`、`&mut [T]` |
+| 第 4 章 | `&` 與 `&mut`（借用不轉移所有權；函式簽名與呼叫端都要寫 `&` 或 `&mut`，變數要 `let mut` 才能借出 `&mut`）、借用規則（多個 `&` 或一個 `&mut`，E0499、E0502、E0506）、NLL（借用到最後一次使用為止）、懸置參照（E0106、E0597，改成回傳擁有的值）、`*` 解參照（E0368、E0507）、字串 slice `&s[起..迄]` 與 `&str`、字串字面值是 `&str`、只需要讀的字串參數用 `&str`、陣列 slice `&[T]`、`&mut [T]`（E0594）。回傳參照的函式只有一個參照參數，沒有生命週期標註；還沒有 `struct`、`Vec`、`match` |
 | 第 5 章 | `struct`、欄位初始化簡寫、更新語法、tuple struct、`#[derive(Debug)]`、`impl` 與方法、`&self`/`&mut self`/`self`、關聯函式與 `new`、自動參照 |
 | 第 6 章 | `enum` 與帶資料的 variant、`match` 與窮盡性、`_`、`Option`、`if let`、`let else`、match guard、`\|` 與範圍模式、解構、slice pattern、`matches!`、let chains、enum 的方法 |
 | 第 7 章 | `Vec`、`while let`、`get`、走訪與借用、`String` 深入與 `format!`、`chars`/`bytes`、常用字串方法、`HashMap`、`entry().or_insert`、`HashSet`、`BTreeMap`、`sort`/`dedup` |
@@ -209,6 +209,7 @@
 | 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章 |
 | 第 2 章第 15 集 | `s.len()`（`String` 與陣列都能用）、`s.push_str("...")`、`String::from("...")` | 方法第 5 章 |
 | 第 3 章第 7 集 | `s.clone()`（寫法同上，是方法呼叫） | 方法第 5 章；`Clone` 第 8 章 |
+| 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 
@@ -257,9 +258,16 @@ let n: i32 = line.parse().expect("請輸入整數");
 | `.clone()` | 第 3 章第 7 集 | 重新寫一次 `String::from(...)`，或調整順序 |
 | `Copy` 型別的概念 | 第 3 章第 8 集 | 只說「整數可以直接複製」，不談哪些型別是 `Copy` |
 | `String` 傳進函式、從函式回傳 | 第 3 章第 9、10 集 | 全部寫在 `main` 裡；回傳新建立的 `String` 要等到第 10 集 |
-| 參照 `&` | 第 4 章第 1 集 | 用 `clone` 或用回傳值交還所有權 |
+| 參照 `&`、把 `&` 傳給函式（借用） | 第 4 章第 1、2 集 | 用 `clone` 或用回傳值交還所有權 |
 | `&mut` | 第 4 章第 3 集 | 回傳新的值 |
-| `&str` 參數、slice | 第 4 章第 8～11 集 | 參數用 `&String` 或陣列參照 |
+| 借用規則（E0499、E0502） | 第 4 章第 4 集 | 不要出會同時借出好幾個參照的題目 |
+| NLL（參照用完就結束） | 第 4 章第 5 集 | 同上；不要解釋「為什麼用完就能再借」 |
+| 懸置參照（E0106、E0597） | 第 4 章第 6 集 | 回傳擁有的值（`String`） |
+| `*` 解參照 | 第 4 章第 7 集 | 只用不需要 `*` 的寫法（印出、呼叫方法） |
+| 字串 slice `&s[起..迄]`、`&str` | 第 4 章第 8、9 集 | 不要切字串；只用 `String` 和字面值 |
+| 參數用 `&str`（只需要讀的字串） | 第 4 章第 10 集 | 參數用 `&String` |
+| 陣列 slice `&[T]`、`&mut [T]` | 第 4 章第 11、12 集 | 參數用陣列參照 `&[T; N]` |
+| 回傳參照的函式 | 第 4 章第 8 集（只有一個參照參數） | 回傳擁有的值 |
 | `struct` | 第 5 章第 1 集 | 用多個變數或 tuple |
 | `#[derive(Debug)]` | 第 5 章第 6 集 | 逐一印出欄位 |
 | 方法、`impl` | 第 5 章第 7 集 | 用一般函式；固定句型裡的方法呼叫除外 |
@@ -269,6 +277,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 | `if let`、`let else` | 第 6 章第 8、9 集 | 用 `match` |
 | let chains | 第 6 章第 15 集 | 用巢狀 `if let` |
 | `Vec`、`vec!` | 第 7 章第 1 集 | 用陣列 |
+| 走訪參照：`for x in &a`、`for x in slice` | 第 7 章第 4 集（`&v`）、第 11 章第 8 集 | 用索引 `for i in 0..a.len()` 加 `a[i]` |
 | `format!` | 第 7 章第 7 集 | 用 `push_str` 組字串 |
 | `HashMap` | 第 7 章第 11 集 | 用陣列加迴圈尋找 |
 | 定義 `trait` | 第 8 章第 1 集 | 不要定義 trait |
