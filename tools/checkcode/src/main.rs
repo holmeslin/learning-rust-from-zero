@@ -5,17 +5,25 @@
 //! `deps/` 的共用依賴 package，每個區塊一個 bin，一次批次編譯與 lint；`compile_fail` 與 `test`
 //! 區塊另外單獨編譯。編譯完成後，兩種區塊都走同一套判定與執行流程。
 //!
+//! 多檔案專案（第 12 章起，一集一個專案，見 `project.rs`）：依路徑標籤把區塊組成暫時的 Cargo
+//! 專案，在每個 `cargo …` 的輸出區塊那一刻執行該指令，檢查成功或失敗跟書上貼的一致。
+//!
 //! shortcut: 共用的 target 目錄固定在 `deps/target`（跟 CI 快取一致），所以同一時間只能有
 //! 一個 checkcode 行程編譯 crate 區塊；有需要平行跑多個行程時，再改成各自的 target 目錄。
 
+mod project;
+
 use std::env;
 use std::fs::{self, File};
+use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Mutex, PoisonError};
 use std::thread;
 use std::time::{Duration, Instant};
+
+use project::{Project, check_projects, extract_project};
 
 const CLIPPY_ALLOW: &str = include_str!("../clippy-allow.txt");
 const DEPS_TOML: &str = include_str!("../deps/Cargo.toml");
@@ -25,6 +33,9 @@ const RUN_TIMEOUT: Duration = Duration::from_secs(30);
 static NEXT_DIR: AtomicUsize = AtomicUsize::new(0);
 /// 所有 crate 區塊共用同一個 target 目錄與 package 目錄，編譯到執行期間一次只讓一組進行。
 static CARGO_LOCK: Mutex<()> = Mutex::new(());
+
+/// 失敗的位置（檔案、行號）與原因。
+type Failure = (PathBuf, usize, String);
 
 struct Block {
     file: PathBuf,
@@ -225,42 +236,63 @@ fn finish(job: &Job, built: &Built) -> Result<(), String> {
         return Ok(());
     }
 
-    let stdout_path = job.dir.join("stdout");
-    let stderr_path = job.dir.join("stderr");
-    let mut child = Command::new(&built.exe)
-        .stdin(Stdio::piped())
-        .stdout(File::create(&stdout_path).map_err(|e| e.to_string())?)
-        .stderr(File::create(&stderr_path).map_err(|e| e.to_string())?)
-        .spawn()
-        .map_err(|e| format!("無法執行程式：{e}"))?;
-    // 先寫完 stdin 再關掉，程式讀到 EOF 才不會卡住；不讀 stdin 的程式可能已結束，忽略寫入錯誤。
-    if let Some(mut input) = child.stdin.take() {
-        let _ = std::io::Write::write_all(
-            &mut input,
-            opts.stdin.as_deref().unwrap_or_default().as_bytes(),
-        );
-    }
-    let start = Instant::now();
-    let status = loop {
-        if let Some(status) = child.try_wait().map_err(|e| e.to_string())? {
-            break status;
-        }
-        if start.elapsed() > RUN_TIMEOUT {
-            let _ = child.kill();
-            return Err(format!("執行超過 {} 秒", RUN_TIMEOUT.as_secs()));
-        }
-        thread::sleep(Duration::from_millis(20));
-    };
-    let code = status.code().unwrap_or(-1);
+    let (code, output) = run_limited(
+        &mut Command::new(&built.exe),
+        &job.dir,
+        opts.stdin.as_deref().unwrap_or_default(),
+        RUN_TIMEOUT,
+    )?;
     if code != opts.exit {
-        let output = fs::read_to_string(&stdout_path).unwrap_or_default()
-            + &fs::read_to_string(&stderr_path).unwrap_or_default();
         return Err(format!(
             "結束碼是 {code}，預期 {}。輸出：\n{output}",
             opts.exit
         ));
     }
     Ok(())
+}
+
+/// 執行 `cmd`（stdin 餵 `input`），超過 `limit` 就結束它。stdout 與 stderr 先收進 `scratch` 底下的
+/// 檔案；回傳 (結束碼, stdout 加 stderr)。命令自成一個行程群組，逾時時整組結束，所以 `cargo run`
+/// 啟動的程式也不會留下來。
+///
+/// shortcut: 行程群組只支援 unix（用 `kill` 指令結束），要支援 Windows 時再換做法。
+fn run_limited(
+    cmd: &mut Command,
+    scratch: &Path,
+    input: &str,
+    limit: Duration,
+) -> Result<(i32, String), String> {
+    let (out_path, err_path) = (scratch.join("stdout"), scratch.join("stderr"));
+    let mut child = cmd
+        .process_group(0)
+        .stdin(Stdio::piped())
+        .stdout(File::create(&out_path).map_err(|e| e.to_string())?)
+        .stderr(File::create(&err_path).map_err(|e| e.to_string())?)
+        .spawn()
+        .map_err(|e| format!("無法執行 {:?}：{e}", cmd.get_program()))?;
+    // 先寫完 stdin 再關掉，程式讀到 EOF 才不會卡住；不讀 stdin 的程式可能已結束，忽略寫入錯誤。
+    if let Some(mut stdin) = child.stdin.take() {
+        let _ = std::io::Write::write_all(&mut stdin, input.as_bytes());
+    }
+    let start = Instant::now();
+    let status = loop {
+        if let Some(status) = child.try_wait().map_err(|e| e.to_string())? {
+            break status;
+        }
+        if start.elapsed() > limit {
+            let group = format!("-{}", child.id());
+            let _ = Command::new("kill")
+                .args(["-s", "KILL", "--", &group])
+                .status();
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(format!("執行超過 {} 秒", limit.as_secs()));
+        }
+        thread::sleep(Duration::from_millis(20));
+    };
+    let output = fs::read_to_string(&out_path).unwrap_or_default()
+        + &fs::read_to_string(&err_path).unwrap_or_default();
+    Ok((status.code().unwrap_or(-1), output))
 }
 
 /// 在共用依賴 package 裡跑 cargo：clippy-driver 當工作區 wrapper，所以只有區塊本身會被 lint，
@@ -488,9 +520,13 @@ fn main() -> ExitCode {
         }
     }
     let mut blocks = Vec::new();
+    let mut projects = Vec::new();
     for file in &files {
         match fs::read_to_string(file) {
-            Ok(text) => blocks.extend(extract_blocks(file, &text)),
+            Ok(text) => {
+                blocks.extend(extract_blocks(file, &text));
+                projects.extend(extract_project(file, &text));
+            }
             Err(e) => {
                 eprintln!("{}: {e}", file.display());
                 return ExitCode::from(2);
@@ -498,14 +534,22 @@ fn main() -> ExitCode {
         }
     }
 
-    let failures = check_all(&blocks);
-    for (block, msg) in &failures {
-        println!("{}:{}: {msg}", block.file.display(), block.line);
+    let mut failures: Vec<Failure> = check_all(&blocks)
+        .into_iter()
+        .map(|(block, msg)| (block.file.clone(), block.line, msg))
+        .collect();
+    failures.extend(check_projects(&projects));
+    failures.sort_by(|a, b| (&a.0, a.1).cmp(&(&b.0, b.1)));
+    for (file, line, msg) in &failures {
+        println!("{}:{line}: {msg}", file.display());
     }
     println!(
-        "{} 個檔案、{} 個 rust 區塊，{} 個失敗",
+        "{} 個檔案、{} 個 rust 區塊、{} 個專案（{} 個檔案、{} 個檢查點），{} 個失敗",
         files.len(),
         blocks.len(),
+        projects.len(),
+        projects.iter().map(Project::files).sum::<usize>(),
+        projects.iter().map(Project::checkpoints).sum::<usize>(),
         failures.len()
     );
     if failures.is_empty() {
@@ -518,6 +562,8 @@ fn main() -> ExitCode {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::project::unpinned_packages;
+    use std::collections::BTreeSet;
 
     fn blocks_of(name: &str) -> Vec<Block> {
         let path = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -587,6 +633,109 @@ mod tests {
                 block.line
             );
         }
+    }
+
+    fn testdata(name: &str) -> PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("testdata")
+            .join(name)
+    }
+
+    fn project_of(name: &str) -> Project {
+        let path = testdata(name);
+        extract_project(&path, &fs::read_to_string(&path).unwrap()).expect("應該認得出專案")
+    }
+
+    /// 檔案 `name` 裡，路徑標籤 `label` 後面那個程式區塊的行號（標籤、空行、區塊開頭）。
+    fn block_line_after(name: &str, label: &str) -> usize {
+        let text = fs::read_to_string(testdata(name)).unwrap();
+        let at = text.lines().position(|l| l == label).expect("找不到標籤");
+        at + 3
+    }
+
+    /// 失敗專案裡應該失敗的位置：標籤是「輸出」（檢查點），或寫了（故意…）的區塊，後面那個圍欄的行號。
+    fn marked_lines(name: &str) -> BTreeSet<usize> {
+        let text = fs::read_to_string(testdata(name)).unwrap();
+        let lines: Vec<&str> = text.lines().collect();
+        (0..lines.len())
+            .filter(|&i| {
+                let l = lines[i];
+                l.starts_with('`')
+                    && l.ends_with('：')
+                    && (l.contains("的輸出") || l.contains("（故意"))
+            })
+            .map(|i| {
+                i + lines[i + 1..]
+                    .iter()
+                    .position(|l| l.starts_with("```"))
+                    .unwrap()
+                    + 2
+            })
+            .collect()
+    }
+
+    #[test]
+    fn project_pass_all_pass() {
+        let projects: Vec<Project> = [
+            "project-pass.md",
+            "project-workspace.md",
+            "project-crate.md",
+        ]
+        .map(project_of)
+        .into();
+        assert!(projects.iter().all(|p| p.checkpoints() >= 1));
+        let failures = check_projects(&projects);
+        assert!(failures.is_empty(), "{failures:#?}");
+    }
+
+    #[test]
+    fn project_fail_each_marked_case_fails() {
+        let failures = check_projects(&[project_of("project-fail.md")]);
+        let failed: BTreeSet<usize> = failures.iter().map(|f| f.1).collect();
+        assert_eq!(failed, marked_lines("project-fail.md"), "{failures:#?}");
+    }
+
+    /// 拿掉一個 `pub`：失敗要落在檢查點，並指出是哪一集、哪些檔案（連同區塊在該集的行號）。
+    #[test]
+    fn project_removed_pub_names_episode_and_files() {
+        let mut failures = check_projects(&[project_of("project-fail.md")]);
+        failures.sort_by_key(|f| f.1);
+        let (file, line, msg) = failures.first().expect("應該失敗");
+        assert!(file.ends_with("project-fail.md"));
+        assert_eq!(*line, *marked_lines("project-fail.md").first().unwrap());
+        for label in ["`src/lib.rs`：", "`src/main.rs`："] {
+            let name = label.trim_matches(|c| c == '`' || c == '：');
+            let line = block_line_after("project-fail.md", label);
+            assert!(msg.contains(&format!("{name}（第 {line} 行）")), "{msg}");
+        }
+    }
+
+    /// 通過與失敗的專案放在同一次檢查，各自的判定不能互相影響。
+    #[test]
+    fn mixed_projects_keep_verdicts_separate() {
+        let projects = ["project-fail.md", "project-crate.md", "project-pass.md"].map(project_of);
+        let failed: Vec<(PathBuf, usize)> = check_projects(&projects)
+            .into_iter()
+            .map(|f| (f.0, f.1))
+            .collect();
+        let expected: Vec<(PathBuf, usize)> = marked_lines("project-fail.md")
+            .into_iter()
+            .map(|line| (testdata("project-fail.md"), line))
+            .collect();
+        assert_eq!(
+            failed.iter().collect::<BTreeSet<_>>(),
+            expected.iter().collect::<BTreeSet<_>>()
+        );
+    }
+
+    #[test]
+    fn packages_outside_deps_lock_are_unpinned() {
+        let registry = "source = \"registry+https://github.com/rust-lang/crates.io-index\"";
+        let lock = format!(
+            "[[package]]\nname = \"serde\"\nversion = \"0.0.1\"\n{registry}\n\n[[package]]\nname = \"teashop\"\nversion = \"0.1.0\"\n"
+        );
+        assert_eq!(unpinned_packages(&lock), ["serde 0.0.1"]);
+        assert!(unpinned_packages(DEPS_LOCK).is_empty());
     }
 
     #[test]
