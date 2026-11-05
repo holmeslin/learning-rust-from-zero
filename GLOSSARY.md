@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`trait`、trait bound、newtype、crate、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、Cargo 與它的指令名稱。
+保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -89,3 +89,9 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 型別參數 | type parameter | 類型參數 |
 | trait 物件 | trait object | 特徵物件 |
 | 孤兒規則 | orphan rule | 孤立規則 |
+| 可見性 | visibility | 能見度 |
+| 屬性 | attribute | 特性 |
+| 文件註解 | doc comment | 說明註解 |
+| 單元測試 | unit test | 模組測試 |
+| 整合測試 | integration test | 集成測試 |
+| 相依套件 | dependency | 依賴 |
