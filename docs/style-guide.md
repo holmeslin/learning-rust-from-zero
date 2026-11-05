@@ -80,6 +80,7 @@
 | 第 12 章第 2 集 | 函式前面的 `pub`（開放給別的 crate 使用，照抄） | `pub` 第 12 章第 4 集 |
 | 第 12 章第 10 集 | `#[cfg(test)]`，只加在 `mod tests { use super::*; ... }` 上，照抄 | `cfg` 第 16 章第 10 集 |
 | 第 12 章第 15 集 | `#[cfg(feature = "名字")]`，照抄 | `cfg` 第 16 章第 10 集 |
+| 第 14 章第 1 集 | `thread::sleep(Duration::from_millis(n))`（睡 `n` 毫秒，搭配檔案最上面的 `use std::thread;`、`use std::time::Duration;`，照抄） | `Duration` 第 17 章第 6 集 |
 
 讀一行輸入（每次要讀一行就重複這三行）：
 
@@ -155,7 +156,7 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 第 7 章第 6 集起，只讀的 `Vec` 參數寫 `&[T]`，不寫 `&Vec<T>`（clippy `ptr_arg` 放行，只是讓第 6 集示範 E0308 用）；要 `push`、`pop` 才寫 `&mut Vec<T>`。第 6 集之前沒有把 `Vec` 傳進函式的範例。
   - clippy 會擋下這些寫法：`let v = vec![...]` 只被讀、索引、`get`、`for x in &v` 或傳成 `&[T]`（`useless_vec`，要不改成陣列，要不讓範例真的 `push` 過）；`v.get(0)`（`get_first`，改用 `first()` 或換成別的索引）；`for (_, v) in &map`（`for_kv_map`，改用 `values()`）；`v.len() == 0`（`len_zero`，用 `is_empty()`）；`loop { match v.pop() { Some(x) => ..., None => break } }`（`while_let_loop`，直接寫 `while let`）；單獨一個 `format!("{s}")`（`useless_format`）。
   - 第 7 章第 9 集起，`for` 後面可以直接放回傳迭代器的方法呼叫（`s.chars()`、`s.bytes()`、`s.split(',')`、`map.keys()`、`map.values()`），不展開原理（`Iterator` 第 11 章第 8 集）。第 11 章之前不要接 `.count()`、`.nth()`、`.rev()`、`.enumerate()`、`.collect()` 這些迭代器的方法：數字元就用 `for` 加累加變數。
-  - `HashMap`、`HashSet` 的走訪順序每次執行都不同，貼了整份輸出的話，`fill.py --check` 會時好時壞。驗證過的範例只印跟順序無關的結果（`get`、`len`、加總、計數）；要印整個 map，就只放一組，或改用 `BTreeMap`。需要展示「順序會變」時，輸出標籤寫成「某一次的輸出（順序每次可能不同）：」，fill.py 不認得這個標籤，所以不會比對；整本書只有第 7 章第 14 集這樣用，並在文中說明順序不固定。
+  - `HashMap`、`HashSet` 的走訪順序每次執行都不同，貼了整份輸出的話，`fill.py --check` 會時好時壞。驗證過的範例只印跟順序無關的結果（`get`、`len`、加總、計數）；要印整個 map，就只放一組，或改用 `BTreeMap`。需要展示「順序會變」時，輸出標籤寫成「某一次的輸出（順序每次可能不同）：」，fill.py 不認得這個標籤，所以不會比對；整本書只有第 7 章第 14 集與第 14 章第 1 集（執行緒交錯）這樣用，並在文中說明順序不固定。
   - 第 7 章第 11 集起，`use std::collections::HashMap;` 這類固定句型放在檔案最上面、`fn main` 之前。
 - trait 與泛型相關的範例：
   - 領域沿用飲料店：`Tea`、`Coffee`、`Water`、`Cookie`，trait 叫 `Priced`、`Named`，泛型容器叫 `Shelf<T>`，金額是 `Money`。避開 The Rust Book 的 `Summary`、`Draw`、`largest`、`Point<T>`、`Wrapper`。
@@ -187,7 +188,7 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 簽名裡出現帶生命週期的 struct，一律寫 `Receipt<'_>`（`-> Option<Receipt<'_>>`）：省略不寫，rustc 1.99 預設會警告 `mismatched_lifetime_syntaxes`，checkcode 會判失敗。`impl` 寫 `impl Receipt<'_>`；方法簽名要用到 `'a` 時才寫 `impl<'a> Receipt<'a>`（clippy 不會抱怨）。第 10 章第 6 集起 `Display` 骨架可以寫完整的 `std::fmt::Formatter<'_>`，之前的章節維持原本的骨架。
   - 示範 E0597 時，結果要在內層區塊結束「之後」還被用到，否則 NLL 會讓它編譯成功。內層區塊寫成 `let r = { let s = ...; 借用 s 的運算式 };` 這種區塊值的形式，不寫先宣告後賦值的 `let r;`（第 1 章第 5 集說本書不用它，clippy `needless_late_init` 也會擋）。不要同時示範好幾個不同的錯誤。
   - 1.99 的訊息形狀：兩個參照參數回傳參照是 E0106，`help` 只建議 `<'a>`（`'a` 標在全部參照上）；沒有參照參數的 `-> &str` 是 E0106，`help` 先建議 `'static`、再建議回傳擁有的值；標了 `'a` 或 `'static` 卻回傳區域變數的參照是 E0515（`cannot return reference to local variable`，沒有 `help`）；回傳了沒有綁進 `'a` 的參數是 E0621，`help` 建議替它標 `'a`；`impl Receipt`（缺 `<'_>`）是 E0726，`help` 建議 `<'_>`；呼叫端結果超出某個輸入的範圍是 E0597。這些訊息都很短，整段貼出。
-  - 進度邊界：不寫生命週期 bound（`'a: 'b`、`T: 'a`、`T: 'static`）、`for<'a>`、`dyn Trait + 'a`；不用 `Self`、閉包與迭代器的方法。`T: 'static` 只在第 7 集用一句話指向第 14 章。
+  - 進度邊界：不寫生命週期 bound（`'a: 'b`、`T: 'a`、`T: 'static`）、`for<'a>`、`dyn Trait + 'a`；不用 `Self`、閉包與迭代器的方法。`T: 'static` 只在第 7 集用一句話指向第 14 章第 3 集。
 
 - 閉包與迭代器相關的範例：
   - 領域沿用飲料店：`prices`、`menu`、`orders`、`Member`（`name`、`points`）、`Tickets`（取餐號碼，第 17 集沿用第 8 章第 17 集的 `Dispenser`）。避開 The Rust Book 的 `Inventory`、`Shirt`、`Rectangle`、`Counter`、`shoes_in_size`、`expensive_closure`、`add_one`。
@@ -244,6 +245,26 @@ let n: i32 = line.parse().expect("請輸入整數");
   - `Cow` 的回傳型別一律寫 `Cow<'_, str>`：寫成 `Cow<str>` 會被 rustc 1.99 警告 `mismatched_lifetime_syntaxes`（跟 `Receipt<'_>` 同一條規則，checkcode 判失敗）。
   - 1.99 的訊息形狀（實測）：遞迴型別沒有 `Box` 是 E0072（`recursive without indirection`，`help` 建議 `Box<Price>`；`Option<Step>` 的 struct 一樣）；`Box<i32> + 5` 是 E0369，`note` 夾 `/rustc/<雜湊>/library/alloc/src/boxed.rs` 路徑，貼前 8 行；對沒有 `Deref` 的型別寫 `*x` 是 E0614（整段貼，很短）；`String::trim(&s)` 是 E0599（`help` 說 `the function trim is implemented on str`，在 `note` 之後，只貼前 6 行）；`x.drop()` 是 E0040（整段貼）；`Drop` 加 `Copy` 是 E0184；`*rc -= 3`（`Rc<i32>`）是 E0594（`help` 說 `DerefMut` 沒有實作，整段貼）；`&self` 方法裡對 `Vec` 欄位 `push` 是 E0596（`help` 建議 `&mut self`）；`Cell<String>` 呼叫 `get` 是 E0599（`String: Copy` 沒有滿足，整段貼）。
   - 篇幅：每集 101～150 行（第 8 集 150 行最長）。省行數的辦法：用 unit struct（`struct Tea;`）、把「規則照舊」的 E0382 改成一句話、每個 `compile_fail` 只貼前半段。
+
+- 並行相關的範例（第 14 章）：
+  - 領域沿用飲料店：`Till`（`total`、`orders`）、`cups`／`beans`、`menu`、`board`、`NEXT_TICKET`、`SHOP_NAME`、`ORDERS`、worker pool 的 `job_tx`／`done_tx`。避開 The Rust Book 的 `hi number … from the spawned thread!`、`vec![1, 2, 3]` 的 `v`、`Mutex::new(5)` 的 `m`、10 條執行緒加總的 `counter`、`ThreadPool`／`Worker`／`Job`、`val` 的 `hi`、`from`、`the`、`thread` 訊息。
+  - 只用 std。`use` 可用（`use std::thread;`、`use std::sync::{Arc, Mutex, mpsc};`），不用 `Self`、不寫 async、不用 crate。`Duration` 是固定句型（見上表），`Instant`、`std::time` 的其他東西不用；`Ordering` 只寫 `Ordering::SeqCst`，其他選項（`Relaxed`、`Acquire`、`Release`）一句話帶過「本書不展開」；`Send`／`Sync` 在第 11 集之前只說「先讀成能安全交給別的執行緒」；`unsafe`、`static mut` 只在文字帶過（E0133，第 16 章）；`Condvar`、`Barrier`、`thread::park`、`thread::Builder`、`recv_timeout`、`compare_exchange` 不教，最多提名字。
+  - **輸出要固定**（這章最大的風險）：
+    - 執行緒裡面不 `println!`。結果靠 `join` 的回傳值或 channel 帶回主執行緒，由主執行緒依 handle 的順序印出；好幾條執行緒的結果先收進 `Vec` 再 `sort`，或只印跟順序無關的值（總和、`len()`、`is_ok()`、`> 0`）。
+    - 第 14 章第 1 集刻意展示交錯：標籤寫「某一次的輸出（順序每次可能不同）：」，`fill.py` 不比對，貼的是實際跑出來的其中一次；除了這一處，不要再用。
+    - 需要「主執行緒先、子執行緒後」時，靠 `sleep` 拉開至少 100 毫秒的差距（慢的一方 200 毫秒、快的一方不睡）；整個區塊的睡眠總和不超過約 1 秒。不印 `ThreadId`、經過時間、`available_parallelism`。
+    - 子執行緒 panic 的訊息帶 `thread '<unnamed>' (數字)`，`fill.py` 只把 `thread 'main' (N)` 正規化，所以不能讓它出現在「執行結果」區塊：子執行緒的 panic 一律用 `match handle.join()` 或 `.is_err()` 接住（結束碼 0，stderr 不進「執行結果」），並在文中用行內程式碼說明 stderr 會多印什麼。不要寫會讓子執行緒 panic 又讓 `main` 以 `exit=101` 結束的範例。
+    - 每個會開執行緒的範例，寫完用 `fill.py --check` 連跑 5 次以上確認輸出穩定（兩份同時跑也要穩）。
+  - 會永遠卡住的範例（忘了 `drop(tx)`、死結）用 `rust,no_run`，後面不接輸出區塊（checkcode 只編譯，rustfmt 與 clippy 仍要乾淨）；文中用文字或 `text` 區塊說明會看到什麼。實測：編譯後執行幾秒再中止。
+  - Go 的輸出區塊（`go run -race main.go` 的輸出）：標籤寫「`go run -race main.go` 的輸出（節錄）：」，`fill.py` 不認得，不會比對；貼實測的其中一次，位址與 goroutine 編號每次不同，文中要說明。Go 區塊用 Tab 縮排，要在 Go 1.27 實際跑過。
+  - `lock()`、`read()`、`write()`、`join()`、`send()`、`recv()` 都回傳 `Result`，一律 `.expect("…")`（訊息寫成「收銀機壞了」「店員出事了」「櫃台不見了」這種領域用語）；`tx.send(x);` 與 `handle.join();` 單獨一行是 `unused_must_use`（clippy `-D warnings` 擋）。`thread::spawn(...)` 不接 handle 沒問題。
+  - 慣用寫法：迴圈裡 `let x = Arc::clone(&x);` 用同名遮蔽再 `move`；`thread::scope` 裡迴圈變數（`for price in …`）每圈新建，活不到範圍結束，要借它還是得 `move`（不然 E0373），共用的 `Mutex` 先 `let till_ref = &till;` 再 `move`（參照是 `Copy`，直接 `move` `till` 本身會被第一條搬走）。
+  - clippy 實測：`let _ = m.lock();` 被 `let_underscore_lock`（deny）擋；`Arc::new(RefCell::new(..))` 被 `arc_with_non_send_sync` 擋（要展示 `Arc<RefCell<T>>` 不能跨執行緒，寫成 `is_send::<Arc<RefCell<u32>>>()` 的 `compile_fail`）；`n.store(1, Ordering::Acquire)`、`n.load(Ordering::Release)` 是 rustc 的 deny lint `invalid_atomic_ordering`。不擋：`Mutex<u32>`／`Mutex<bool>`（`mutex_atomic` 預設關）、`RwLock` 的 `write()` 只用來讀、`static NEXT: AtomicU32`、`thread::spawn(函式名稱)`、`static ORDERS: Mutex<Vec<u32>> = Mutex::new(Vec::new());`、`Receiver` 的 `for x in rx`。
+  - rustfmt：`use std::collections::HashMap;` 要排在 `use std::sync::LazyLock;` 之前（`use` 依字母排序）；`use std::sync::{Arc, Mutex, mpsc};`（大寫在小寫前）；`println!` 引數超過寬度就拆成每行一個，所以 `println!("店員那邊 {}，這邊 {cups}", handle.join().expect("店員出事了"))` 要拆開或先 `let` 起來。
+  - 1.99 的訊息形狀（實測）：`thread::spawn` 借區域變數是 E0373（`note: function requires argument type to outlive 'static`，`help` 直接建議 `move`；迴圈裡同時又借 `&mut` 還會多一個 E0499）；`Rc` 交給 `spawn` 是 E0277（`Rc<String>` cannot be sent between threads safely，`help` 寫 `the trait Send is not implemented`，後面兩則 `note` 夾 `/rustc/<雜湊>/library/std/src/thread/functions.rs`，只貼前 14 行）；`Arc<RefCell<T>>` 與範圍執行緒裡的 `Cell`／`RefCell` 是 E0277（`cannot be shared between threads safely`，`help` 寫 `the trait Sync is not implemented`，`note` 建議 `RwLock` 或 atomic）；`join` 之後再 `join` 是 E0382（`takes ownership of the receiver self`）；`send` 之後再用值是 E0382；範圍執行緒兩條都 `&mut` 同一個變數是 E0499（迴圈裡是 `was mutably borrowed here in the previous iteration of the loop`），一改一讀是 E0502，兩者的 `note` 都夾 `/rustc/<雜湊>/library/std/src/thread/scoped.rs`，只貼前 12～15 行；`static` 放 `Cell` 是 E0277（`shared static variables must have a type that implements Sync`）；`static` 初始值呼叫非 const 函式是 E0015（`note: consider wrapping this expression in LazyLock::new(|| ...)`）；`static mut` 讀寫要 `unsafe` 是 E0133；`static` 不可變直接改是 E0594。
+  - 執行時的行為（都實測過）：`recv()` 在通道關閉且沒有訊息時回傳 `Err(RecvError)`，`try_recv()` 是 `Err(Empty)` 或 `Err(Disconnected)`；`send` 在 `Receiver` 被 drop 後回傳 `Err`（`SendError`，`.0` 是沒送出去的值）；`join` 拿到子執行緒 panic 是 `Err`；持鎖時 panic 之後 `is_poisoned()` 是 `true`、`lock()` 是 `Err`，`PoisonError::into_inner()` 可以拿回 guard；`try_lock()` 在同一條執行緒已持鎖時是 `Err`，`{:?}` 印成 `"WouldBlock"`（有引號）；`sync_channel(2)` 的第 3 筆 `send` 會卡住、`sync_channel(0)` 第 1 筆就卡住，`mpsc::channel()` 不卡；`try_send` 滿了是 `Err(TrySendError::Full(值))`；`AtomicU8` 從 250 `fetch_add(10)` 回傳 250、結果是 4（環繞）；`OnceLock::set` 第二次回傳 `Err(值)`；`LazyLock` 多條執行緒同時第一次存取，初始化閉包只跑一次；`while let Ok(x) = rx.lock().expect(..).recv() { … }` 的 guard 活到迴圈本體結束（edition 2024 也一樣），3 位工人處理 6 筆各 100 毫秒的工作，`let job = …recv();` 約 200 毫秒、`while let` 約 600 毫秒；同一條執行緒對同一個 `Mutex` 連續 `lock()` 兩次，在 macOS 上會卡住（文件只說「可能 panic 或死結」，書裡照文件寫）；兩把鎖相反順序加 `sleep` 一定卡住。
+  - 「跟 Go 比一比」第 14 章用在：01（goroutine 很輕、`thread::spawn` 是作業系統執行緒）、02（沒 `recover` 的 goroutine panic 讓整個程式結束；`WaitGroup` 帶不回結果）、03（Go 閉包共用變數）、05（`close` vs drop 最後一個 `Sender`；送指標兩邊共用）、06（誰來 `close`）、07（`sync.Mutex` 跟資料分開）、12（`Add` 回傳新值、沒有 `Ordering`）、13（`init()`、`sync.OnceValue`）、14（runtime 的 `all goroutines are asleep - deadlock!`）、15（`-race`）、16（`make(chan T, n)` 對應 `sync_channel`，`channel()` 是無限的）、17（多個消費者直接 `range` 同一個 channel）。04、08、09、10、11 沒有值得單獨成節的差異。Go 版的行為都在 Go 1.27 跑過：`go run -race` 對計數器印 `WARNING: DATA RACE`、`Found 2 data race(s)`、`exit status 66`；兩把鎖相反順序加 `WaitGroup` 印 `fatal error: all goroutines are asleep - deadlock!`、`exit status 2`；`make(chan int, 2)` 讓送的人在第 3 筆卡住。
+  - 篇幅：每集 89～153 行（第 15 集 153 行最長）。省行數的辦法：編譯錯誤只貼前半段（用 `tr.sh` 節錄，`fill.py --check` 接受前綴節錄）、「規則照舊」的錯誤（`join` 兩次、`move` 之後再用）改成一句話。
 
 ## 多檔案專案
 

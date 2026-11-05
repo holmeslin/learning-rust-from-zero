@@ -119,7 +119,7 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ### 跟 Go 比一比
 
-Go 的指標隨時都能寫，沒有人檢查。Rust 的 `&` 預設只能讀，`RefCell` 是你主動選的例外，而且有人在執行時把關：它比較像單執行緒版的 `sync.Mutex`，只是同一個地方重複「加鎖」不會卡死，而是立刻 panic，直接告訴你哪一行。
+Go 的指標隨時都能寫，沒有人檢查。Rust 的 `&` 預設只能讀，`RefCell` 是你主動選的例外，而且有人在執行時把關：它比較像單執行緒版的 `sync.Mutex`（真正的 `Mutex` 在第 14 章第 7 集），只是同一個地方重複「加鎖」不會卡死，而是立刻 panic，直接告訴你哪一行。
 
 ## 重點整理
 
