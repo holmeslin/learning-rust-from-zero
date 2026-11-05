@@ -73,7 +73,7 @@
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 | 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
-| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章 |
+| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章；`'_` 第 10 章第 5、6 集 |
 | 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`） | `Box` 第 13 章 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 
@@ -130,19 +130,19 @@ let n: i32 = line.parse().expect("請輸入整數");
 - 借用相關的範例：
   - 第 4 章第 10 集起，只需要讀的字串參數一律寫 `&str`，不寫 `&String`（clippy `ptr_arg` 放行，只是讓第 2～9 集教 `&String` 用）；要改動的才寫 `&mut String`。
   - 第 7 章第 4 集之前，不寫 `for x in &a`、`for x in slice` 這種走訪參照的迴圈，改用 `for i in 0..a.len()` 加索引（clippy `needless_range_loop` 已放行）。
-  - 回傳參照的函式只放一個參照參數（第 4、5 章）；示範 E0106 時，用沒有參數的 `fn dangle() -> &String`。
+  - 回傳參照的函式只放一個參照參數（第 4、5 章，第 10 章第 2 集起沒有這個限制）；示範 E0106 時，用沒有參數的 `fn dangle() -> &String`。
   - 展示借用錯誤的 `compile_fail` 區塊，要讓參照在衝突「之後」還被用到，否則 NLL 會讓它編譯成功。
   - 展示錯誤時，盡量別讓訊息夾帶無關的警告：變數沒被改到就不要寫 `mut`（`unused_mut`），被指定的值要讀過一次（`unused_assignments`），貼出來的訊息才乾淨。
 - struct 與方法相關的範例：
   - 附錄一 e 才教 `Self`，`impl` 裡的型別一律寫完整名稱：`fn new(owner: String) -> Account`、`Account { owner, balance: 0 }`。
-  - struct 的欄位只放擁有的型別（`String`、數字、別的 struct），不放參照；示範 E0106 時才寫 `name: &str`。
+  - struct 的欄位只放擁有的型別（`String`、數字、別的 struct），不放參照；示範 E0106 時才寫 `name: &str`（第 10 章第 5 集起可以放參照，見「生命週期相關的範例」）。
   - `rust` 區塊裡不要寫 `Member { name: name }` 這種多餘的欄位名稱（clippy `redundant_field_names` 不在放行清單）；要對照時只用行內程式碼。
   - 方法不要取名 `to_string`（clippy `inherent_to_string`）；`is_` 開頭的方法要用 `&self`（`wrong_self_convention`）。
   - struct 建立式的大括號內容超過約 18 欄寬，rustfmt 就會拆成每個欄位一行（像 `Account { balance: 500 }` 這麼短才能留在同一行）；`println!` 的引數（含格式字串）合計超過約 60 欄寬也會被拆開，改成兩行 `println!`。
 - enum 與模式相關的範例：
   - variant 帶的資料要被 `match` 或 `if let` 讀出來；`#[derive(Debug)]` 印出來不算讀過，沒讀到的欄位 rustc 會報 `dead_code`（跟 struct 欄位同一條規則）。第 6 章第 2 集刻意用 `rust,warn` 區塊展示這個警告：「編譯警告：」區塊只接受整段貼出（fill.py 不收節錄），所以那個範例只放兩個帶資料的 variant，警告才不會太長。
   - 每個 variant 都要在程式裡建立過（例如 `for x in [A, B, C]`），否則會有 `variant never constructed`；不要用 `let _ = Status::Paid;` 這種湊數的寫法。
-  - 函式不要回傳字串字面值（`-> &str` 沒有參照參數可以借，要 `'static`，第 10 章）。要把 enum 轉成文字，在 `match` 分支裡直接 `println!`，或在 `main` 裡寫 `let text = match ... { ... => "文字" };`。
+  - 函式不要回傳字串字面值（`-> &str` 沒有參照參數可以借，要 `'static`，第 10 章第 7 集才教）。要把 enum 轉成文字，在 `match` 分支裡直接 `println!`，或在 `main` 裡寫 `let text = match ... { ... => "文字" };`。
   - clippy 會擋下「有更短寫法」的程式：`matches!(x, None)`、`matches!(x, Some(_))`（`redundant_pattern_matching`）；`matches!(c, 'a'..='z')`（`manual_is_ascii_check`）；連續整數的 `1 | 2 | 3 | 4`（`manual_range_patterns`，改用不連續的數字，或直接寫範圍）；`if let` 裡面再包一層沒有 `else` 的 `if`（`collapsible_if`，edition 2024）；`Some(x) => Some(f(x)), None => None`（`manual_map`）；`Some(v) => v, None => 預設值`（`manual_unwrap_or` 或 `manual_unwrap_or_default`）。展示巢狀 `if let` 時，內外層都要有 `else`。
   - `match x { Some(p) => ..., _ => {} }` 沒問題（`single_match` 在放行清單），可以拿來引出 `if let`。
   - rustfmt 對簡單的 `if a { x } else { y }` 沒有固定規則：函式本體或 `let` 右邊放得下就會摺成一行（`else if` 串不會），`match` 分支的區塊裡則一律拆成多行；let chains 放不下一行時，排成 `if let ... ⏎ && 條件 ⏎ {`。先照 checkcode 的結果寫。
@@ -157,7 +157,7 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 領域沿用飲料店：`Tea`、`Coffee`、`Water`、`Cookie`，trait 叫 `Priced`、`Named`，泛型容器叫 `Shelf<T>`，金額是 `Money`。避開 The Rust Book 的 `Summary`、`Draw`、`largest`、`Point<T>`、`Wrapper`。
   - `Self` 附錄一 e 才教，`impl` 裡一律寫完整型別名稱：`fn from(name: &str) -> Member`、`fn add(self, other: Money) -> Money`、`fn new() -> Shelf<T>`。唯一的例外是第 8 章第 17 集：trait 定義裡的 `Self::Item`（`type Item;` 一定要這樣引用），文中一句話帶過「`Self` 代表實作這個 trait 的型別，附錄一 e 才完整介紹」，`impl` 區塊裡仍然寫完整型別。
   - `Result`、`Ok`、`Err` 第 9 章才教，第 8 章只出現三處：`impl Display` 骨架裡的 `std::fmt::Result`（固定句型）、`parse` 的結果（照舊用 `.expect()`）、第 14 集用 `{:?}` 印出 `parse` 的結果來觀察。不自己回傳 `Result`，所以第 14 集不實作 `FromStr`（第 9 章第 7 集才實作）。
-  - 路徑一律寫完整：`std::fmt::Display`、`std::fmt::Formatter`、`std::ops::Add`、`std::str::FromStr`、`std::cmp::Ordering`；`use` 只有第 7 章教的 `use std::collections::HashMap;` 一類。`Formatter` 不寫 `<'_>`（生命週期第 10 章，沒有也能通過 clippy）。`Ordering` 只用 `{:?}` 印，不在程式裡寫出它的路徑。
+  - 路徑一律寫完整：`std::fmt::Display`、`std::fmt::Formatter`、`std::ops::Add`、`std::str::FromStr`、`std::cmp::Ordering`；`use` 只有第 7 章教的 `use std::collections::HashMap;` 一類。`Formatter` 在第 10 章第 6 集之前不寫 `<'_>`（生命週期第 10 章，沒有也能通過 clippy）。`Ordering` 只用 `{:?}` 印，不在程式裡寫出它的路徑。
   - 第 8 章第 2 集的 `&impl Priced` 比第 4 集早出現，用一句話帶過（「現在讀成任何實作了該 trait 的型別的參照」）；第 15 集的 `Box<dyn Trait>`、`Box::new(...)` 同樣只當作照抄的寫法。
   - 只實作 `From` 與 `Display`，不手寫 `Into`、`ToString`（clippy `from_over_into`、`to_string_trait_impl`）；`.into()` 要有型別標註，否則是 E0283。`.to_string()` 不要直接寫在 `println!` 的引數裡（`to_string_in_format_args`），先 `let` 起來。
   - 手寫的 `Default`、`Clone` 如果只是「每個欄位取預設值／複製」，會被 `derivable_impls` 擋下，要用 `derive`。`derive` 與手寫不要混用在同一組成對的 trait 上（例如 `derive(PartialOrd)` 加手寫 `Ord`，`derive_ord_xor_partial_ord`）。
@@ -175,6 +175,15 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 展示 `?` 的 E0277（`couldn't convert the error`）要寫 `qty.parse::<u32>()?`；寫成 `let qty: u32 = qty.parse()?;` 而且回傳型別是自訂 enum、這個 enum 還沒有任何自己寫的 `From`（只剩「任何型別都能轉成自己」那個）時，編譯器會推論成 E0271（`type mismatch resolving`），訊息不一樣。
   - 錯誤型別一律 `#[derive(Debug)]`（`.expect()`、`.unwrap()` 要 `Debug`，缺的話是 E0277）；variant 帶的資料要被 `match` 或 `Display` 讀出來，`derive(Debug)` 不算讀過。
   - `impl std::error::Error for 型別 {}` 的大括號留空，不寫 `source`、不提過時的 `description`；E0277 的 `note` 若夾帶 `/rustc/<雜湊>/library/...` 路徑，只貼到 `note:` 那一行為止。
+
+- 生命週期相關的範例：
+  - 領域沿用飲料店：`name_or`、`first_part`、`tail`、`Receipt`（`customer`、`drink`）、`Status`、`Drink`。避開 The Rust Book 的 `longest`、`ImportantExcerpt`、`first_word`。
+  - clippy `needless_lifetimes` 不在放行清單：只有一個參照參數、省略規則補得出來的函式，`rust` 區塊裡不能寫 `<'a>`（`<'a, 'b>` 裡只用一次的名字也會被擋）。要示範「展開之後的樣子」，用 ```` ```text ```` 區塊（第 4 集）或行內程式碼；真的要寫標註的範例，必須有兩個以上的參照參數，而且回傳值只綁其中一部分（`name_or<'a>(name: &'a str, fallback: &'a str)`、`first_part<'a>(line: &'a str, sep: &str)`）。
+  - `const`、`static` 裡不要寫 `&'static str`，參照預設就是 `'static`（clippy `redundant_static_lifetimes`）；函式回傳型別與 struct 欄位可以寫。
+  - 簽名裡出現帶生命週期的 struct，一律寫 `Receipt<'_>`（`-> Option<Receipt<'_>>`）：省略不寫，rustc 1.99 預設會警告 `mismatched_lifetime_syntaxes`，checkcode 會判失敗。`impl` 寫 `impl Receipt<'_>`；方法簽名要用到 `'a` 時才寫 `impl<'a> Receipt<'a>`（clippy 不會抱怨）。第 10 章第 6 集起 `Display` 骨架可以寫完整的 `std::fmt::Formatter<'_>`，之前的章節維持原本的骨架。
+  - 示範 E0597 時，結果要在內層區塊結束「之後」還被用到，否則 NLL 會讓它編譯成功。內層區塊寫成 `let r = { let s = ...; 借用 s 的運算式 };` 這種區塊值的形式，不寫先宣告後賦值的 `let r;`（第 1 章第 5 集說本書不用它，clippy `needless_late_init` 也會擋）。不要同時示範好幾個不同的錯誤。
+  - 1.99 的訊息形狀：兩個參照參數回傳參照是 E0106，`help` 只建議 `<'a>`（`'a` 標在全部參照上）；沒有參照參數的 `-> &str` 是 E0106，`help` 先建議 `'static`、再建議回傳擁有的值；標了 `'a` 或 `'static` 卻回傳區域變數的參照是 E0515（`cannot return reference to local variable`，沒有 `help`）；回傳了沒有綁進 `'a` 的參數是 E0621，`help` 建議替它標 `'a`；`impl Receipt`（缺 `<'_>`）是 E0726，`help` 建議 `<'_>`；呼叫端結果超出某個輸入的範圍是 E0597。這些訊息都很短，整段貼出。
+  - 進度邊界：不寫生命週期 bound（`'a: 'b`、`T: 'a`、`T: 'static`）、`for<'a>`、`dyn Trait + 'a`；不用 `Self`、閉包與迭代器的方法。`T: 'static` 只在第 7 集用一句話指向第 14 章。
 
 ## 第二部使用 crate
 
