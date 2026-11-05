@@ -126,6 +126,12 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 回傳參照的函式只放一個參照參數（第 4、5 章）；示範 E0106 時，用沒有參數的 `fn dangle() -> &String`。
   - 展示借用錯誤的 `compile_fail` 區塊，要讓參照在衝突「之後」還被用到，否則 NLL 會讓它編譯成功。
   - 展示錯誤時，盡量別讓訊息夾帶無關的警告：變數沒被改到就不要寫 `mut`（`unused_mut`），被指定的值要讀過一次（`unused_assignments`），貼出來的訊息才乾淨。
+- struct 與方法相關的範例：
+  - 附錄一 e 才教 `Self`，`impl` 裡的型別一律寫完整名稱：`fn new(owner: String) -> Account`、`Account { owner, balance: 0 }`。
+  - struct 的欄位只放擁有的型別（`String`、數字、別的 struct），不放參照；示範 E0106 時才寫 `name: &str`。
+  - `rust` 區塊裡不要寫 `Member { name: name }` 這種多餘的欄位名稱（clippy `redundant_field_names` 不在放行清單）；要對照時只用行內程式碼。
+  - 方法不要取名 `to_string`（clippy `inherent_to_string`）；`is_` 開頭的方法要用 `&self`（`wrong_self_convention`）。
+  - struct 建立式的大括號內容超過約 18 欄寬，rustfmt 就會拆成每個欄位一行（像 `Account { balance: 500 }` 這麼短才能留在同一行）；`println!` 的引數（含格式字串）合計超過約 60 欄寬也會被拆開，改成兩行 `println!`。
 
 ## 第二部使用 crate
 

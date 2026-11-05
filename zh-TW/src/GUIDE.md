@@ -174,7 +174,7 @@
 | 第 2 章 | `const`/`static`（不可變）、函式與參數（每個參數都要標型別、參數預設不可變）、回傳值與最後一個運算式、陳述式 vs 運算式（分號）、early `return`、`()`、tuple 與用 tuple 回傳多個值、解構與 `_`、陣列 `[T; N]` 與 `{:?}`、`usize` 索引與越界 panic、`for x in 陣列`、遞迴、`String` 初探（`String::from`、`push_str`、`len`，只在同一個函式內使用） |
 | 第 3 章 | 沒有 GC 的記憶體管理、stack 與 heap、所有權三條規則與作用域、drop（區塊結束、函式結束、重新指定值）、move 與 E0382、`.clone()`、`Copy` 型別（整數、`bool`、`char`、元素都是 `Copy` 的 tuple 與陣列、字串字面值）、傳參數時 move、用回傳值（含 tuple）交還所有權。還沒有 `&` |
 | 第 4 章 | `&` 與 `&mut`（借用不轉移所有權；函式簽名與呼叫端都要寫 `&` 或 `&mut`，變數要 `let mut` 才能借出 `&mut`）、借用規則（多個 `&` 或一個 `&mut`，E0499、E0502、E0506）、NLL（借用到最後一次使用為止）、懸置參照（E0106、E0597，改成回傳擁有的值）、`*` 解參照（E0368、E0507）、字串 slice `&s[起..迄]` 與 `&str`、字串字面值是 `&str`、只需要讀的字串參數用 `&str`、陣列 slice `&[T]`、`&mut [T]`（E0594）。回傳參照的函式只有一個參照參數，沒有生命週期標註；還沒有 `struct`、`Vec`、`match` |
-| 第 5 章 | `struct`、欄位初始化簡寫、更新語法、tuple struct、`#[derive(Debug)]`、`impl` 與方法、`&self`/`&mut self`/`self`、關聯函式與 `new`、自動參照 |
+| 第 5 章 | `struct`（欄位只放擁有的型別如 `String`，不放參照；每個欄位都要給值，沒有零值）、建立與讀取欄位、欄位初始化簡寫、更新語法 `..`（會 move、partial move；struct 預設不是 `Copy`，也不能 `.clone()`）、tuple struct 與 unit struct、`#[derive(Debug)]` 與 `{:?}`/`{:#?}`、`impl` 與方法、`&self`/`&mut self`/`self`（E0596、E0382）、關聯函式與 `Type::new`、關聯常數、`.` 自動參照與解參照（E0596、E0507）、多個 `impl` 區塊（E0592）。還沒有 `enum`、`match`、`Vec`、`Self`、`pub`、`Clone`/`Copy`/`PartialEq` 的 derive，也不能比較兩個 struct（`==`） |
 | 第 6 章 | `enum` 與帶資料的 variant、`match` 與窮盡性、`_`、`Option`、`if let`、`let else`、match guard、`\|` 與範圍模式、解構、slice pattern、`matches!`、let chains、enum 的方法 |
 | 第 7 章 | `Vec`、`while let`、`get`、走訪與借用、`String` 深入與 `format!`、`chars`/`bytes`、常用字串方法、`HashMap`、`entry().or_insert`、`HashSet`、`BTreeMap`、`sort`/`dedup` |
 | 第 8 章 | `trait`、預設方法、`impl Trait`、trait bound、`where`、泛型函式與 struct、`derive`、`Display`、`PartialOrd`/`Ord`、`From`/`Into`、`FromStr`、`dyn Trait`、孤兒規則、關聯型別、`Add` |
@@ -269,8 +269,15 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 陣列 slice `&[T]`、`&mut [T]` | 第 4 章第 11、12 集 | 參數用陣列參照 `&[T; N]` |
 | 回傳參照的函式 | 第 4 章第 8 集（只有一個參照參數） | 回傳擁有的值 |
 | `struct` | 第 5 章第 1 集 | 用多個變數或 tuple |
+| 欄位初始化簡寫 `Member { name, city }` | 第 5 章第 3 集 | 寫完整的 `name: name` |
+| 更新語法 `..舊值` | 第 5 章第 4 集 | 把每個欄位寫出來 |
+| tuple struct、unit struct | 第 5 章第 5 集 | 用有名字欄位的 struct |
 | `#[derive(Debug)]` | 第 5 章第 6 集 | 逐一印出欄位 |
 | 方法、`impl` | 第 5 章第 7 集 | 用一般函式；固定句型裡的方法呼叫除外 |
+| `&mut self`、`self`（方法） | 第 5 章第 8 集 | 方法只用 `&self`；要改或拿走時寫成一般函式 |
+| 關聯函式 `Type::new(...)`、關聯常數 | 第 5 章第 9 集 | 寫成一般函式（例如 `fn new_account(...)`） |
+| 自動參照與解參照（對 `&`、`&mut` 用 `.` 呼叫方法） | 第 5 章第 10 集 | 只用固定句型裡的方法呼叫，不解釋為什麼能對參照呼叫 |
+| 多個 `impl` 區塊 | 第 5 章第 11 集 | 只寫一個 `impl` |
 | `enum` | 第 6 章第 1 集 | 用整數或 `bool` 表示狀態 |
 | `match` | 第 6 章第 3 集 | 用 `if` / `else if` |
 | `Option` | 第 6 章第 6 集 | 用 `bool` 加一個值表示「有沒有」 |
