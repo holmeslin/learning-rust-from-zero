@@ -49,6 +49,7 @@
 - 不要「順便」介紹本集主題以外的語法。
 - 讀者會 Go，所以「迴圈」「函式」這些**概念**不用教，但 Rust 的**語法**仍然要照進度：例如第 6 章之前不能用 `match`。
 - `docs/outline.md` 各章下方的「邊界」是額外規定，寫該章前先看。
+- **`Self` 從附錄一 e 起才能用。** 第 1～12 章與附錄一 a～d 的 `impl` 裡一律寫完整型別名稱（唯一的例外是第 8 章第 17 集、第 11 章第 7 集 trait 定義裡的 `Self::Item`，文中一句話帶過）。附錄一 e 之後（e 本身、f～j 與第二部全部）可以用 `Self`，也可以繼續寫完整名稱：兩種寫法編譯結果相同，clippy 的 `use_self` 預設關閉，所以混用不會被擋，不強制改寫。已經寫好的第 1～12 章不回頭改。
 
 ## 固定句型
 
@@ -221,6 +222,16 @@ let n: i32 = line.parse().expect("請輸入整數");
   - `///` 範例裡含三個反引號時（第 13 集），外層的程式區塊用四個反引號圍住（````` ````rust,ignore `````）。單檔檢查（checkcode 的 `rust` 區塊、`fill.py`）不會把四個反引號的區塊當成 `rust` 區塊；專案驗證看得懂圍欄的長度，前面有路徑標籤的話，照樣是專案裡的檔案。
   - 第 12 章的 crate：`Cargo.toml` 的 `[dependencies]` 展示只能用第二部清單內的 crate，版本與 `tools/checkcode/deps/Cargo.toml` 一致（`rand = "0.10.3"`、`clap = { version = "4.6.7", features = ["derive"] }`）；第一部不寫實際呼叫 crate 的 `rust` 區塊。
   - 排版亂掉的示範不能用 `rust`（checkcode 會因 `rustfmt --check` 擋下）：用 `rust,ignore`，後面接「`cargo fmt` 之後的 `src/main.rs`：」與排好的 `rust` 區塊；checkcode 會確認 rustfmt 真的把前一個區塊排成後面那個。展示 clippy 警告用 `rust,warn`（`len_zero` 這類不在放行清單的 lint），輸出標籤用「`cargo clippy` 的輸出（省略編譯進度）：」。
+
+- 附錄一相關的範例（a～j）：
+  - 進度邊界：可用第 1～12 章的全部內容與固定句型，不用第 13 章起的東西（`Deref`、`Rc`、執行緒、`size_of`……）。附錄一各集可以引用字母較前的集（i 用 g 的 `{:b}`），要預告字母較後的集時只用一句話（a 的 `{:x}` 標明「附錄一 g 才教」），不展開。非得提到書裡完全沒教的東西（`TryFrom`、`char::from_u32`），一句話帶過並寫「這本書不展開」，不寫範例。
+  - `Self` 在 e 之前（a～d）不用，從 e 起可用（見「進度邊界」）；`#[allow(...)]`、`#[deny(...)]` 在 j 之前不用，需要避開警告時改寫範例，不要靠屬性。
+  - 領域沿用飲料店：`prices`、`Account`、`Status`、`Size`、`Member`、`Menu`、`Money`、`Meters`／`Seconds`（第 5 章第 5 集的 tuple struct 對照）。
+  - clippy 的雷（都實測過）：`010`（`zero_prefixed_literal`，只有 clippy 會擋，rustc 照常編譯，所以用 `rust,warn` 展示，fill.py 只抓 rustc 的警告，clippy 的訊息改用文字說明）；對字面值 `300 as u8`（`unnecessary_cast`，另外 rustc 的 deny lint `overflowing_literals` 也會擋），轉換要用有型別的變數；`let x = x;` 只在 `x` 沒被改過時才會被 `redundant_locals` 擋，先 `let mut` 改過再 `let x = x;` 凍結沒事；`'outer: loop { loop { break 'outer; } }` 外層從不重複（`never_loop`，deny），外層要真的會迴圈；`println!("{}", format!(...))`（`format_in_format_args`）；`println!("{0} {1}", "a", "b")` 引數是字面值（`print_literal`）；`stock > 0 && println!(...)` 不是 clippy 而是 E0308（`println!` 回傳 `()`）。
+  - 附錄一 g 的輸出會刻意對不齊：寬度算字元數，中文字寬度是兩個英文字母。這種範例的輸出照實貼，文中要說明為什麼歪。
+  - 附錄一 j 之前遇到「不需要的 `mut`」之類的警告，用 `rust,warn` 展示，並讓警告成為教學的線索（d 的迴圈 shadowing 會得到 `unused_mut`）。
+  - 1.99 的訊息形狀（實測）：沒宣告的標籤是 E0426；`Self` 放在普通函式裡是 E0411（`Self not allowed in a function`）；陣列長度用變數是 E0435（`help` 建議 `const`，貼整段）；shadowing 之後 `push_str` 不存在是 E0599，訊息帶 `there's an earlier shadowed binding` 的 `note`；對 shadow 之後的不可變變數 `+=` 是 E0384；`u32 as char` 是 E0604、`i32 as bool` 是 E0054；字面值放不下是沒有錯誤碼的錯誤（`literal out of range for ...`，`overflowing_literals`）；`#![deny(unused_variables)]` 產生沒有錯誤碼的錯誤；`[u32; 3]` 對 `[u32; 4]` 是 E0308；`type Price = u32;` 後 `impl Price` 是 E0390（本書沒用到）。
+  - 「跟 Go 比一比」用在：a（`010`、`1e3`）、b（`switch` 裡的 `break`）、d（內層 `:=`）、f（`type X Y` 是新型別）、g（`%8s` 靠右）、h（`[]int` 同時是擁有者與一段資料）、i（浮點數轉整數放不下）、j（未使用變數是錯誤）。c（短路）與 e（`Self`）沒有值得單獨成節的差異。
 
 ## 多檔案專案
 
