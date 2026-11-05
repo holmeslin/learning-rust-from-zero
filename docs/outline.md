@@ -14,7 +14,7 @@ Rust 1.99 · edition 2024 · 繁中 · 給會寫 Go 的 Rust 新手 · 一集一
 ## 第 2 章 函式與複合型別
 01 `const` 與 `static` · 02 函式 · 03 參數一定要標型別 · 04 回傳值與最後一個運算式 · 05 陳述式 vs 運算式（分號的意義）· 06 early `return` · 07 unit 型別 `()` · 08 tuple · 09 用 tuple 回傳多個值（跟 Go 比一比）· 10 解構與 `_` · 11 陣列 `[T; N]` · 12 索引、`usize` 與越界 panic · 13 `for` 走訪陣列 · 14 遞迴 · 15 `String` 初探（`String::from`、`push_str`、`len`）
 
-邊界：`static` 只教不可變（edition 2024 取 `static mut` 的參照是硬錯誤），可變的全域狀態留到第 14 章。第 7 章以前一律用陣列，不用 `Vec`。
+邊界：`static` 只教不可變（edition 2024 取 `static mut` 的參照是硬錯誤），可變的全域狀態留到第 14 章第 12、13 集。第 7 章以前一律用陣列，不用 `Vec`。
 
 ## 第 3 章 所有權
 01 為什麼需要所有權（沒有 GC，跟 Go 比一比）· 02 stack 與 heap · 03 所有權三條規則 · 04 離開作用域就 drop · 05 move · 06 move 之後不能再用（E0382）· 07 `clone` · 08 `Copy` 型別 · 09 傳參數也會 move · 10 回傳值交還所有權 · 11 「交出去再拿回來」很麻煩
@@ -66,6 +66,8 @@ a 數字字面值（`1_000`、`0x`、`0b`、`10u8`）· b 標籤 `'outer` · c �
 
 ## 第 14 章 並行
 01 `thread::spawn` · 02 `join` · 03 把資料 `move` 進執行緒 · 04 `thread::scope` · 05 `mpsc` channel · 06 多個生產者 · 07 `Mutex` · 08 `Arc` · 09 `Arc<Mutex<T>>` · 10 `RwLock` · 11 `Send` 與 `Sync` · 12 atomic · 13 `OnceLock` 與 `LazyLock` · 14 死結 · 15 data race 為什麼編譯不過（跟 Go 的 `-race` 比一比）· 16 `sync_channel` 與背壓 · 17 worker pool
+
+邊界：只用 std，不寫 async（第 15 章）。`thread::sleep(Duration::from_millis(n))` 是固定句型（`Duration` 第 17 章第 6 集）；`Ordering` 只用 `SeqCst`；`unsafe`、`static mut` 只在文字帶過（第 16 章）。範例的輸出要固定：執行緒裡不印東西（第 1 集的交錯示範除外），結果由主執行緒依 `join` 順序或排序後印；會卡住的範例（死結、忘了 `drop(tx)`）用 `rust,no_run`。
 
 ## 第 15 章 async
 01 為什麼需要 async（跟 goroutine 比一比）· 02 `async fn` 與 `.await` · 03 `Future` 是惰性的 · 04 tokio 與 `#[tokio::main]` · 05 `tokio::spawn` · 06 `JoinSet` · 07 `tokio::sync::mpsc` · 08 `select!` · 09 `timeout` · 10 `CancellationToken`（跟 Go 的 context 比一比）· 11 async 裡的 `Mutex` · 12 不要阻塞 runtime：`spawn_blocking` · 13 async 閉包 · 14 跨 `.await` 的 `Send` 限制
