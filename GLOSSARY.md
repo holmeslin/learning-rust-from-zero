@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、Cargo 與它的指令名稱。
+保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -106,3 +106,10 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 短路求值 | short-circuit evaluation | 短路運算 |
 | 型別別名 | type alias | 類型別名 |
 | 截斷 | truncation | 截取 |
+| 互斥鎖 | mutex | 互斥體 |
+| 死結 | deadlock | 死鎖 |
+| 背壓 | backpressure | 反壓 |
+| 原子操作 | atomic operation | 原子運算 |
+| 範圍執行緒 | scoped thread | 作用域線程 |
+| 生產者、消費者 | producer、consumer | 生產方、消費方 |
+| 鎖中毒 | poisoned | 鎖污染 |
