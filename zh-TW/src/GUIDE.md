@@ -181,7 +181,7 @@
 | 第 9 章 | `panic!`（結束碼 101、型別 `!`）、`Result<T, E>`（`Ok`/`Err`；不能直接運算，E0369；忽略不處理有 `unused_must_use` 警告）、用 `match`/`if let`/`let else` 處理 `Result`（只寫 `Ok` 是 E0004；`{e}` 與 `{e:?}`）、`unwrap`/`expect`（`Result` 與 `Option` 都有；訊息格式；`read_line` 回傳 `Result<usize, std::io::Error>`）、`?`（用在回傳 `Result` 或 `Option` 的函式，不能混用，也不能用在回傳 `()` 的 `main`，E0277）、自己的錯誤 enum 與實作 `FromStr`（`type Err`、`from_str`；`match` 可拿 `&str` 對字串字面值比對）、`Display` + `std::error::Error`（空的 `impl`；`Error` 要求先有 `Debug` 與 `Display`，E0277）、`?` 自動呼叫 `From`（沒有 `From` 是 E0277）、`Box<dyn std::error::Error>`（`Err("...".into())`、`Err(Box::new(...))`、`downcast_ref`）、`main` 回傳 `Result<(), E>`（`Err` 時印 `Error: {:?}`、結束碼 1）、panic 與 `Result` 的取捨。還沒有 `Option`/`Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`is_some`、`ok()` 等，第 11 章）、閉包、`std::fs`（第 17 章）、`thiserror`/`anyhow`（第 17 章）、`ExitCode`（第 18 章）、`Self` |
 | 第 10 章 | 生命週期是參照有效的範圍（只存在編譯時期，沒有執行時期成本）、標註 `<'a>`、`&'a str`、`&'a mut T`（同一個名字代表同一段範圍；標註只描述參照之間的關係，不會讓值活得更久，函式本體違反標註是 E0515、E0621）、有兩個以上參照參數又回傳參照要標註（沒標是 E0106）、共用同一個 `'a` 時結果的壽命是最短的輸入（E0597）、只替會被回傳的參數標 `'a`、不同名字 `<'a, 'b>`、省略規則三條（每個參照參數各有一個生命週期；輸入只有一個就用它；有 `&self` 就用 `self` 的；能省略就省略，clippy `needless_lifetimes`）、struct 持有參照（`struct Receipt<'a>`，欄位沒有省略規則，struct 不能活得比資料久，E0597）、`'_`（匿名生命週期，`Receipt<'_>`；`Formatter<'_>`）、帶生命週期的 `impl`（`impl<'a> Receipt<'a>`、`impl Receipt<'_>`，只寫 `impl Receipt` 是 E0726）、方法回傳 `&str`（借自 `&self`）與 `&'a str`（借自欄位裡的參照）、`'static`（字串字面值是 `&'static str`、`-> &'static str`、`&'static str` 欄位；對區域變數標 `'static` 仍是 E0515；`const`/`static` 裡不用寫）、借還是擁有的取捨（回傳 `String`、欄位用 `String`）。還沒有閉包、迭代器的方法、`Option`/`Result` 的方法（第 11 章）、`Self`（附錄一 e）、生命週期 bound（`T: 'a`、`'a: 'b`）與 `T: 'static`（第 14 章 `thread::spawn`）、`Box<dyn Trait + 'a>`、`for<'a>`；範例用 `let r = { ...; 借用 };` 的區塊形式，不用先宣告後賦值的 `let r;`（第 1 章第 5 集說本書不用） |
 | 第 11 章 | 閉包 `\|參數\| 運算式`（型別通常不標，第一次呼叫決定後固定，換型別是 E0308；主體用 `{ }`；沒有參數寫 `\|\|`；每個閉包型別獨一無二）、擷取環境（預設借用：只讀 `&`、改動 `&mut`；函式不能擷取，E0434；閉包借著變數時改它是 E0506、讀它是 E0502）、`move` 閉包（`String` 被搬走，E0382；`Copy` 型別搬進去的是複本；閉包要活得比變數久必須 `move`，E0373）、`Fn`/`FnMut`/`FnOnce`（依主體自動決定；`FnMut` 閉包要 `let mut`，E0596；`FnOnce` 呼叫第二次是 E0382）、閉包當參數（`F: Fn(u32) -> u32`、`impl Fn`、`where`，要求太嚴是 E0594；函式名稱可以直接傳；`mut f: F`）、回傳閉包（`-> impl Fn(u32) -> u32` 要 `move`；不同閉包用 `Box<dyn Fn(u32) -> u32>`，否則 E0308）、`Iterator` 與 `next`（`while let`、`nth`；手動使用要 `let mut`，E0596）、`iter`/`iter_mut`/`into_iter` 與 `for` 的原理（`IntoIterator`；範圍 `0..n` 本身是迭代器）、惰性（adapter 與 consumer，`unused_must_use` 警告）、`map`/`filter`（`filter` 的閉包多一層參照，`**p`）、`collect`（要型別標註，E0283；`Vec<_>`、`HashMap<_, _>`；`copied()`/`cloned()`；收成 `String`、`HashMap`、`Result<Vec<_>, _>`）、`sum`/`count`/`min`/`max`（`sum` 要型別標註；`min`/`max` 回傳 `Option`；`f64` 不能用，E0277；`chars().count()`）、`enumerate`/`zip`/`rev`、`fold`（累積值可以是 tuple、`String`）、`find`/`any`/`all`/`position`（找到就停）、`sort_by_key`（鍵要 `Ord`，`std::cmp::Reverse`；不能借用元素）與 `sort_by`（`Ordering`、`partial_cmp`、`total_cmp`）、自己實作 `Iterator`（`type Item`、`next`，自動擁有全部預設方法；回傳 `impl Iterator<Item = T>`）、`Option`/`Result` 的方法（`is_some`/`is_none`/`is_ok`/`is_err`、`unwrap_or`/`unwrap_or_else`、`map`、`and_then`、`ok_or`/`ok_or_else`、`ok()`、`map_err`）、`entry` 的 `and_modify`/`or_insert_with`。還沒有（書中完全沒教，讀者問到時照超前規則簡短回答）：`take`、`skip`、`chain`、`flat_map`、`max_by_key`、`reduce`、`windows`、`chunks`、`|&&p|` 這類在參數裡拆參照的寫法；`mod` 與 `use`（只有 `use std::collections::...;`）、`Rc`、`thread`、`Self`（附錄一 e） |
-| 第 12 章 | `Cargo.toml`、binary/library crate、`mod`/`pub`/`use`、多檔案模組、`pub(crate)`、文件註解、`cargo fmt`/`cargo clippy`、`#[test]`、`assert_eq!`、`#[should_panic]`、整合測試、doc test、加入 crate、features、workspace |
+| 第 12 章 | `Cargo.toml`（`[package]` 的 `name`/`version`/`edition`、`[dependencies]`）、`cargo run`/`build`/`check` 與 `target/`、binary crate（`src/main.rs`）與 library crate（`src/lib.rs`；只有 library 不能 `cargo run`；同一個 package 兩者並存時 `main.rs` 用 `套件名::` 引用 library）、`mod`（內聯模組、`crate::` 絕對路徑、模組是獨立範圍，找不到是 E0433）、`pub` 與可見性（預設私有，E0603；私有只有定義它的模組與子模組看得到；`pub struct` 的欄位要各自 `pub`，E0616、E0451；`pub enum` 的 variant 自動公開）、`use`（`crate`/`self`/`super` 路徑、`{A, B}`、`as`、`*`、prelude；E0432、`unused_imports`）、多檔案模組（`mod 名稱;`、`src/a/b.rs`、E0583）、`pub(crate)`/`pub(super)`/`pub use`、文件註解 `///`/`//!` 與 `cargo doc`、`cargo fmt`/`cargo clippy`（`-D warnings`）、`#[test]` 與 `cargo test`（`#[cfg(test)] mod tests { use super::*; }` 先照抄、`assert!`、名稱篩選）、`assert_eq!`/`assert_ne!`（要 `PartialEq` 與 `Debug`，E0369）、`#[should_panic(expected = "...")]`、`tests/` 整合測試（只能用 `pub`；只有 binary 不能寫，E0432）、doc test（只對 library 有效；`no_run`、`ignore`、`should_panic`）、加入 crate（`cargo add`、版本範圍、`Cargo.lock`、`cargo update`、`[dev-dependencies]`、`path` 相依套件）、features（`[features]`、`#[cfg(feature = "名字")]` 先照抄、`--features`、`default`、替相依套件開 feature）、workspace（根的 `[workspace]`、`members`、`resolver = "3"`、`-p`、共用 `Cargo.lock` 與 `target/`）。還沒有（讀者問到時照超前規則簡短回答）：`#[cfg]` 的其他用法與 `cfg!`（第 16 章第 10 集）、屬性 `#[allow]`（附錄一 j）、`Self`（附錄一 e）、`build.rs`（第 16 章第 11 集）、`Rc`、`thread`、發布到 crates.io |
 | 附錄一 | 數字字面值、標籤 `'outer`、短路求值、shadowing 陷阱、`Self`、`type` 別名、格式化進階、陣列/slice/`Vec` 的差別、`as` 截斷、屬性 |
 | 第 13 章 | `Box`、`Deref`、`Drop`、`Rc`、`RefCell`、`Rc<RefCell<T>>`、`Weak`、`Cell`、`Cow` |
 | 第 14 章 | `thread::spawn`/`join`、`move` 進執行緒、`thread::scope`、`mpsc`、`Mutex`、`Arc`、`RwLock`、`Send`/`Sync`、atomic、`OnceLock`/`LazyLock`、死結、`sync_channel`、worker pool |
@@ -199,7 +199,7 @@
 
 | 從哪一集起可用 | 固定句型 | 原理在哪裡解釋 |
 | --- | --- | --- |
-| 第 1 章第 2 集 | `cargo new <名稱>`、`cargo run`；程式骨架 `fn main() { ... }` | 函式第 2 章；Cargo 第 12 章 |
+| 第 1 章第 2 集 | `cargo new <名稱>`、`cargo run`；程式骨架 `fn main() { ... }` | 函式第 2 章；Cargo 第 12 章第 1 集 |
 | 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章 |
 | 第 1 章第 9 集 | 讀一行輸入（見下方） | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章第 4 集 |
 | 第 1 章第 10 集 | 文字轉數字（見下方） | `FromStr` 第 8 章；`expect` 第 9 章第 4 集 |
@@ -219,6 +219,9 @@
 | 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章；`'_` 第 10 章第 5、6 集 |
 | 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`；第 11 章第 6 集起 `Box<dyn Fn(u32) -> u32>` 同樣照寫） | `Box` 第 13 章 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
+| 第 12 章第 2 集 | 函式前面的 `pub`（開放給別的 crate 使用，照抄） | `pub` 第 12 章第 4 集 |
+| 第 12 章第 10 集 | `#[cfg(test)]`，只加在 `mod tests { use super::*; ... }` 上，照抄 | `cfg` 第 16 章第 10 集 |
+| 第 12 章第 15 集 | `#[cfg(feature = "名字")]`，照抄 | `cfg` 第 16 章第 10 集 |
 
 讀一行輸入（每次要讀一行就重複這三行）：
 
@@ -372,9 +375,22 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 自己實作 `Iterator`、回傳 `impl Iterator<Item = T>` | 第 11 章第 17 集 | 自己的 trait（例如第 8 章第 17 集的 `Dispenser`）或 `Vec` |
 | `Option`/`Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`map`、`and_then`…） | 第 11 章第 18 集 | `match` / `if let` / `let else`、`unwrap`、`expect` |
 | `entry` 的 `and_modify`、`or_insert_with` | 第 11 章第 19 集 | `or_insert`、`or_default`，或先 `get` 再 `insert` |
-| 模組、多檔案 | 第 12 章第 3、6 集 | 所有程式碼放在同一個 `main.rs` |
-| `cargo test` | 第 12 章第 10 集 | 用 `cargo run` 印結果檢查 |
-| 第三方 crate | 第 12 章第 14 集 | 只用 std |
+| `Cargo.toml` 的欄位、`cargo check`、`target/` | 第 12 章第 1 集 | 只用 `cargo new`、`cargo run` |
+| binary crate 與 library crate、`src/lib.rs` | 第 12 章第 2 集 | 所有程式碼放在同一個 `main.rs` |
+| `mod`（內聯模組）、`crate::` 路徑 | 第 12 章第 3 集 | 所有程式碼放在同一個 `main.rs`，不分模組 |
+| `pub`、可見性、`struct` 欄位的 `pub` | 第 12 章第 4 集 | 不要出需要分模組的題目；模組裡的函式前面的 `pub` 照抄 |
+| `use`、`self`/`super`、`as`、`*` | 第 12 章第 5 集 | 寫完整路徑（`std::fmt::Display`）；`use std::collections::HashMap;` 固定句型照舊 |
+| 多檔案模組 `mod 名稱;` | 第 12 章第 6 集 | 所有程式碼放在同一個 `main.rs`；不要要求多個檔案 |
+| `pub(crate)`、`pub(super)`、`pub use` | 第 12 章第 7 集 | 只用 `pub` 或不寫 |
+| `///`、`//!`、`cargo doc` | 第 12 章第 8 集 | 用 `//` 註解 |
+| `cargo fmt`、`cargo clippy` | 第 12 章第 9 集 | 只要求程式碼用標準排版，不要求執行工具 |
+| `#[test]`、`cargo test`、`assert!` | 第 12 章第 10 集 | 用 `cargo run` 印結果檢查 |
+| `assert_eq!`、`assert_ne!`、`#[should_panic]` | 第 12 章第 11 集 | 測試只用 `assert!` |
+| `tests/` 整合測試 | 第 12 章第 12 集 | 只寫單元測試（`mod tests`） |
+| doc test | 第 12 章第 13 集 | 不要出文件註解範例的題目 |
+| 第三方 crate、`cargo add`、`Cargo.lock`、`[dev-dependencies]` | 第 12 章第 14 集 | 只用 std |
+| features（`[features]`、`--features`） | 第 12 章第 15 集 | 不要出需要 feature 的題目 |
+| workspace（`[workspace]`、`-p`） | 第 12 章第 16 集 | 單一 package |
 | `Box`、`Rc`、`RefCell` | 第 13 章 | 用擁有權與參照設計資料結構 |
 | 執行緒 | 第 14 章第 1 集 | 循序執行 |
 | async、tokio | 第 15 章 | 用執行緒 |

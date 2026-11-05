@@ -92,7 +92,7 @@ false
 
 ## 重點整理
 
-- 使用前先寫 `use std::collections::HashMap;`（先照抄，`use` 第 12 章解釋）。
+- 使用前先寫 `use std::collections::HashMap;`（先照抄，`use` 第 12 章第 5 集解釋）。
 - `HashMap<K, V>` 是鍵對應值；`HashMap::new()` 建立空的，`insert(鍵, 值)` 放入，`len()` 是組數。
 - `insert` 會把鍵和值 move 進去；同一個鍵再 `insert` 會覆蓋舊值，並回傳 `Option`（`None` 或 `Some(舊值)`）。
 - `contains_key(&鍵)` 問有沒有，`remove(&鍵)` 刪除並回傳 `Option`；鍵是 `String` 時可以傳 `&str`。
