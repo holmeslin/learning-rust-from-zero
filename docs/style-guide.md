@@ -73,6 +73,9 @@
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 | 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
+| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()` | `Result` 第 9 章；`write!` 巨集第 16 章 |
+| 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`） | `Box` 第 13 章 |
+| 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 
 讀一行輸入（每次要讀一行就重複這三行）：
 
@@ -150,6 +153,18 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 第 7 章第 9 集起，`for` 後面可以直接放回傳迭代器的方法呼叫（`s.chars()`、`s.bytes()`、`s.split(',')`、`map.keys()`、`map.values()`），不展開原理（`Iterator` 第 11 章）。不要接 `.count()`、`.nth()`、`.rev()`、`.enumerate()`、`.collect()` 這些迭代器的方法：數字元就用 `for` 加累加變數。
   - `HashMap`、`HashSet` 的走訪順序每次執行都不同，貼了整份輸出的話，`fill.py --check` 會時好時壞。驗證過的範例只印跟順序無關的結果（`get`、`len`、加總、計數）；要印整個 map，就只放一組，或改用 `BTreeMap`。需要展示「順序會變」時，輸出標籤寫成「某一次的輸出（順序每次可能不同）：」，fill.py 不認得這個標籤，所以不會比對；整本書只有第 7 章第 14 集這樣用，並在文中說明順序不固定。
   - 第 7 章第 11 集起，`use std::collections::HashMap;` 這類固定句型放在檔案最上面、`fn main` 之前。
+- trait 與泛型相關的範例：
+  - 領域沿用飲料店：`Tea`、`Coffee`、`Water`、`Cookie`，trait 叫 `Priced`、`Named`，泛型容器叫 `Shelf<T>`，金額是 `Money`。避開 The Rust Book 的 `Summary`、`Draw`、`largest`、`Point<T>`、`Wrapper`。
+  - `Self` 附錄一 e 才教，`impl` 裡一律寫完整型別名稱：`fn from(name: &str) -> Member`、`fn add(self, other: Money) -> Money`、`fn new() -> Shelf<T>`。唯一的例外是第 8 章第 17 集：trait 定義裡的 `Self::Item`（`type Item;` 一定要這樣引用），文中一句話帶過「`Self` 代表實作這個 trait 的型別，附錄一 e 才完整介紹」，`impl` 區塊裡仍然寫完整型別。
+  - `Result`、`Ok`、`Err` 第 9 章才教，第 8 章只出現三處：`impl Display` 骨架裡的 `std::fmt::Result`（固定句型）、`parse` 的結果（照舊用 `.expect()`）、第 14 集用 `{:?}` 印出 `parse` 的結果來觀察。不自己回傳 `Result`，所以第 14 集不實作 `FromStr`。
+  - 路徑一律寫完整：`std::fmt::Display`、`std::fmt::Formatter`、`std::ops::Add`、`std::str::FromStr`、`std::cmp::Ordering`；`use` 只有第 7 章教的 `use std::collections::HashMap;` 一類。`Formatter` 不寫 `<'_>`（生命週期第 10 章，沒有也能通過 clippy）。`Ordering` 只用 `{:?}` 印，不在程式裡寫出它的路徑。
+  - 第 8 章第 2 集的 `&impl Priced` 比第 4 集早出現，用一句話帶過（「現在讀成任何實作了該 trait 的型別的參照」）；第 15 集的 `Box<dyn Trait>`、`Box::new(...)` 同樣只當作照抄的寫法。
+  - 只實作 `From` 與 `Display`，不手寫 `Into`、`ToString`（clippy `from_over_into`、`to_string_trait_impl`）；`.into()` 要有型別標註，否則是 E0283。`.to_string()` 不要直接寫在 `println!` 的引數裡（`to_string_in_format_args`），先 `let` 起來。
+  - 手寫的 `Default`、`Clone` 如果只是「每個欄位取預設值／複製」，會被 `derivable_impls` 擋下，要用 `derive`。`derive` 與手寫不要混用在同一組成對的 trait 上（例如 `derive(PartialOrd)` 加手寫 `Ord`，`derive_ord_xor_partial_ord`）。
+  - 其他會被 clippy 擋下的寫法：對 `Copy` 型別呼叫 `.clone()`（`clone_on_copy`）、`&a == &b`（`op_ref`）、`String::from(字串變數)` 與 `i64::from(i64 的值)`（`useless_conversion`）、`Marker::default()` 用在 unit struct（`default_constructed_unit_structs`）、`impl Add` 的本體裡用 `-`（`suspicious_arithmetic_impl`）。
+  - dead_code：每個 trait、每個 trait 方法（包含有預設本體的）都要在程式裡被呼叫過。欄位只被 `derive(Debug)`、`derive(Clone)`、`derive(Default)` 用到不算讀過；會比較欄位的 derive（`PartialEq`、`Hash`、`PartialOrd`）算讀過。
+  - 編譯錯誤訊息裡的 `help` 若列出「other types implement trait」的清單（E0277 的 `FromStr`、`Eq`）、夾帶 `/rustc/<雜湊>/library/...` 路徑，或建議了還沒教的東西（`Box<dyn Trait>`、`.to_string()`），只貼前面幾行，並在文中說明後面還有 `help` 與 `note`、先不用管。
+  - E0204、E0117 的訊息很短，可以整段貼；E0271、E0382（運算子）、E0308（泛型 `T`、`impl Trait`）貼前 10 到 13 行，到箭頭指的位置為止，後面的 `note` 在文中交代一句。節錄用 `fill.py --check` 驗證，不要再 `fill` 蓋回去。
 
 ## 第二部使用 crate
 
