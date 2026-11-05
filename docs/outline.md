@@ -41,9 +41,9 @@ Rust 1.99 · edition 2024 · 繁中 · 給會寫 Go 的 Rust 新手 · 一集一
 01 `trait` 定義與實作 · 02 必須明確實作（跟 Go 的隱式介面比一比）· 03 預設方法 · 04 參數用 `impl Trait` · 05 trait bound `<T: Trait>` · 06 `where` 子句 · 07 回傳 `impl Trait` · 08 泛型函式 · 09 泛型 struct 與 `impl<T>` · 10 `derive` 是什麼（`Debug` `Clone` `Copy` `PartialEq` `Eq` `Hash` `Default`）· 11 `Display` 與 `to_string` · 12 `PartialOrd` 與 `Ord` · 13 `From` 與 `Into` · 14 `FromStr` 與 `parse` 的原理 · 15 trait 物件 `dyn Trait`（`Box` 第 13 章正式介紹）· 16 孤兒規則 · 17 關聯型別 · 18 運算子多載 `Add`
 
 ## 第 9 章 錯誤處理
-01 `panic!` · 02 `Result<T, E>` · 03 用 `match` 處理 `Result` · 04 `unwrap` 與 `expect`（揭曉固定句型）· 05 `?` 運算子 · 06 `?` 也能用在 `Option` · 07 用 enum 當錯誤型別 · 08 實作 `Display` 與 `Error` · 09 `?` 會自動呼叫 `From` · 10 `Box<dyn Error>` · 11 `main` 回傳 `Result` · 12 什麼時候 panic、什麼時候回傳 `Result`（跟 Go 的 `if err != nil` 比一比）
+01 `panic!` · 02 `Result<T, E>` · 03 用 `match` 處理 `Result` · 04 `unwrap` 與 `expect`（揭曉固定句型）· 05 `?` 運算子 · 06 `?` 也能用在 `Option` · 07 用 enum 當錯誤型別（含自己實作 `FromStr`，兌現第 8 章第 14 集）· 08 實作 `Display` 與 `Error` · 09 `?` 會自動呼叫 `From` · 10 `Box<dyn Error>` · 11 `main` 回傳 `Result` · 12 什麼時候 panic、什麼時候回傳 `Result`（跟 Go 的 `if err != nil` 比一比）
 
-邊界：`Option` / `Result` 的組合子（`map`、`and_then`…）用到閉包，留到第 11 章。
+邊界：`Option` / `Result` 的組合子（`map`、`and_then`…）用到閉包，留到第 11 章；`unwrap_or`、`ok_or`、`map_err` 等方法也一併留到第 11 章。不用 `std::fs`（第 17 章），錯誤來源只有 `parse` 與 `read_line`。
 
 ## 第 10 章 生命週期
 01 為什麼需要生命週期 · 02 標註語法 `'a` · 03 函式的生命週期 · 04 省略規則 · 05 struct 持有參照 · 06 方法的生命週期 · 07 `'static` · 08 常見錯誤：改成擁有資料就好
