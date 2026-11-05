@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`trait`、crate、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、Cargo 與它的指令名稱。
+保留英文：`trait`、trait bound、newtype、crate、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -81,3 +81,8 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 內部可變性 | interior mutability | 內部可變 |
 | 關聯函式 | associated function | 靜態方法 |
 | 關聯型別 | associated type | 相關類型 |
+| 預設方法 | default method | 預設實作 |
+| 覆寫 | override | 重寫、覆蓋 |
+| 型別參數 | type parameter | 類型參數 |
+| trait 物件 | trait object | 特徵物件 |
+| 孤兒規則 | orphan rule | 孤立規則 |
