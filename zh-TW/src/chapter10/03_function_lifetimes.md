@@ -17,11 +17,10 @@ fn name_or<'a>(name: &'a str, fallback: &'a str) -> &'a str {
 
 fn main() {
     let name = String::from("小美");
-    let result;
-    {
+    let result = {
         let fallback = String::from("貴賓");
-        result = name_or(&name, &fallback);
-    }
+        name_or(&name, &fallback)
+    };
     println!("{result}");
 }
 ```
@@ -30,16 +29,16 @@ fn main() {
 
 ```text
 error[E0597]: `fallback` does not live long enough
-  --> src/main.rs:10:33
+  --> src/main.rs:9:24
    |
- 9 |         let fallback = String::from("貴賓");
+ 7 |     let result = {
+   |         ------ borrow later stored here
+ 8 |         let fallback = String::from("貴賓");
    |             -------- binding `fallback` declared here
-10 |         result = name_or(&name, &fallback);
-   |                                 ^^^^^^^^^ borrowed value does not live long enough
-11 |     }
+ 9 |         name_or(&name, &fallback)
+   |                        ^^^^^^^^^ borrowed value does not live long enough
+10 |     };
    |     - `fallback` dropped here while still borrowed
-12 |     println!("{result}");
-   |                ------ borrow later used here
 ```
 
 `name` 活到 `main` 結束，`fallback` 只活到內層的 `}`。簽名把兩個輸入和結果綁在同一個 `'a`，`'a` 就只能取兩段範圍重疊的部分，也就是活得比較短的那個：
@@ -51,7 +50,7 @@ fallback            [=========]
 result                  [==============]      用到 println!，超出 'a
 ```
 
-`result` 在內層 `}` 之後還要用，超出了 `'a`，所以編譯器說 `fallback` 活得不夠久（`does not live long enough`）。
+`result` 存著區塊的值，內層 `}` 之後還要用，超出了 `'a`，所以編譯器說 `fallback` 活得不夠久（`does not live long enough`）。
 
 這段程式實際跑起來，`name` 不是空的，回傳的就是 `name`，照理沒有問題。可是編譯器不看值，只看簽名；簽名說「結果可能是任何一個輸入」，它就照最壞的情況算。**共用同一個 `'a`，結果的壽命就是輸入裡最短的那個。**
 
@@ -69,11 +68,10 @@ fn first_part<'a>(line: &'a str, sep: &str) -> &'a str {
 
 fn main() {
     let line = String::from("小美,台北");
-    let part;
-    {
+    let part = {
         let sep = String::from(",");
-        part = first_part(&line, &sep);
-    }
+        first_part(&line, &sep)
+    };
     println!("{part}");
 }
 ```
