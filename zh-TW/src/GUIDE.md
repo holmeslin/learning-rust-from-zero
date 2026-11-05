@@ -175,7 +175,7 @@
 | 第 3 章 | 沒有 GC 的記憶體管理、stack 與 heap、所有權三條規則與作用域、drop（區塊結束、函式結束、重新指定值）、move 與 E0382、`.clone()`、`Copy` 型別（整數、`bool`、`char`、元素都是 `Copy` 的 tuple 與陣列、字串字面值）、傳參數時 move、用回傳值（含 tuple）交還所有權。還沒有 `&` |
 | 第 4 章 | `&` 與 `&mut`（借用不轉移所有權；函式簽名與呼叫端都要寫 `&` 或 `&mut`，變數要 `let mut` 才能借出 `&mut`）、借用規則（多個 `&` 或一個 `&mut`，E0499、E0502、E0506）、NLL（借用到最後一次使用為止）、懸置參照（E0106、E0597，改成回傳擁有的值）、`*` 解參照（E0368、E0507）、字串 slice `&s[起..迄]` 與 `&str`、字串字面值是 `&str`、只需要讀的字串參數用 `&str`、陣列 slice `&[T]`、`&mut [T]`（E0594）。回傳參照的函式只有一個參照參數，沒有生命週期標註；還沒有 `struct`、`Vec`、`match` |
 | 第 5 章 | `struct`（欄位只放擁有的型別如 `String`，不放參照；每個欄位都要給值，沒有零值）、建立與讀取欄位、欄位初始化簡寫、更新語法 `..`（會 move、partial move；struct 預設不是 `Copy`，也不能 `.clone()`）、tuple struct 與 unit struct、`#[derive(Debug)]` 與 `{:?}`/`{:#?}`、`impl` 與方法、`&self`/`&mut self`/`self`（E0596、E0382）、關聯函式與 `Type::new`、關聯常數、`.` 自動參照與解參照（E0596、E0507）、多個 `impl` 區塊（E0592）。還沒有 `enum`、`match`、`Vec`、`Self`、`pub`、`Clone`/`Copy`/`PartialEq` 的 derive，也不能比較兩個 struct（`==`） |
-| 第 6 章 | `enum` 與帶資料的 variant、`match` 與窮盡性、`_`、`Option`、`if let`、`let else`、match guard、`\|` 與範圍模式、解構、slice pattern、`matches!`、let chains、enum 的方法 |
+| 第 6 章 | `enum`（variant 一定要寫 `Status::Paid`，只寫 `Paid` 是 E0170；值只能是列出的 variant，傳整數是 E0308；不能用 `==` 比較，E0369）、帶資料的 variant（tuple 式、struct 式；不能用 `.0`、`.欄位` 讀資料，E0609）、`match` 與窮盡性（E0004）、`_` 與綁定變數、分支順序（`unreachable pattern`）、`Option<T>`（`Some`/`None`；不能直接當 `T` 用，E0369；`<T>` 先當成型別名稱，泛型第 8 章）、用 `match` 處理 `Option`、`match &x`（綁定會 move，E0382；對參照比對時，綁到的變數是參照）、`if let`/`else if let`、`let else`（`else` 必須離開，E0308）、match guard（不算窮盡）、`\|` 與範圍模式（`a..=b`、`90..`）、`名字 @ 模式`、解構 struct 與 tuple（`..`，E0027）、slice pattern（`[first, .., last]`、`rest @ ..`）、`matches!`、let chains（只有 edition 2024）、enum 的方法（`match self`、`*self = ...`、關聯函式回傳 `Option<Status>`）。還沒有 `Vec`、`while let`、`PartialEq`（所以不能 `==` 比較 enum）、`Option` 的方法（`unwrap`、`expect`、`is_some`、`map`…）、`Result`、`?`、`Self`、`pub` |
 | 第 7 章 | `Vec`、`while let`、`get`、走訪與借用、`String` 深入與 `format!`、`chars`/`bytes`、常用字串方法、`HashMap`、`entry().or_insert`、`HashSet`、`BTreeMap`、`sort`/`dedup` |
 | 第 8 章 | `trait`、預設方法、`impl Trait`、trait bound、`where`、泛型函式與 struct、`derive`、`Display`、`PartialOrd`/`Ord`、`From`/`Into`、`FromStr`、`dyn Trait`、孤兒規則、關聯型別、`Add` |
 | 第 9 章 | `panic!`、`Result`、`unwrap`/`expect`、`?`（含 `Option`）、enum 錯誤型別、`Display` + `Error`、`From` 轉換、`Box<dyn Error>`、`main` 回傳 `Result` |
@@ -211,6 +211,7 @@
 | 第 3 章第 7 集 | `s.clone()`（寫法同上，是方法呼叫） | 方法第 5 章；`Clone` 第 8 章 |
 | 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
+| 第 6 章第 14 集 | `matches!(值, 模式)`（回傳 `bool`） | 巨集第 16 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 
 讀一行輸入（每次要讀一行就重複這三行）：
@@ -279,10 +280,21 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 自動參照與解參照（對 `&`、`&mut` 用 `.` 呼叫方法） | 第 5 章第 10 集 | 只用固定句型裡的方法呼叫，不解釋為什麼能對參照呼叫 |
 | 多個 `impl` 區塊 | 第 5 章第 11 集 | 只寫一個 `impl` |
 | `enum` | 第 6 章第 1 集 | 用整數或 `bool` 表示狀態 |
+| 帶資料的 variant | 第 6 章第 2 集 | 用 `struct`，每種情況要的欄位全部放進去 |
 | `match` | 第 6 章第 3 集 | 用 `if` / `else if` |
+| `match` 必須窮盡 | 第 6 章第 4 集 | 把 enum 的每個 variant 都列出來，不要用 `_` |
+| `_`、綁定變數（`other => ...`） | 第 6 章第 5 集 | 整數用 `if` / `else if`；enum 逐一列出每個 variant |
 | `Option` | 第 6 章第 6 集 | 用 `bool` 加一個值表示「有沒有」 |
-| `if let`、`let else` | 第 6 章第 8、9 集 | 用 `match` |
-| let chains | 第 6 章第 15 集 | 用巢狀 `if let` |
+| 對 `Option<String>` 做 `match`、`match &值`（綁到的變數是參照） | 第 6 章第 7 集 | `Option` 只放 `Copy` 的值（例如 `Option<u32>`） |
+| `if let` | 第 6 章第 8 集 | 用 `match`，其餘分支寫 `_ => {}` |
+| `let else` | 第 6 章第 9 集 | 用 `match` 或 `if let` |
+| match guard（`模式 if 條件`） | 第 6 章第 10 集 | 在分支裡再寫 `if` |
+| `\|` 模式、範圍模式 `a..=b`、`名字 @ 模式` | 第 6 章第 11 集 | 每個值各寫一個分支；範圍用 `if` 判斷 |
+| 解構 struct 與 tuple（`Member { name, .. }`、`(Some(x), None)`） | 第 6 章第 12 集 | 用 `.` 取欄位、`.0` 取 tuple 的值；`let (a, b) = ...`（第 2 章）照舊可用 |
+| slice pattern（`[first, .., last]`、`rest @ ..`） | 第 6 章第 13 集 | 用索引 `a[0]` 與 `a.len()` 判斷 |
+| `matches!` | 第 6 章第 14 集 | 用各分支回 `true` / `false` 的 `match` |
+| let chains | 第 6 章第 15 集（只有 edition 2024） | 用巢狀 `if let` |
+| enum 的 `impl`（方法、關聯函式、`*self = ...`） | 第 6 章第 16 集 | 寫成一般函式，例如 `fn apply(discount: &Discount, price: u32)` |
 | `Vec`、`vec!` | 第 7 章第 1 集 | 用陣列 |
 | 走訪參照：`for x in &a`、`for x in slice` | 第 7 章第 4 集（`&v`）、第 11 章第 8 集 | 用索引 `for i in 0..a.len()` 加 `a[i]` |
 | `format!` | 第 7 章第 7 集 | 用 `push_str` 組字串 |
