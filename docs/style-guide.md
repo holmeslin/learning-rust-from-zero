@@ -58,8 +58,8 @@
 | --- | --- | --- |
 | 第 1 章第 2 集 | `cargo new <名稱>`、`cargo run`；程式骨架 `fn main() { ... }` | 函式第 2 章；Cargo 第 12 章 |
 | 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章 |
-| 第 1 章第 9 集 | 讀一行輸入：見下方 | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章 |
-| 第 1 章第 10 集 | 文字轉數字：見下方 | `FromStr` 第 8 章；`expect` 第 9 章 |
+| 第 1 章第 9 集 | 讀一行輸入：見下方 | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章第 4 集 |
+| 第 1 章第 10 集 | 文字轉數字：見下方 | `FromStr` 第 8 章；`expect` 第 9 章第 4 集 |
 | 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章 |
 | 第 1 章第 15 集 | 型別的最小、最大值 `i32::MIN`、`i32::MAX`（`u8::MAX` 等） | 關聯常數第 5 章（關聯函式） |
 | 第 2 章第 11 集 | `println!("{:?}", 陣列)`（tuple、`()` 也能這樣印；也可寫成 `{x:?}`） | `Debug` 第 8 章 |
@@ -73,7 +73,7 @@
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 | 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
-| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()` | `Result` 第 9 章；`write!` 巨集第 16 章 |
+| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章 |
 | 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`） | `Box` 第 13 章 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 
@@ -156,7 +156,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - trait 與泛型相關的範例：
   - 領域沿用飲料店：`Tea`、`Coffee`、`Water`、`Cookie`，trait 叫 `Priced`、`Named`，泛型容器叫 `Shelf<T>`，金額是 `Money`。避開 The Rust Book 的 `Summary`、`Draw`、`largest`、`Point<T>`、`Wrapper`。
   - `Self` 附錄一 e 才教，`impl` 裡一律寫完整型別名稱：`fn from(name: &str) -> Member`、`fn add(self, other: Money) -> Money`、`fn new() -> Shelf<T>`。唯一的例外是第 8 章第 17 集：trait 定義裡的 `Self::Item`（`type Item;` 一定要這樣引用），文中一句話帶過「`Self` 代表實作這個 trait 的型別，附錄一 e 才完整介紹」，`impl` 區塊裡仍然寫完整型別。
-  - `Result`、`Ok`、`Err` 第 9 章才教，第 8 章只出現三處：`impl Display` 骨架裡的 `std::fmt::Result`（固定句型）、`parse` 的結果（照舊用 `.expect()`）、第 14 集用 `{:?}` 印出 `parse` 的結果來觀察。不自己回傳 `Result`，所以第 14 集不實作 `FromStr`。
+  - `Result`、`Ok`、`Err` 第 9 章才教，第 8 章只出現三處：`impl Display` 骨架裡的 `std::fmt::Result`（固定句型）、`parse` 的結果（照舊用 `.expect()`）、第 14 集用 `{:?}` 印出 `parse` 的結果來觀察。不自己回傳 `Result`，所以第 14 集不實作 `FromStr`（第 9 章第 7 集才實作）。
   - 路徑一律寫完整：`std::fmt::Display`、`std::fmt::Formatter`、`std::ops::Add`、`std::str::FromStr`、`std::cmp::Ordering`；`use` 只有第 7 章教的 `use std::collections::HashMap;` 一類。`Formatter` 不寫 `<'_>`（生命週期第 10 章，沒有也能通過 clippy）。`Ordering` 只用 `{:?}` 印，不在程式裡寫出它的路徑。
   - 第 8 章第 2 集的 `&impl Priced` 比第 4 集早出現，用一句話帶過（「現在讀成任何實作了該 trait 的型別的參照」）；第 15 集的 `Box<dyn Trait>`、`Box::new(...)` 同樣只當作照抄的寫法。
   - 只實作 `From` 與 `Display`，不手寫 `Into`、`ToString`（clippy `from_over_into`、`to_string_trait_impl`）；`.into()` 要有型別標註，否則是 E0283。`.to_string()` 不要直接寫在 `println!` 的引數裡（`to_string_in_format_args`），先 `let` 起來。
@@ -165,6 +165,16 @@ let n: i32 = line.parse().expect("請輸入整數");
   - dead_code：每個 trait、每個 trait 方法（包含有預設本體的）都要在程式裡被呼叫過。欄位只被 `derive(Debug)`、`derive(Clone)`、`derive(Default)` 用到不算讀過；會比較欄位的 derive（`PartialEq`、`Hash`、`PartialOrd`）算讀過。
   - 編譯錯誤訊息裡的 `help` 若列出「other types implement trait」的清單（E0277 的 `FromStr`、`Eq`）、夾帶 `/rustc/<雜湊>/library/...` 路徑，或建議了還沒教的東西（`Box<dyn Trait>`、`.to_string()`），只貼前面幾行，並在文中說明後面還有 `help` 與 `note`、先不用管。
   - E0204、E0117 的訊息很短，可以整段貼；E0271、E0382（運算子）、E0308（泛型 `T`、`impl Trait`）貼前 10 到 13 行，到箭頭指的位置為止，後面的 `note` 在文中交代一句。節錄用 `fill.py --check` 驗證，不要再 `fill` 蓋回去。
+- 錯誤處理相關的範例：
+  - 領域沿用飲料店：`split_bill`、`order_total`、`Size`（`S` / `M` / `L`）、`SizeError`、`OrderError`、`TooMany`。避開 The Rust Book 的 `File::open`、`read_username_from_file`、`Guess`。不用 `std::fs`（第 17 章），錯誤的來源只有 `parse`（`std::num::ParseIntError`、`std::str::ParseBoolError`）、`read_line`（`std::io::Error`）與自己定義的型別。
+  - 路徑照樣寫完整：`std::error::Error`、`std::str::FromStr`、`std::num::ParseIntError`、`Box<dyn std::error::Error>`；沒有新的 `use`。`impl` 裡不寫 `Self`：`fn from_str(text: &str) -> Result<Size, SizeError>`，`type Err = SizeError;`。
+  - 第 11 章之前不用 `Option` / `Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`is_some`、`ok()`），只有 `unwrap`、`expect`（第 9 章第 4 集）；要把 `Option` 轉成 `Result`，用 `match`；要給預設值，`match` 的 `Err` 分支寫成區塊（先印提醒再回傳預設值）。
+  - clippy 會擋下這些寫法：`match r { Ok(v) => v, Err(e) => return Err(e) }`、`if let Err(e) = r { return Err(e); }`、對 `Option` 的 `let Some(x) = o else { return None; }`（`question_mark`）；展示「`?` 之前」的寫法時，用兩層巢狀 `match`，內層與外層的 `Err(e) => Err(e)` 不會被擋。`Ok(v) => v, Err(_) => 0`（`manual_unwrap_or`）；`match r { Ok(_) => true, Err(_) => false }` 與 `matches!(r, Ok(_))`（`redundant_pattern_matching`）；`Some(5).unwrap()`、對字面值 `Ok(...)` 呼叫 `unwrap`（`unnecessary_literal_unwrap`，`"42".parse().unwrap()` 不會）；`Ok(x?)`（`needless_question_mark`）；`if let Some(a) = m.get(k) { Some(*a + 1) } else { None }`（`manual_map`）。
+  - 呼叫回傳 `Result` 的函式卻不處理，是 rustc 的 `unused_must_use`，要用 `rust,warn` 展示，並整段貼出警告。
+  - 輸出標籤：panic（`exit=101`）寫「執行結果（某一次）：」；`main` 回傳 `Err` 時結束碼是 1（`exit=1`），輸出是 `Error: ` 加 `Debug` 格式，沒有執行緒編號，寫「執行結果：」（stdin 版本寫「輸入 `abc` 的執行結果：」）。
+  - 展示 `?` 的 E0277（`couldn't convert the error`）要寫 `qty.parse::<u32>()?`；寫成 `let qty: u32 = qty.parse()?;` 而且回傳型別是自訂 enum、這個 enum 還沒有任何自己寫的 `From`（只剩「任何型別都能轉成自己」那個）時，編譯器會推論成 E0271（`type mismatch resolving`），訊息不一樣。
+  - 錯誤型別一律 `#[derive(Debug)]`（`.expect()`、`.unwrap()` 要 `Debug`，缺的話是 E0277）；variant 帶的資料要被 `match` 或 `Display` 讀出來，`derive(Debug)` 不算讀過。
+  - `impl std::error::Error for 型別 {}` 的大括號留空，不寫 `source`、不提過時的 `description`；E0277 的 `note` 若夾帶 `/rustc/<雜湊>/library/...` 路徑，只貼到 `note:` 那一行為止。
 
 ## 第二部使用 crate
 
