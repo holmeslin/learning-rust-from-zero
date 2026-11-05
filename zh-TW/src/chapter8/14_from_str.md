@@ -92,7 +92,7 @@ error[E0277]: the trait bound `Money: FromStr` is not satisfied
 
 `` the trait bound `Money: FromStr` is not satisfied ``：箭頭指著 `parse`，意思是「`Money` 不知道怎麼從文字轉過來」。後面的 `help` 會列出有實作 `FromStr` 的型別，這裡省略。
 
-要讓自己的型別也能 `parse`，就是替它實作 `FromStr`，寫一個 `from_str` 方法。它的回傳型別是 `Result`，要等學完第 9 章才有足夠的工具，所以這一集只看用法，不自己實作。
+要讓自己的型別也能 `parse`，就是替它實作 `FromStr`，寫一個 `from_str` 方法。它的回傳型別是 `Result`，所以這一集只看用法，不自己實作。第 9 章第 7 集會替自己的型別實作 `FromStr`。
 
 ### 跟 Go 比一比
 
@@ -116,5 +116,5 @@ fmt.Println(n, err)
 - `parse` 呼叫目標型別的 `from_str`（`FromStr` trait）；目標型別由變數標註或 `parse::<型別>()` 決定。
 - 每個型別有自己的規則：`i32` 吃整數、`bool` 吃 `true` / `false`、`char` 吃單一字元；失敗的原因也不同（`ParseIntError`、`ParseBoolError`）。
 - `parse` 回傳 `Result`（`Ok(值)` 或 `Err(原因)`），第 9 章正式介紹；固定句型的 `.expect` 就是在處理它。
-- 目標型別沒有實作 `FromStr`，`parse` 會是 E0277。自己實作 `FromStr` 要回傳 `Result`，這一集不寫。
+- 目標型別沒有實作 `FromStr`，`parse` 會是 E0277。自己實作 `FromStr` 要回傳 `Result`，這一集不寫，第 9 章第 7 集才實作。
 - 跟 Go 比：Go 每種型別一個函式，失敗時回傳零值加 `err`；Rust 一個 `parse`，失敗是 `Err`。

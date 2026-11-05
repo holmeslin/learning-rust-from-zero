@@ -178,7 +178,7 @@
 | 第 6 章 | `enum`（variant 一定要寫 `Status::Paid`，只寫 `Paid` 是 E0170；值只能是列出的 variant，傳整數是 E0308；不能用 `==` 比較，E0369）、帶資料的 variant（tuple 式、struct 式；不能用 `.0`、`.欄位` 讀資料，E0609）、`match` 與窮盡性（E0004）、`_` 與綁定變數、分支順序（`unreachable pattern`）、`Option<T>`（`Some`/`None`；不能直接當 `T` 用，E0369；`<T>` 先當成型別名稱，泛型第 8 章）、用 `match` 處理 `Option`、`match &x`（綁定會 move，E0382；對參照比對時，綁到的變數是參照）、`if let`/`else if let`、`let else`（`else` 必須離開，E0308）、match guard（不算窮盡）、`\|` 與範圍模式（`a..=b`、`90..`）、`名字 @ 模式`、解構 struct 與 tuple（`..`，E0027）、slice pattern（`[first, .., last]`、`rest @ ..`）、`matches!`、let chains（只有 edition 2024）、enum 的方法（`match self`、`*self = ...`、關聯函式回傳 `Option<Status>`）。還沒有 `Vec`、`while let`、`PartialEq`（所以不能 `==` 比較 enum）、`Option` 的方法（`unwrap`、`expect`、`is_some`、`map`…）、`Result`、`?`、`Self`、`pub` |
 | 第 7 章 | `Vec`（`vec!`、`Vec::new()`、`push`、`pop`、`len`、`is_empty`；`v[i]` 越界在執行時 panic，`v.get(i)` 回傳 `Option<&T>`；非 `Copy` 的元素不能 `let x = v[0];`，E0507）、`while let`、走訪 `for x in &v` / `&mut v` / `v`（最後一種會 move，E0382）、持有元素的參照時不能 `push`（E0502）、參數用 `&[T]`（讀）/ `&mut [T]`（改元素）/ `&mut Vec<T>`（增減）、`String` 的 `push`/`push_str`/`+=`/`+`（左邊 move、右邊要 `&str`，E0308）與 `format!`、字串不能用索引（E0277；`len` 是位元組數）、`for c in s.chars()` / `for b in s.bytes()`（字元數用累加變數數）、常用字串方法（`trim`、`to_uppercase`、`to_lowercase`、`replace`、`contains`、`starts_with`、`ends_with`、`is_empty`、`split`、`split_whitespace`、`find`）、`HashMap`（先 `use std::collections::HashMap;`；`insert`、`len`、`contains_key`、`remove`、`get`、`get_mut`；`map[鍵]` 只能讀，E0594；`entry().or_insert`、`or_default`；`for (k, v) in &map`、`keys`、`values`；走訪順序不固定）、`HashSet`（`insert` 回傳 `bool`）、`BTreeMap`（依鍵排序、`first_key_value`、`last_key_value`）、`sort`/`reverse`/`dedup`（`Vec<f64>` 不能 `sort`，E0277）。還沒有 `.iter()`、`.map`、`.collect`、`.count()`、`.nth()`、`sort_by`（以上與閉包都是第 11 章）、`or_insert_with`/`and_modify`、`Option` 的方法（`unwrap`、`expect`、`is_some`、`unwrap_or`…）、`to_string`、`Self`、`pub`、`Result`；`for` 後面的 `chars()`、`split()`、`keys()` 照寫，不解釋原理 |
 | 第 8 章 | `trait`（定義、`impl 某trait for 型別`；少實作方法是 E0046；型別有同名方法但沒有 `impl` 不算實作，是 E0277）、預設方法與覆寫、參數 `&impl Trait`（函式裡只能用 trait 的方法，讀欄位是 E0609）、`<T: Trait>`（`T` 可以用很多次，兩個參數要同型別，不同型別是 E0308）、`+` 與 `where`、回傳 `impl Trait`（只能回傳同一種型別，E0308）、泛型函式（`<T>`、`::<型別>`；沒有 bound 的 `T` 不能 `==`，E0369）、泛型 struct 與 `impl<T>`、`impl<T: Trait>`、`derive`（`Debug`、`Clone`、`Copy`、`PartialEq`、`Eq`、`Hash`、`Default`；有 `String` 欄位不能 `Copy`，E0204）、`Display`（骨架照抄）與 `.to_string()`、`PartialOrd`/`Ord`（`derive` 的比法、`sort`、`BTreeMap` 的鍵、`f64` 只有 `PartialOrd`）、`From`/`Into`（`.into()` 要有型別標註，E0283）、`parse` 與 `FromStr` 的原理（只講用法，不自己實作）、`&dyn Trait` 與 `Box<dyn Trait>`（`Box::new(...)` 照抄）、孤兒規則（E0117）與 newtype、關聯型別（`type Item`、`Trait<Item = T>`，E0271）、`Add`/`Mul<u32>` 運算子多載（`self` 會 move，E0382）。還沒有 `Result` 的處理（`match`、`?`）、自己回傳 `Result`、`Self`（只有第 17 集 trait 定義裡的 `Self::Item`）、生命週期標註、閉包、迭代器的方法（`.iter()`、`.map`、`sort_by`）、`use`（只有 `use std::collections::...;`）、`unwrap`、`Option` 的方法 |
-| 第 9 章 | `panic!`、`Result`、`unwrap`/`expect`、`?`（含 `Option`）、enum 錯誤型別、`Display` + `Error`、`From` 轉換、`Box<dyn Error>`、`main` 回傳 `Result` |
+| 第 9 章 | `panic!`（結束碼 101、型別 `!`）、`Result<T, E>`（`Ok`/`Err`；不能直接運算，E0369；忽略不處理有 `unused_must_use` 警告）、用 `match`/`if let`/`let else` 處理 `Result`（只寫 `Ok` 是 E0004；`{e}` 與 `{e:?}`）、`unwrap`/`expect`（`Result` 與 `Option` 都有；訊息格式；`read_line` 回傳 `Result<usize, std::io::Error>`）、`?`（用在回傳 `Result` 或 `Option` 的函式，不能混用，也不能用在回傳 `()` 的 `main`，E0277）、自己的錯誤 enum 與實作 `FromStr`（`type Err`、`from_str`；`match` 可拿 `&str` 對字串字面值比對）、`Display` + `std::error::Error`（空的 `impl`；`Error` 要求先有 `Debug` 與 `Display`，E0277）、`?` 自動呼叫 `From`（沒有 `From` 是 E0277）、`Box<dyn std::error::Error>`（`Err("...".into())`、`Err(Box::new(...))`、`downcast_ref`）、`main` 回傳 `Result<(), E>`（`Err` 時印 `Error: {:?}`、結束碼 1）、panic 與 `Result` 的取捨。還沒有 `Option`/`Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`is_some`、`ok()` 等，第 11 章）、閉包、`std::fs`（第 17 章）、`thiserror`/`anyhow`（第 17 章）、`ExitCode`（第 18 章）、`Self` |
 | 第 10 章 | 生命週期標註、省略規則、struct 持有參照、`'static` |
 | 第 11 章 | 閉包與擷取、`move`、`Fn`/`FnMut`/`FnOnce`、`Iterator`、`iter`/`iter_mut`/`into_iter`、常用 adapter 與 consumer、`collect`、`sort_by_key`、自己實作 `Iterator`、`Option`/`Result` 組合子、`or_insert_with`/`and_modify` |
 | 第 12 章 | `Cargo.toml`、binary/library crate、`mod`/`pub`/`use`、多檔案模組、`pub(crate)`、文件註解、`cargo fmt`/`cargo clippy`、`#[test]`、`assert_eq!`、`#[should_panic]`、整合測試、doc test、加入 crate、features、workspace |
@@ -201,8 +201,8 @@
 | --- | --- | --- |
 | 第 1 章第 2 集 | `cargo new <名稱>`、`cargo run`；程式骨架 `fn main() { ... }` | 函式第 2 章；Cargo 第 12 章 |
 | 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章 |
-| 第 1 章第 9 集 | 讀一行輸入（見下方） | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章 |
-| 第 1 章第 10 集 | 文字轉數字（見下方） | `FromStr` 第 8 章；`expect` 第 9 章 |
+| 第 1 章第 9 集 | 讀一行輸入（見下方） | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章第 4 集 |
+| 第 1 章第 10 集 | 文字轉數字（見下方） | `FromStr` 第 8 章；`expect` 第 9 章第 4 集 |
 | 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章 |
 | 第 1 章第 15 集 | `i32::MIN`、`i32::MAX`（`u8::MAX` 等） | 關聯常數第 5 章 |
 | 第 2 章第 11 集 | `println!("{:?}", 陣列)`（tuple、`()` 也能這樣印；也可寫成 `{x:?}`） | `Debug` 第 8 章 |
@@ -216,7 +216,7 @@
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 | 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
-| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()` | `Result` 第 9 章；`write!` 巨集第 16 章 |
+| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章 |
 | 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`） | `Box` 第 13 章 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 
@@ -234,7 +234,7 @@ let line = line.trim();
 let n: i32 = line.parse().expect("請輸入整數");
 ```
 
-輸入不是整數時，程式會 panic、以結束碼 101 結束。第 9 章以前不要要求讀者「處理」這個錯誤。
+輸入不是整數時，程式會 panic、以結束碼 101 結束。第 9 章第 3 集以前不要要求讀者「處理」這個錯誤。
 
 ### 4.3 精確語法門檻
 
@@ -332,13 +332,22 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 實作 `Display`、`.to_string()` | 第 8 章第 11 集 | 用 `{:?}` 或寫一個印出用的函式 |
 | `PartialOrd`、`Ord`（`<`、對自己的型別 `sort`、當 `BTreeMap` 的鍵） | 第 8 章第 12 集 | 逐欄位比大小；不要出需要排序自己型別的題目 |
 | `From`、`Into`、`.into()`、`i64::from` | 第 8 章第 13 集 | `as`；`String::from("...")` 固定句型照舊 |
-| `parse` 與 `FromStr` 的原理（不含自己實作） | 第 8 章第 14 集 | 只用 `parse().expect(...)` 固定句型 |
+| `parse` 與 `FromStr` 的原理（不含自己實作；自己實作在第 9 章第 7 集） | 第 8 章第 14 集 | 只用 `parse().expect(...)` 固定句型 |
 | `&dyn Trait`、`Box<dyn Trait>` | 第 8 章第 15 集 | 用 enum 表示多種型別 |
 | 孤兒規則、newtype | 第 8 章第 16 集 | 不要出替標準型別實作標準 trait 的題目 |
 | 關聯型別（`type Item`、`Trait<Item = T>`） | 第 8 章第 17 集 | 不要定義帶關聯型別的 trait |
 | 運算子多載（`Add`、`Mul<u32>`） | 第 8 章第 18 集 | 寫成一般方法，例如 `fn add(self, other: Money) -> Money` 直接呼叫 |
-| 自己回傳 `Result` | 第 9 章第 2 集 | 回傳 `Option` 或 `bool` |
-| `?` | 第 9 章第 5 集 | 用 `match` |
+| `panic!`（自己呼叫）、型別 `!` | 第 9 章第 1 集 | 不要要求讀者自己寫 `panic!`；要示範 panic 用越界或固定句型的 `expect` |
+| 自己回傳 `Result`、`Ok` / `Err` | 第 9 章第 2 集 | 回傳 `Option` 或 `bool` |
+| 用 `match`、`if let`、`let else` 處理 `Result`（`Err(e)`、`{e}`） | 第 9 章第 3 集 | 輸入不是整數時用固定句型的 `parse().expect(...)`，不處理 |
+| `unwrap`、`expect` 的原理（`Result` 與 `Option` 都有）、`read_line` 回傳 `Result` | 第 9 章第 4 集（`expect` 的固定句型第 1 章起可抄寫） | `Option` 一律用 `match` / `if let`；`expect` 只用固定句型 |
+| `?`（回傳 `Result` 的函式裡） | 第 9 章第 5 集 | 用 `match` |
+| `?` 用在 `Option`（回傳 `Option` 的函式裡） | 第 9 章第 6 集 | 用 `match` 或 `let else` |
+| 自己的錯誤 enum、實作 `FromStr`（`type Err`、`from_str`）、`match` 比對字串字面值 | 第 9 章第 7 集 | 錯誤原因用 `String`；不要出實作 `FromStr` 的題目；字串比對用 `if` / `else if` |
+| `impl std::error::Error for 型別 {}`（要先有 `Debug` 與 `Display`） | 第 9 章第 8 集 | 只實作 `Display`（第 8 章第 11 集） |
+| `?` 自動呼叫 `From`、替錯誤 enum 實作 `From<別人的錯誤>` | 第 9 章第 9 集 | `match` 加手動轉換（`Err(e) => Err(OrderError::BadQty(e))`） |
+| `Box<dyn std::error::Error>`、`downcast_ref` | 第 9 章第 10 集 | 回傳自己的錯誤 enum |
+| `main` 回傳 `Result<(), E>` | 第 9 章第 11 集 | `main` 回傳 `()`，用 `match` 處理錯誤 |
 | 生命週期標註 | 第 10 章第 2 集 | 回傳擁有的值（例如 `String`） |
 | 閉包 | 第 11 章第 1 集 | 寫成有名字的函式 |
 | `map` / `filter` 等 adapter | 第 11 章第 10 集 | 用 `for` 迴圈 |
