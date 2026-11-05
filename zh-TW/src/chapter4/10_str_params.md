@@ -68,7 +68,7 @@ fn main() {
 ```
 
 - `shout("加油")`：字面值本來就是 `&str`。
-- `shout(&owned)`：傳的是 `&String`，編譯器在需要 `&str` 的地方會自動轉換。原理第 13 章的 `Deref` 才會解釋，現在照寫就好。
+- `shout(&owned)`：傳的是 `&String`，編譯器在需要 `&str` 的地方會自動轉換。原理第 13 章第 3 集的 `Deref` 才會解釋，現在照寫就好。
 - `shout(&owned[0..3])`：slice 本來就是 `&str`，這裡切出「加」（中文一個字 3 個位元組）。
 
 反過來不行：`&str` 不能變成 `&String`，因為字面值和 slice 後面根本沒有 `String`。所以參數寫 `&str`，能收的比 `&String` 多，函式的內容完全不用改。
@@ -115,7 +115,7 @@ hello
 ## 重點整理
 
 - 只需要讀的字串參數寫 `&str`，不寫 `&String`：字面值、`&String`、字串 slice 都能傳。
-- `&String` 會自動轉成 `&str`（原理第 13 章解釋）；`&str` 不能轉成 `&String`。
+- `&String` 會自動轉成 `&str`（原理第 13 章第 3 集解釋）；`&str` 不能轉成 `&String`。
 - 回傳 `&str` 的函式只放一個參照參數，回傳值借自它。
 - 第 1 章的 `line.trim()` 回傳的就是借自原 `String` 的 `&str`。
 - 選型別：只要讀用 `&str`，要改用 `&mut String`，要拿走用 `String`。

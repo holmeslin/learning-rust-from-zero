@@ -75,7 +75,7 @@
 | 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章第 8 集 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
 | 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章；`'_` 第 10 章第 5、6 集 |
-| 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`；第 11 章第 6 集起 `Box<dyn Fn(u32) -> u32>` 同樣照寫） | `Box` 第 13 章 |
+| 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`；第 11 章第 6 集起 `Box<dyn Fn(u32) -> u32>` 同樣照寫） | `Box` 第 13 章第 1 集 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 | 第 12 章第 2 集 | 函式前面的 `pub`（開放給別的 crate 使用，照抄） | `pub` 第 12 章第 4 集 |
 | 第 12 章第 10 集 | `#[cfg(test)]`，只加在 `mod tests { use super::*; ... }` 上，照抄 | `cfg` 第 16 章第 10 集 |
@@ -232,6 +232,18 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 附錄一 j 之前遇到「不需要的 `mut`」之類的警告，用 `rust,warn` 展示，並讓警告成為教學的線索（d 的迴圈 shadowing 會得到 `unused_mut`）。
   - 1.99 的訊息形狀（實測）：沒宣告的標籤是 E0426；`Self` 放在普通函式裡是 E0411（`Self not allowed in a function`）；陣列長度用變數是 E0435（`help` 建議 `const`，貼整段）；shadowing 之後 `push_str` 不存在是 E0599，訊息帶 `there's an earlier shadowed binding` 的 `note`；對 shadow 之後的不可變變數 `+=` 是 E0384；`u32 as char` 是 E0604、`i32 as bool` 是 E0054；字面值放不下是沒有錯誤碼的錯誤（`literal out of range for ...`，`overflowing_literals`）；`#![deny(unused_variables)]` 產生沒有錯誤碼的錯誤；`[u32; 3]` 對 `[u32; 4]` 是 E0308；`type Price = u32;` 後 `impl Price` 是 E0390（本書沒用到）。
   - 「跟 Go 比一比」用在：a（`010`、`1e3`）、b（`switch` 裡的 `break`）、d（內層 `:=`）、f（`type X Y` 是新型別）、g（`%8s` 靠右）、h（`[]int` 同時是擁有者與一段資料）、i（浮點數轉整數放不下）、j（未使用變數是錯誤）。c（短路）與 e（`Self`）沒有值得單獨成節的差異。
+
+- 智慧指標相關的範例（第 13 章）：
+  - 領域沿用飲料店：`Price`（價格樹）、`Step`（製作步驟）、`Tea`／`Coffee`、`Priced`（`Box`）；`Sleeve<T>`（杯套，`Deref`）；`Cup`（`Drop`，印「洗杯子」）；`Menu`／`Branch`（`Rc`）；`Till`（`RefCell`）；`Card`／`Member`（`Rc<RefCell<T>>`）；`Shop`、`Hq`／`Store`（`Weak`）；`Kiosk`（`Cell`）；`normalize`（`Cow`）。避開 The Rust Book 的 cons list（`List`、`Cons`、`Nil`）、`MyBox`、`CustomSmartPointer`、`Messenger`／`LimitTracker`、`Node`／`leaf`／`branch`。
+  - 第 13 章只用 std（大綱沒有指定 crate）。`use` 可以用（第 12 章第 5 集），`Self` 可寫可不寫；不寫執行緒、`size_of`（附錄二）、`unsafe`、`Pin`。`Arc` 只在第 5、7 集各用一句話指向第 14 章第 8、9 集，不展開；「`Rc`、`RefCell`、`Cell` 只能在單一執行緒用」一句話帶過，不談 `Send`／`Sync`。
+  - 第 1、2 集用到「`&Box<T>` 傳給要 `&T` 的參數」，只說「編譯器自動轉換，原理下一集」，第 3 集才解釋解參照轉換。前面各章指向第 13 章的地方，都已改成指名第 1 集（`Box`）、第 3 集（`Deref`）、第 4 集（`Drop`）。
+  - 用語：參照計數（reference counting）、強參照（strong reference，`Rc` 的擁有者）、弱參照（weak reference，`Weak`）、參照循環（reference cycle）、記憶體洩漏（memory leak）、內部可變性（interior mutability）、解參照轉換（deref coercion，前面各章稱「自動轉換」）、clone-on-write（寫入時才複製）。第 5 集先用「擁有者數量」讀 `strong_count`，第 8 集才引入強、弱參照。
+  - 觀察 drop 與計數用 `impl Drop`（`println!`）與 `Rc::strong_count`／`Rc::weak_count`，輸出文字寫成「擁有者：2」「強參照 1，弱參照 1」。`Drop` 的 struct 欄位要在 `drop` 裡被讀到（`self.name`），否則 `dead_code`。
+  - `RefCell` 重複借用的 panic，1.99 的訊息是 `RefCell already borrowed`（不是舊版的 `BorrowMutError`），所以用 `rust,exit=101`，標籤寫「執行結果（某一次）：」，並在文中說明括號中的數字會變。`Weak` 的 `{:?}` 印成 `(Weak)`，沒有資訊，不要拿來展示。
+  - clippy 會擋下這些寫法（都實測過）：參數寫 `&Box<T>`（`borrowed_box`，函式要 `&T`，讓呼叫端靠解參照轉換傳 `&boxed`）；`&*b` 這種自動解參照就辦得到的寫法（`explicit_auto_deref`）；`vec![Rc::new(...); n]`（`rc_clone_in_vec_init`）；`drop(&x)` 與 `drop(Copy 的值)`（`drop_ref`、`drop_copy`，rustc 另有 `dropping_references`、`dropping_copy_types` 警告）；`drop(x)` 而 `x` 的型別沒有 `Drop`（`drop_non_drop`，被 drop 的型別要有 `Drop`，`Rc`、`Box`、`Vec` 都算）；`Box::new(Vec::new())`（`box_default`）。不擋：`Vec<Box<dyn Trait>>` 加 `push`（`dyn` 沒有固定大小，`vec_box` 不管；`vec_init_then_push` 已放行）、`Rc<RefCell<T>>`、`x.clone()` 對 `Rc`（`clone_on_ref_ptr` 預設關閉，書中仍寫 `Rc::clone(&x)`）。
+  - `Cow` 的回傳型別一律寫 `Cow<'_, str>`：寫成 `Cow<str>` 會被 rustc 1.99 警告 `mismatched_lifetime_syntaxes`（跟 `Receipt<'_>` 同一條規則，checkcode 判失敗）。
+  - 1.99 的訊息形狀（實測）：遞迴型別沒有 `Box` 是 E0072（`recursive without indirection`，`help` 建議 `Box<Price>`；`Option<Step>` 的 struct 一樣）；`Box<i32> + 5` 是 E0369，`note` 夾 `/rustc/<雜湊>/library/alloc/src/boxed.rs` 路徑，貼前 8 行；對沒有 `Deref` 的型別寫 `*x` 是 E0614（整段貼，很短）；`String::trim(&s)` 是 E0599（`help` 說 `the function trim is implemented on str`，在 `note` 之後，只貼前 6 行）；`x.drop()` 是 E0040（整段貼）；`Drop` 加 `Copy` 是 E0184；`*rc -= 3`（`Rc<i32>`）是 E0594（`help` 說 `DerefMut` 沒有實作，整段貼）；`&self` 方法裡對 `Vec` 欄位 `push` 是 E0596（`help` 建議 `&mut self`）；`Cell<String>` 呼叫 `get` 是 E0599（`String: Copy` 沒有滿足，整段貼）。
+  - 篇幅：每集 101～150 行（第 8 集 150 行最長）。省行數的辦法：用 unit struct（`struct Tea;`）、把「規則照舊」的 E0382 改成一句話、每個 `compile_fail` 只貼前半段。
 
 ## 多檔案專案
 
