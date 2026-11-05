@@ -39,7 +39,7 @@
 ### 跟 Go 比一比
 
 - 只有在 Rust 跟 Go **不一樣、而且會 Go 的人容易踩坑**時才加，放在正文最後一個小節。跟 Go 一樣的地方，正文裡一句話帶過就好。
-- 可以放一小段 Go 程式碼對照，用 ```` ```go ```` 區塊（不會被驗證，但要是正確的 Go 1.27）。
+- 可以放一小段 Go 程式碼對照，用 ```` ```go ```` 區塊（不會被驗證，但要是正確的 Go 1.27，縮排用 Tab，跟 `gofmt` 一致）。
 - 重點是「Go 的直覺在這裡會錯在哪」，不是比較哪個語言比較好。
 
 ## 進度邊界（最重要）
@@ -69,7 +69,10 @@
 | 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
 | 第 6 章第 14 集 | `matches!(值, 模式)` | 巨集第 16 章 |
+| 第 7 章第 1 集 | `vec![...]`；`{:?}` 也能印 `Vec`（`HashMap`、`HashSet`、`BTreeMap` 也能這樣印，但 `HashMap`、`HashSet` 的順序不固定） | 巨集第 16 章；`Debug` 第 8 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
+| 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章 |
+| 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
 
 讀一行輸入（每次要讀一行就重複這三行）：
 
@@ -118,7 +121,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - 浮點數範例避開 3.14、2.718 這類常數（clippy `approx_constant` 會直接報錯），改用 2.5、1.5 之類的值。
 - `#[derive(Debug)]` 的 struct，每個欄位都要在程式裡被讀到（印出整個 struct 不算），否則 rustc 會報 `dead_code`。
 - 中文一個字算兩欄寬，`println!` 的字串太長會被 rustfmt 拆成多行；訊息寫短一點。
-- `push_str` 的參數至少要兩個字元：`s.push_str("！")` 這種只有一個字元的字串，會被 clippy `single_char_add_str` 擋下，而 `push` 第 7 章才教。
+- `push_str` 的參數至少要兩個字元：`s.push_str("！")` 這種只有一個字元的字串，會被 clippy `single_char_add_str` 擋下，而 `push` 要到第 7 章第 7 集才教，那之後單一字元用 `push`。
 - 記憶體、所有權的示意圖放在 ```` ```text ```` 區塊，只用 ASCII 符號（`[ ]`、`--->`）加中文標註，不用方框線字元（中英文字寬不同，對不齊）。示意圖不是程式輸出，前面不寫「執行結果：」。
 - 概念用語 move、drop 保留英文、不加反引號；程式裡真的會寫出來的名稱（`.clone()`、`Copy`、`Drop`）才加反引號。
 - 借用相關的範例：
@@ -141,6 +144,12 @@ let n: i32 = line.parse().expect("請輸入整數");
   - `match x { Some(p) => ..., _ => {} }` 沒問題（`single_match` 在放行清單），可以拿來引出 `if let`。
   - rustfmt 對簡單的 `if a { x } else { y }` 沒有固定規則：函式本體或 `let` 右邊放得下就會摺成一行（`else if` 串不會），`match` 分支的區塊裡則一律拆成多行；let chains 放不下一行時，排成 `if let ... ⏎ && 條件 ⏎ {`。先照 checkcode 的結果寫。
   - E0004 的訊息（尤其 `Option`）會夾帶 `/rustc/<雜湊>/library/...` 路徑，只貼前 6 到 7 行（到 `|` 或 `= note: the matched value` 為止），並在文中說明後面還有 `note`、`help`。節錄後要用 `fill.py --check` 確認，不要再用 `--fill` 蓋回去。
+- 集合相關的範例：
+  - 第 7 章第 6 集起，只讀的 `Vec` 參數寫 `&[T]`，不寫 `&Vec<T>`（clippy `ptr_arg` 放行，只是讓第 6 集示範 E0308 用）；要 `push`、`pop` 才寫 `&mut Vec<T>`。第 6 集之前沒有把 `Vec` 傳進函式的範例。
+  - clippy 會擋下這些寫法：`let v = vec![...]` 只被讀、索引、`get`、`for x in &v` 或傳成 `&[T]`（`useless_vec`，要不改成陣列，要不讓範例真的 `push` 過）；`v.get(0)`（`get_first`，改用 `first()` 或換成別的索引）；`for (_, v) in &map`（`for_kv_map`，改用 `values()`）；`v.len() == 0`（`len_zero`，用 `is_empty()`）；`loop { match v.pop() { Some(x) => ..., None => break } }`（`while_let_loop`，直接寫 `while let`）；單獨一個 `format!("{s}")`（`useless_format`）。
+  - 第 7 章第 9 集起，`for` 後面可以直接放回傳迭代器的方法呼叫（`s.chars()`、`s.bytes()`、`s.split(',')`、`map.keys()`、`map.values()`），不展開原理（`Iterator` 第 11 章）。不要接 `.count()`、`.nth()`、`.rev()`、`.enumerate()`、`.collect()` 這些迭代器的方法：數字元就用 `for` 加累加變數。
+  - `HashMap`、`HashSet` 的走訪順序每次執行都不同，貼了整份輸出的話，`fill.py --check` 會時好時壞。驗證過的範例只印跟順序無關的結果（`get`、`len`、加總、計數）；要印整個 map，就只放一組，或改用 `BTreeMap`。需要展示「順序會變」時，輸出標籤寫成「某一次的輸出（順序每次可能不同）：」，fill.py 不認得這個標籤，所以不會比對；整本書只有第 7 章第 14 集這樣用，並在文中說明順序不固定。
+  - 第 7 章第 11 集起，`use std::collections::HashMap;` 這類固定句型放在檔案最上面、`fn main` 之前。
 
 ## 第二部使用 crate
 
