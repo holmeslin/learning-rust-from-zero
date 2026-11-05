@@ -56,7 +56,7 @@
 
 | 首次出現 | 固定句型 | 正式解釋 |
 | --- | --- | --- |
-| 第 1 章第 2 集 | `cargo new <名稱>`、`cargo run`；程式骨架 `fn main() { ... }` | 函式第 2 章；Cargo 第 12 章 |
+| 第 1 章第 2 集 | `cargo new <名稱>`、`cargo run`；程式骨架 `fn main() { ... }` | 函式第 2 章；Cargo 第 12 章第 1 集 |
 | 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章 |
 | 第 1 章第 9 集 | 讀一行輸入：見下方 | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章第 4 集 |
 | 第 1 章第 10 集 | 文字轉數字：見下方 | `FromStr` 第 8 章；`expect` 第 9 章第 4 集 |
@@ -76,6 +76,9 @@
 | 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章；`'_` 第 10 章第 5、6 集 |
 | 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`；第 11 章第 6 集起 `Box<dyn Fn(u32) -> u32>` 同樣照寫） | `Box` 第 13 章 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
+| 第 12 章第 2 集 | 函式前面的 `pub`（開放給別的 crate 使用，照抄） | `pub` 第 12 章第 4 集 |
+| 第 12 章第 10 集 | `#[cfg(test)]`，只加在 `mod tests { use super::*; ... }` 上，照抄 | `cfg` 第 16 章第 10 集 |
+| 第 12 章第 15 集 | `#[cfg(feature = "名字")]`，照抄 | `cfg` 第 16 章第 10 集 |
 
 讀一行輸入（每次要讀一行就重複這三行）：
 
@@ -109,9 +112,9 @@ let n: i32 = line.parse().expect("請輸入整數");
 | `rust,exit=101` | 故意 panic（Rust 的 panic 結束碼是 101） |
 | `rust,no_run` | 會一直執行或需要外部環境，只編譯（mdBook 也會隱藏執行按鈕） |
 | `rust,warn` | 故意展示編譯器警告，只有這種區塊允許警告 |
-| `rust,test` | 用 `--test` 編譯並執行裡面的 `#[test]`（第 12 章起） |
+| `rust,test,noplayground` | 用 `--test` 編譯並執行裡面的 `#[test]`（第 12 章起）。Playground 只會執行 `main`，所以一律加 `noplayground`；不需要 `fn main`；要展示失敗的測試，再加 `exit=101` |
 | `rust,noplayground` | 不顯示執行按鈕（Playground 沒有的 crate、讀 stdin） |
-| `rust,ignore` | 不完整的片段、多檔案範例 |
+| `rust,ignore` | 不完整的片段、多檔案範例（第 12 章）、刻意排版亂掉的示範 |
 
 - 不使用 mdBook 的隱藏行（`# ` 開頭的行），程式碼全部給讀者看。
 - 輸出區塊前一行固定寫「執行結果：」（輸出不固定時寫「執行結果（某一次）：」），編譯錯誤寫「編譯錯誤：」，編譯警告寫「編譯警告：」。讀 stdin 的範例要讓讀者知道輸入了什麼，標籤寫成「輸入 `Andy` 的執行結果：」（有好幾行輸入時寫「輸入 `小明` 和 `台北` 的執行結果：」）。
@@ -205,6 +208,19 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 只串了 adapter、沒有 consumer，是 rustc 的 `unused_must_use`（`iterators are lazy and do nothing unless consumed`），第 9 集用 `rust,warn` 展示，整段貼出。
   - 1.99 的訊息形狀：閉包第二次用別的型別呼叫是 E0308（帶 `closure was earlier called with an argument of type`）；函式裡用外面的區域變數是 E0434（`help` 建議閉包）；閉包借著變數時改它是 E0506、讀它是 E0502（`borrow occurs due to use in closure`）；`move` 之後再用是 E0382（`value moved into closure here`，`help` 建議 `.clone()`）；閉包活得比變數久是 E0373（區塊版寫 `current block`，函式版寫 `current function`，`help` 直接建議 `move`）；沒有 `let mut` 就呼叫 `FnMut` 閉包是 E0596；`FnOnce` 呼叫兩次是 E0382（`closure cannot be invoked more than once`）；要求 `Fn` 卻傳會改動的閉包是 E0594（`change this to accept FnMut instead of Fn`，不是 E0525）；`if`／`else` 各回傳一個擷取了變數的閉包是 E0308（`no two closures, even if identical, have the same type`，`help` 建議 `Box<dyn Fn>`）；`collect`、`sum` 沒標型別是 E0283（訊息夾 `/rustc/<雜湊>/` 路徑，只貼前 7 行）；`Vec<u32>` 收到 `&u32` 是 E0277；`f64` 用 `max`、`sort_by_key` 是 E0277（`the trait bound f64: Ord is not satisfied`，貼前 5 行）；`sort_by_key(|m| &m.name)` 是沒有錯誤碼的 `lifetime may not live long enough`（用不帶碼的 `compile_fail`）；少寫 `type Item` 或 `next` 是 E0046；`1..=3.rev()` 是 E0689。
   - 兩個沒有擷取變數的閉包，在 `if`／`else` 裡回傳 `impl Fn` 反而編譯成功（會變成函式指標）；示範 E0308 時，兩個閉包都要擷取變數（`move |price| price - off`）。`let add_fee = |price| price + 5;` 後面 `let total: u32 = add_fee(30);` 會是 E0271（先被推成 `i32`），要先宣告 `let price: u32 = 30;` 再傳。
+
+- 模組、Cargo 與測試相關的範例（第 12 章）：
+  - 領域沿用飲料店：package 叫 `teashop`，模組 `menu`、`bill`，函式 `price`、`total_for`，`Member`（`name`、`points`）。避開 The Rust Book 的 `restaurant`、`front_of_house`、`hosting`、`Guess`、`add_two`。
+  - 單檔案的 `rust` 區塊（內聯 `mod`）：模組裡的函式、型別都要加 `pub` 才叫得到；bin crate 裡 `pub` 擋不住 `dead_code`，所以每個 `pub` 項目都要在 `main` 裡被呼叫過，沒用到的 `use` 是 `unused_imports`。`mod` 裡面看不到外面的名字，要寫 `crate::` 路徑（E0433）。
+  - 多檔案或需要 `cargo` 才能展示的內容（`src/lib.rs`、`mod 名稱;`、`tests/`、`Cargo.toml`、workspace）：每個檔案前一行寫「`路徑`：」（路徑放在行內程式碼裡，後面接全形冒號），再接程式區塊：`.rs` 用 `rust,ignore`，`Cargo.toml` 用 `toml`，目錄樹用 `text`（目錄樹可以用 `├──`、`└──`，節點只寫英文名稱，免得中英文寬度對不齊）。單一集裡的檔案一路接續，後面的同名檔案會覆蓋前面的，就像讀者一路在改它；沒寫 `Cargo.toml` 時，預設是 package `teashop`、版本 `0.1.0`、edition 2024。
+  - cargo 指令的輸出放 `text` 區塊，前一行寫「`cargo test` 的輸出：」；省略 `Compiling`、`Finished` 等進度行時寫「`cargo test` 的輸出（省略編譯進度）：」；輸出帶執行緒編號（失敗的測試）時再加「某一次」：「`cargo test` 的輸出（省略編譯進度，某一次）：」。不要用「執行結果：」，那是 `fill.py` 認得的標籤，專給單檔 `rust` 區塊用。路徑一律寫成 `/home/you/teashop`，並在文中說明路徑、秒數與 `teashop-` 後面的雜湊每個人不同。
+  - 這些 cargo 輸出與多檔案範例，由撰寫者在暫時建立的專案裡實測、逐字比對（把每一段的檔案依序寫進暫時專案，再執行指令）；`checkcode` 只驗單檔的 `rust` 區塊，CI 目前不驗證多檔案範例與 cargo 輸出。
+  - 測試區塊用 `rust,test,noplayground`，內容像 `src/lib.rs`：函式加 `#[cfg(test)] mod tests { use super::*; ... }`。`#[cfg(test)]` 與 `#[cfg(feature = "名字")]` 都是 `#[cfg]`，要到第 16 章第 10 集才正式教，在第 12 章當固定句型照抄；`#[test]`、`assert!`、`assert_eq!` 在第 10、11 集教。
+  - 函式前面的 `pub` 第 4 集才解釋，但第 2、3 集的範例不得不用，一句話帶過「先照抄」；`use` 在第 5 集之前只有第 7 章的固定句型，第 3 集 E0433 的 `help` 建議 `use crate::menu;`，文中說第 5 集才學。
+  - 會被 `cargo` 或 clippy 拿來示範的訊息：E0603（`function ... is private`；從別的 crate 用 `pub(crate)` 項目也是 E0603；`module ... is private` 且 `function ... is not publicly re-exported`）、E0616（讀私有欄位）、E0451（用大括號建立有私有欄位的 struct）、E0433（`cannot find module or crate`，`help` 建議 `use crate::...`）、E0432（`unresolved import`）、E0583（`file not found for module`，只貼到 `note`，省略 `For more information` 與 `could not compile`）、E0425（`feature` 沒打開，`note` 有 `the item is gated behind the ... feature`）、E0369 與 E0277（`assert_eq!` 缺 `PartialEq` 與 `Debug`）。clippy 的 `len_zero` 說明網址帶的版本號是 clippy 的版本（目前是 `rust-1.96.0`），不是 Rust 的版本。
+  - `///` 範例裡含三個反引號時（第 13 集），外層的程式區塊用四個反引號圍住（````` ````rust,ignore `````）；checkcode 與 `fill.py` 都不會把四個反引號的區塊當成 `rust` 區塊。
+  - 第 12 章的 crate：`Cargo.toml` 的 `[dependencies]` 展示只能用第二部清單內的 crate，版本與 `tools/checkcode/deps/Cargo.toml` 一致（`rand = "0.10.3"`、`clap = { version = "4.6.7", features = ["derive"] }`）；第一部不寫實際呼叫 crate 的 `rust` 區塊。
+  - 排版亂掉的示範不能用 `rust`（checkcode 會因 `rustfmt --check` 擋下）：用 `rust,ignore`，後面接「`cargo fmt` 之後的 `src/main.rs`：」與排好的 `rust` 區塊；展示 clippy 警告用 `rust,warn`（`len_zero` 這類不在放行清單的 lint），輸出標籤用「`cargo clippy` 的輸出（省略編譯進度）：」。
 
 ## 第二部使用 crate
 
