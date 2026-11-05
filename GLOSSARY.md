@@ -54,6 +54,10 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 閉包 | closure | 閉合 |
 | 模式 | pattern | 樣式 |
 | 模式比對 | pattern matching | 模式匹配 |
+| 解構 | destructuring | 解包、拆包 |
+| 綁定 | binding | 繫結、捆綁 |
+| 窮盡 | exhaustive | 詳盡、窮舉 |
+| 分支（`match` 的） | arm | 臂 |
 | 巨集 | macro | 宏 |
 | 智慧指標 | smart pointer | 智能指針 |
 | 泛型 | generics | 範型 |
