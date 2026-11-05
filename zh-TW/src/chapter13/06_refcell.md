@@ -80,7 +80,7 @@ fn main() {
 共 2 筆，75 元
 ```
 
-- `RefCell::new(值)` 把值包起來。`borrow()` 借出唯讀的 `Ref`，`borrow_mut()` 借出可寫的 `RefMut`，兩個都像參照一樣用（它們實作了 `Deref`）。
+- `RefCell::new(值)` 把值包起來。`borrow()` 借出只能讀的 `Ref`，`borrow_mut()` 借出可寫的 `RefMut`，兩個都像參照一樣用（它們實作了 `Deref`）。
 - `till` 沒有寫 `let mut`，`record` 也只拿 `&self`，資料照樣改得動。
 - 規則跟第 4 章第 4 集一樣：同時間可以有很多個 `borrow()`，或只有一個 `borrow_mut()`，不能混著來。差別在**什麼時候檢查**：普通參照在編譯時期擋下，`RefCell` 在程式執行時才檢查。
 - `Ref` 與 `RefMut` 離開作用域（被 drop）時，才把借用還回去。像 `till.record(30)` 裡的 `borrow_mut()` 只是這一行的暫時值，行尾就還了。
@@ -119,12 +119,12 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 ### 跟 Go 比一比
 
-Go 的指標隨時都能寫，沒有人檢查。Rust 的 `&` 預設是唯讀，`RefCell` 是你主動選的例外，而且有人在執行時把關：它比較像單執行緒版的 `sync.Mutex`，只是同一個地方重複「加鎖」不會卡死，而是立刻 panic，直接告訴你哪一行。
+Go 的指標隨時都能寫，沒有人檢查。Rust 的 `&` 預設只能讀，`RefCell` 是你主動選的例外，而且有人在執行時把關：它比較像單執行緒版的 `sync.Mutex`，只是同一個地方重複「加鎖」不會卡死，而是立刻 panic，直接告訴你哪一行。
 
 ## 重點整理
 
 - 內部可變性：外面是 `&`，裡面的資料照樣能改。要改的資料放進 `RefCell<T>`。
-- `borrow()` 得到唯讀的 `Ref`，`borrow_mut()` 得到可寫的 `RefMut`；`Ref` 與 `RefMut` 被 drop 時才還回借用。
+- `borrow()` 得到只能讀的 `Ref`，`borrow_mut()` 得到可寫的 `RefMut`；`Ref` 與 `RefMut` 被 drop 時才還回借用。
 - 借用規則照舊（多個讀或一個寫），但改在執行時期檢查，違反就 panic（`RefCell already borrowed`）；`try_borrow_mut()` 回傳 `Result`。
 - 用得到它的時機：方法簽名固定是 `&self`，或資料被多個擁有者共用。
-- 跟 Go 比：Go 的指標隨時能寫；Rust 預設唯讀，`RefCell` 是主動選的例外，違反就 panic。
+- 跟 Go 比：Go 的指標隨時能寫；Rust 預設只能讀，`RefCell` 是主動選的例外，違反就 panic。
