@@ -114,7 +114,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 | `rust,warn` | 故意展示編譯器警告，只有這種區塊允許警告 |
 | `rust,test,noplayground` | 用 `--test` 編譯並執行裡面的 `#[test]`（第 12 章起）。Playground 只會執行 `main`，所以一律加 `noplayground`；不需要 `fn main`；要展示失敗的測試，再加 `exit=101` |
 | `rust,noplayground` | 不顯示執行按鈕（Playground 沒有的 crate、讀 stdin） |
-| `rust,ignore` | 不完整的片段、多檔案範例（第 12 章）、刻意排版亂掉的示範 |
+| `rust,ignore` | 不單獨驗證的區塊：不完整的片段、刻意排版亂掉的示範，以及多檔案專案裡的檔案（第 12 章起）。前面一行有路徑標籤的，改在專案裡驗證，見下一節「多檔案專案」；沒有標籤的就是完全不驗證，能寫成完整程式就不要用 |
 
 - 不使用 mdBook 的隱藏行（`# ` 開頭的行），程式碼全部給讀者看。
 - 輸出區塊前一行固定寫「執行結果：」（輸出不固定時寫「執行結果（某一次）：」），編譯錯誤寫「編譯錯誤：」，編譯警告寫「編譯警告：」。讀 stdin 的範例要讓讀者知道輸入了什麼，標籤寫成「輸入 `Andy` 的執行結果：」（有好幾行輸入時寫「輸入 `小明` 和 `台北` 的執行結果：」）。
@@ -214,13 +214,54 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 單檔案的 `rust` 區塊（內聯 `mod`）：模組裡的函式、型別都要加 `pub` 才叫得到；bin crate 裡 `pub` 擋不住 `dead_code`，所以每個 `pub` 項目都要在 `main` 裡被呼叫過，沒用到的 `use` 是 `unused_imports`。`mod` 裡面看不到外面的名字，要寫 `crate::` 路徑（E0433）。
   - 多檔案或需要 `cargo` 才能展示的內容（`src/lib.rs`、`mod 名稱;`、`tests/`、`Cargo.toml`、workspace）：每個檔案前一行寫「`路徑`：」（路徑放在行內程式碼裡，後面接全形冒號），再接程式區塊：`.rs` 用 `rust,ignore`，`Cargo.toml` 用 `toml`，目錄樹用 `text`（目錄樹可以用 `├──`、`└──`，節點只寫英文名稱，免得中英文寬度對不齊）。單一集裡的檔案一路接續，後面的同名檔案會覆蓋前面的，就像讀者一路在改它；沒寫 `Cargo.toml` 時，預設是 package `teashop`、版本 `0.1.0`、edition 2024。
   - cargo 指令的輸出放 `text` 區塊，前一行寫「`cargo test` 的輸出：」；省略 `Compiling`、`Finished` 等進度行時寫「`cargo test` 的輸出（省略編譯進度）：」；輸出帶執行緒編號（失敗的測試）時再加「某一次」：「`cargo test` 的輸出（省略編譯進度，某一次）：」。不要用「執行結果：」，那是 `fill.py` 認得的標籤，專給單檔 `rust` 區塊用。路徑一律寫成 `/home/you/teashop`，並在文中說明路徑、秒數與 `teashop-` 後面的雜湊每個人不同。
-  - 這些 cargo 輸出與多檔案範例，由撰寫者在暫時建立的專案裡實測、逐字比對（把每一段的檔案依序寫進暫時專案，再執行指令）；`checkcode` 只驗單檔的 `rust` 區塊，CI 目前不驗證多檔案範例與 cargo 輸出。
+  - 這些 cargo 輸出與多檔案範例，由撰寫者在暫時建立的專案裡實測、逐字比對（把每一段的檔案依序寫進暫時專案，再執行指令，工具是 `projfill.py`）。`checkcode` 另外驗證專案本身：編譯、clippy、rustfmt、`cargo test` 的成功或失敗跟書上貼的相符，但不逐字比對輸出，規則見下一節「多檔案專案」。
   - 測試區塊用 `rust,test,noplayground`，內容像 `src/lib.rs`：函式加 `#[cfg(test)] mod tests { use super::*; ... }`。`#[cfg(test)]` 與 `#[cfg(feature = "名字")]` 都是 `#[cfg]`，要到第 16 章第 10 集才正式教，在第 12 章當固定句型照抄；`#[test]`、`assert!`、`assert_eq!` 在第 10、11 集教。
   - 函式前面的 `pub` 第 4 集才解釋，但第 2、3 集的範例不得不用，一句話帶過「先照抄」；`use` 在第 5 集之前只有第 7 章的固定句型，第 3 集 E0433 的 `help` 建議 `use crate::menu;`，文中說第 5 集才學。
   - 會被 `cargo` 或 clippy 拿來示範的訊息：E0603（`function ... is private`；從別的 crate 用 `pub(crate)` 項目也是 E0603；`module ... is private` 且 `function ... is not publicly re-exported`）、E0616（讀私有欄位）、E0451（用大括號建立有私有欄位的 struct）、E0433（`cannot find module or crate`，`help` 建議 `use crate::...`）、E0432（`unresolved import`）、E0583（`file not found for module`，只貼到 `note`，省略 `For more information` 與 `could not compile`）、E0425（`feature` 沒打開，`note` 有 `the item is gated behind the ... feature`）、E0369 與 E0277（`assert_eq!` 缺 `PartialEq` 與 `Debug`）。clippy 的 `len_zero` 說明網址帶的版本號是 clippy 的版本（目前是 `rust-1.96.0`），不是 Rust 的版本。
-  - `///` 範例裡含三個反引號時（第 13 集），外層的程式區塊用四個反引號圍住（````` ````rust,ignore `````）；checkcode 與 `fill.py` 都不會把四個反引號的區塊當成 `rust` 區塊。
+  - `///` 範例裡含三個反引號時（第 13 集），外層的程式區塊用四個反引號圍住（````` ````rust,ignore `````）。單檔檢查（checkcode 的 `rust` 區塊、`fill.py`）不會把四個反引號的區塊當成 `rust` 區塊；專案驗證看得懂圍欄的長度，前面有路徑標籤的話，照樣是專案裡的檔案。
   - 第 12 章的 crate：`Cargo.toml` 的 `[dependencies]` 展示只能用第二部清單內的 crate，版本與 `tools/checkcode/deps/Cargo.toml` 一致（`rand = "0.10.3"`、`clap = { version = "4.6.7", features = ["derive"] }`）；第一部不寫實際呼叫 crate 的 `rust` 區塊。
-  - 排版亂掉的示範不能用 `rust`（checkcode 會因 `rustfmt --check` 擋下）：用 `rust,ignore`，後面接「`cargo fmt` 之後的 `src/main.rs`：」與排好的 `rust` 區塊；展示 clippy 警告用 `rust,warn`（`len_zero` 這類不在放行清單的 lint），輸出標籤用「`cargo clippy` 的輸出（省略編譯進度）：」。
+  - 排版亂掉的示範不能用 `rust`（checkcode 會因 `rustfmt --check` 擋下）：用 `rust,ignore`，後面接「`cargo fmt` 之後的 `src/main.rs`：」與排好的 `rust` 區塊；checkcode 會確認 rustfmt 真的把前一個區塊排成後面那個。展示 clippy 警告用 `rust,warn`（`len_zero` 這類不在放行清單的 lint），輸出標籤用「`cargo clippy` 的輸出（省略編譯進度）：」。
+
+## 多檔案專案
+
+第 12 章起，有些範例分散在好幾個檔案，要靠 `cargo` 才能展示。checkcode 依「路徑標籤」把一集裡的區塊組成暫時的 Cargo 專案，驗證它們編譯得過、clippy 沒警告、rustfmt 通過，書上有 `cargo test` 的地方測試真的會跑。第 18～20 章的 CLI、Web、SQLite 專案用同一套標籤。
+
+**一集一個專案。** 一個 `.md` 檔是一條由上往下的時間線，不跨集：後面的標籤覆蓋前面同名的檔案，就像讀者一路在改它；沒有刪除檔案的寫法，要換一個專案就另開一集。沒有任何 `.rs` 檔、也沒有檢查點的集（例如只展示 `Cargo.toml`）不算專案。
+
+**三種標籤**，都是獨佔一行、行內程式碼加全形冒號 `：` 結尾，句尾可以多一段全形括號的（說明），標籤與區塊之間可以有空行；後面緊接著的圍欄區塊才算數：
+
+| 標籤 | 後面的區塊 | 意思 |
+| --- | --- | --- |
+| `` `src/lib.rs`： `` | 任何語言，通常是 `rust,ignore`、`toml` | 專案裡這個檔案現在的內容。路徑只能有英數與 `_ . / -`，檔名要有副檔名，不能是絕對路徑或含 `..`，相對於專案根目錄（workspace 成員寫 `teashop/src/lib.rs`） |
+| `` `cargo run` 的輸出（省略編譯進度）： `` | `text` | 檢查點。這一刻把所有檔案寫進暫時專案，執行這條指令，結果要跟區塊相符。指令要是 `cargo` 開頭，可以帶 `--features`、`-p` 之類的參數；括號裡的說明不影響驗證 |
+| `` `cargo fmt` 之後的 `src/main.rs`： `` | `rust` | 前一個版本排版亂掉的示範（見下）：這個檔案接著變成區塊的內容 |
+
+標籤拼錯（例如半形冒號、少了反引號）不會報錯，那一行就只是普通文字，後面的區塊也就不會進專案。改完標籤要看 checkcode 最後印出的專案、檔案、檢查點數量有沒有變。
+
+**哪些區塊是專案的檔案：**
+
+- 前面有路徑標籤的區塊，內容一律進專案。`rust,ignore` 的 `.rs` 檔除了進專案，還要過 rustfmt（用 stdin，所以 `pub mod menu;` 這種還沒建檔的模組宣告不會出錯）。
+- 帶路徑標籤、而且不是 `ignore` 的 `rust` 區塊（完整的 `main.rs`、`rust,test,noplayground` 的 `lib.rs`），同時照「程式碼區塊」一節的規則單檔驗證；它們的 `exit=`、`stdin=` 只給單檔驗證用，專案以檢查點為準。
+- 沒有路徑標籤的 `rust,ignore` 還是完全不驗證（片段，例如 `mod menu;` 那一行）。
+- `rust,ignore` 的 `.rs` 檔，後面（同一集）一定要有檢查點，否則專案沒有被編譯過，等於沒驗證，checkcode 會報錯。
+- 沒寫 `Cargo.toml` 時，預設是 package `teashop`、版本 `0.1.0`、edition 2024。寫了（`Cargo.toml` 或 workspace 的 `Cargo.toml`）就以書上為準，不另加預設。
+
+**檢查點怎麼判定。** 看 `text` 區塊裡有沒有 `error` 開頭的行（`error[E0603]: …`、`error: test failed…`）或 `test result: FAILED`：
+
+- 沒有：指令必須成功。`cargo run` 與 `cargo test` 也會實際執行（30 秒內，超過算失敗；不給 stdin），結束碼必須是 0。
+- 有：指令必須失敗，而且書上出現的每個 `error[E....]` 錯誤碼，實際輸出都要有。只有 `error:` 沒有錯誤碼的（例如 `a bin target must be available`），只要求失敗。
+- 輸出的文字不逐字比對（雜湊、秒數、路徑、執行緒編號每次都不同），逐字比對由撰寫者用 `projfill.py` 做。
+- 支援 `run`、`test`、`check`、`build`、`doc`、`clippy`；`cargo new`、`cargo add`、`cargo fmt` 這類改檔案、不編譯的指令不驗證，不算檢查點。`clippy` 當 `check` 驗（lint 本來就會跑）。
+- 會一直執行的程式（伺服器）不能放 `cargo run` 的輸出區塊，會逾時失敗；改展示 `cargo build` 或 `cargo test`。
+- 每個檢查點各自判定、互不影響：前一個檢查點失敗（書上本來就貼錯誤，或驗證失敗），後面的照常檢查。
+
+**lint 跟單檔一樣嚴。** rustc 與 clippy 警告都算失敗，套用 `clippy-allow.txt` 的放行清單；書上的 `Cargo.toml` 不必（也不要）寫 `[lints]`。專案裡只要目前有一個 `rust,warn` 的檔案，這個檢查點就允許警告。
+
+**排版亂掉的示範。** `rust,ignore` 區塊後面緊接「`cargo fmt` 之後的 `路徑`：」時，這個區塊不檢查 rustfmt，改成檢查 rustfmt 排出來的結果跟後面那個區塊完全相同；除此之外，所有 `rust,ignore` 的 `.rs` 檔都要是 rustfmt 排好的樣子。
+
+**固定版本的 crate。** 專案的 `Cargo.toml` 的 `[dependencies]` 寫了共用依賴清單（`tools/checkcode/deps/Cargo.toml`）裡的 crate 時，checkcode 用 `deps/Cargo.lock` 當專案的鎖定檔，編譯也共用 `deps/target` 的快取。書上寫的版本要跟 `deps/Cargo.toml` 一致；專案編完後，鎖定檔裡出現 `deps/Cargo.lock` 沒有的 crate 或版本，檢查點就失敗。
+
+**失敗怎麼讀。** 失敗訊息的「檔名:行號」是檢查點的 `text` 區塊（rustfmt 與「沒有檢查點」的錯誤則是那個檔案的區塊）；訊息會列出 cargo 診斷指到的專案檔案，連同它的區塊在這一集的行號，例如 `有問題的檔案：src/main.rs（第 23 行）、src/lib.rs（第 11 行）`，後面是 cargo 的輸出。
 
 ## 第二部使用 crate
 
@@ -230,6 +271,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - 區塊要用到 crate 的名字，一定要寫成 `crate名::` 的路徑形式（`use tokio::spawn;` 或 `tokio::spawn(...)`）。`use tokio as t;` 這種別名寫法不會被認出來。
 - rustfmt、clippy（`-D warnings` 與 `clippy-allow.txt` 放行清單）、結束碼、`stdin`、`no_run`、`warn`、`test`、`compile_fail=E....` 的規則跟 std 區塊完全相同；一個區塊失敗不會影響其他區塊。
 - Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。
+- 多檔案專案（第 18～20 章的實戰章）的 `Cargo.toml` 也只能用這份清單，版本要與 `deps/Cargo.toml` 一致，規則見上一節「多檔案專案」。
 - 版本統一鎖在 `tools/checkcode/deps/Cargo.toml`，`Cargo.lock` 一併提交。新增 feature 或升級版本：改該檔，執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`，再把 `Cargo.lock` 一起提交。不得在書中另外加清單外的 crate。
 - 該檔的 `[lints.clippy]` 必須與 `tools/checkcode/clippy-allow.txt` 一致；改放行清單時兩邊一起改（checkcode 的測試會檢查）。
 - 第一次編譯所有 crate 需要幾分鐘（`rusqlite` 的 bundled 要有 C 編譯器），之後會使用 `tools/checkcode/deps/target` 裡的快取。CI 也快取這個目錄。
