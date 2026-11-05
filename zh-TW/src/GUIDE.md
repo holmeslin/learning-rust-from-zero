@@ -180,7 +180,7 @@
 | 第 8 章 | `trait`（定義、`impl 某trait for 型別`；少實作方法是 E0046；型別有同名方法但沒有 `impl` 不算實作，是 E0277）、預設方法與覆寫、參數 `&impl Trait`（函式裡只能用 trait 的方法，讀欄位是 E0609）、`<T: Trait>`（`T` 可以用很多次，兩個參數要同型別，不同型別是 E0308）、`+` 與 `where`、回傳 `impl Trait`（只能回傳同一種型別，E0308）、泛型函式（`<T>`、`::<型別>`；沒有 bound 的 `T` 不能 `==`，E0369）、泛型 struct 與 `impl<T>`、`impl<T: Trait>`、`derive`（`Debug`、`Clone`、`Copy`、`PartialEq`、`Eq`、`Hash`、`Default`；有 `String` 欄位不能 `Copy`，E0204）、`Display`（骨架照抄）與 `.to_string()`、`PartialOrd`/`Ord`（`derive` 的比法、`sort`、`BTreeMap` 的鍵、`f64` 只有 `PartialOrd`）、`From`/`Into`（`.into()` 要有型別標註，E0283）、`parse` 與 `FromStr` 的原理（只講用法，不自己實作）、`&dyn Trait` 與 `Box<dyn Trait>`（`Box::new(...)` 照抄）、孤兒規則（E0117）與 newtype、關聯型別（`type Item`、`Trait<Item = T>`，E0271）、`Add`/`Mul<u32>` 運算子多載（`self` 會 move，E0382）。還沒有 `Result` 的處理（`match`、`?`）、自己回傳 `Result`、`Self`（只有第 17 集 trait 定義裡的 `Self::Item`）、生命週期標註、閉包、迭代器的方法（`.iter()`、`.map`、`sort_by`）、`use`（只有 `use std::collections::...;`）、`unwrap`、`Option` 的方法 |
 | 第 9 章 | `panic!`（結束碼 101、型別 `!`）、`Result<T, E>`（`Ok`/`Err`；不能直接運算，E0369；忽略不處理有 `unused_must_use` 警告）、用 `match`/`if let`/`let else` 處理 `Result`（只寫 `Ok` 是 E0004；`{e}` 與 `{e:?}`）、`unwrap`/`expect`（`Result` 與 `Option` 都有；訊息格式；`read_line` 回傳 `Result<usize, std::io::Error>`）、`?`（用在回傳 `Result` 或 `Option` 的函式，不能混用，也不能用在回傳 `()` 的 `main`，E0277）、自己的錯誤 enum 與實作 `FromStr`（`type Err`、`from_str`；`match` 可拿 `&str` 對字串字面值比對）、`Display` + `std::error::Error`（空的 `impl`；`Error` 要求先有 `Debug` 與 `Display`，E0277）、`?` 自動呼叫 `From`（沒有 `From` 是 E0277）、`Box<dyn std::error::Error>`（`Err("...".into())`、`Err(Box::new(...))`、`downcast_ref`）、`main` 回傳 `Result<(), E>`（`Err` 時印 `Error: {:?}`、結束碼 1）、panic 與 `Result` 的取捨。還沒有 `Option`/`Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`is_some`、`ok()` 等，第 11 章）、閉包、`std::fs`（第 17 章）、`thiserror`/`anyhow`（第 17 章）、`ExitCode`（第 18 章）、`Self` |
 | 第 10 章 | 生命週期是參照有效的範圍（只存在編譯時期，沒有執行時期成本）、標註 `<'a>`、`&'a str`、`&'a mut T`（同一個名字代表同一段範圍；標註只描述參照之間的關係，不會讓值活得更久，函式本體違反標註是 E0515、E0621）、有兩個以上參照參數又回傳參照要標註（沒標是 E0106）、共用同一個 `'a` 時結果的壽命是最短的輸入（E0597）、只替會被回傳的參數標 `'a`、不同名字 `<'a, 'b>`、省略規則三條（每個參照參數各有一個生命週期；輸入只有一個就用它；有 `&self` 就用 `self` 的；能省略就省略，clippy `needless_lifetimes`）、struct 持有參照（`struct Receipt<'a>`，欄位沒有省略規則，struct 不能活得比資料久，E0597）、`'_`（匿名生命週期，`Receipt<'_>`；`Formatter<'_>`）、帶生命週期的 `impl`（`impl<'a> Receipt<'a>`、`impl Receipt<'_>`，只寫 `impl Receipt` 是 E0726）、方法回傳 `&str`（借自 `&self`）與 `&'a str`（借自欄位裡的參照）、`'static`（字串字面值是 `&'static str`、`-> &'static str`、`&'static str` 欄位；對區域變數標 `'static` 仍是 E0515；`const`/`static` 裡不用寫）、借還是擁有的取捨（回傳 `String`、欄位用 `String`）。還沒有閉包、迭代器的方法、`Option`/`Result` 的方法（第 11 章）、`Self`（附錄一 e）、生命週期 bound（`T: 'a`、`'a: 'b`）與 `T: 'static`（第 14 章 `thread::spawn`）、`Box<dyn Trait + 'a>`、`for<'a>`；範例用 `let r = { ...; 借用 };` 的區塊形式，不用先宣告後賦值的 `let r;`（第 1 章第 5 集說本書不用） |
-| 第 11 章 | 閉包與擷取、`move`、`Fn`/`FnMut`/`FnOnce`、`Iterator`、`iter`/`iter_mut`/`into_iter`、常用 adapter 與 consumer、`collect`、`sort_by_key`、自己實作 `Iterator`、`Option`/`Result` 組合子、`or_insert_with`/`and_modify` |
+| 第 11 章 | 閉包 `\|參數\| 運算式`（型別通常不標，第一次呼叫決定後固定，換型別是 E0308；主體用 `{ }`；沒有參數寫 `\|\|`；每個閉包型別獨一無二）、擷取環境（預設借用：只讀 `&`、改動 `&mut`；函式不能擷取，E0434；閉包借著變數時改它是 E0506、讀它是 E0502）、`move` 閉包（`String` 被搬走，E0382；`Copy` 型別搬進去的是複本；閉包要活得比變數久必須 `move`，E0373）、`Fn`/`FnMut`/`FnOnce`（依主體自動決定；`FnMut` 閉包要 `let mut`，E0596；`FnOnce` 呼叫第二次是 E0382）、閉包當參數（`F: Fn(u32) -> u32`、`impl Fn`、`where`，要求太嚴是 E0594；函式名稱可以直接傳；`mut f: F`）、回傳閉包（`-> impl Fn(u32) -> u32` 要 `move`；不同閉包用 `Box<dyn Fn(u32) -> u32>`，否則 E0308）、`Iterator` 與 `next`（`while let`、`nth`；手動使用要 `let mut`，E0596）、`iter`/`iter_mut`/`into_iter` 與 `for` 的原理（`IntoIterator`；範圍 `0..n` 本身是迭代器）、惰性（adapter 與 consumer，`unused_must_use` 警告）、`map`/`filter`（`filter` 的閉包多一層參照，`**p`）、`collect`（要型別標註，E0283；`Vec<_>`、`HashMap<_, _>`；`copied()`/`cloned()`；收成 `String`、`HashMap`、`Result<Vec<_>, _>`）、`sum`/`count`/`min`/`max`（`sum` 要型別標註；`min`/`max` 回傳 `Option`；`f64` 不能用，E0277；`chars().count()`）、`enumerate`/`zip`/`rev`、`fold`（累積值可以是 tuple、`String`）、`find`/`any`/`all`/`position`（找到就停）、`sort_by_key`（鍵要 `Ord`，`std::cmp::Reverse`；不能借用元素）與 `sort_by`（`Ordering`、`partial_cmp`、`total_cmp`）、自己實作 `Iterator`（`type Item`、`next`，自動擁有全部預設方法；回傳 `impl Iterator<Item = T>`）、`Option`/`Result` 的方法（`is_some`/`is_none`/`is_ok`/`is_err`、`unwrap_or`/`unwrap_or_else`、`map`、`and_then`、`ok_or`/`ok_or_else`、`ok()`、`map_err`）、`entry` 的 `and_modify`/`or_insert_with`。還沒有（書中完全沒教，讀者問到時照超前規則簡短回答）：`take`、`skip`、`chain`、`flat_map`、`max_by_key`、`reduce`、`windows`、`chunks`、`|&&p|` 這類在參數裡拆參照的寫法；`mod` 與 `use`（只有 `use std::collections::...;`）、`Rc`、`thread`、`Self`（附錄一 e） |
 | 第 12 章 | `Cargo.toml`、binary/library crate、`mod`/`pub`/`use`、多檔案模組、`pub(crate)`、文件註解、`cargo fmt`/`cargo clippy`、`#[test]`、`assert_eq!`、`#[should_panic]`、整合測試、doc test、加入 crate、features、workspace |
 | 附錄一 | 數字字面值、標籤 `'outer`、短路求值、shadowing 陷阱、`Self`、`type` 別名、格式化進階、陣列/slice/`Vec` 的差別、`as` 截斷、屬性 |
 | 第 13 章 | `Box`、`Deref`、`Drop`、`Rc`、`RefCell`、`Rc<RefCell<T>>`、`Weak`、`Cell`、`Cow` |
@@ -203,10 +203,10 @@
 | 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章 |
 | 第 1 章第 9 集 | 讀一行輸入（見下方） | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章第 4 集 |
 | 第 1 章第 10 集 | 文字轉數字（見下方） | `FromStr` 第 8 章；`expect` 第 9 章第 4 集 |
-| 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章 |
+| 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章第 8 集 |
 | 第 1 章第 15 集 | `i32::MIN`、`i32::MAX`（`u8::MAX` 等） | 關聯常數第 5 章 |
 | 第 2 章第 11 集 | `println!("{:?}", 陣列)`（tuple、`()` 也能這樣印；也可寫成 `{x:?}`） | `Debug` 第 8 章 |
-| 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章 |
+| 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章第 8 集 |
 | 第 2 章第 15 集 | `s.len()`（`String` 與陣列都能用）、`s.push_str("...")`、`String::from("...")` | 方法第 5 章 |
 | 第 3 章第 7 集 | `s.clone()`（寫法同上，是方法呼叫） | 方法第 5 章；`Clone` 第 8 章 |
 | 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
@@ -214,10 +214,10 @@
 | 第 6 章第 14 集 | `matches!(值, 模式)`（回傳 `bool`） | 巨集第 16 章 |
 | 第 7 章第 1 集 | `vec![...]`；`{:?}` 也能印 `Vec`（`HashMap`、`HashSet`、`BTreeMap` 也能這樣印，但 `HashMap`、`HashSet` 的順序不固定） | 巨集第 16 章；`Debug` 第 8 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
-| 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章 |
+| 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章第 8 集 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
 | 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章；`'_` 第 10 章第 5、6 集 |
-| 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`） | `Box` 第 13 章 |
+| 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`；第 11 章第 6 集起 `Box<dyn Fn(u32) -> u32>` 同樣照寫） | `Box` 第 13 章 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 
 讀一行輸入（每次要讀一行就重複這三行）：
@@ -356,8 +356,22 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 帶生命週期的 `impl`（`impl<'a> Receipt<'a>`、`impl Receipt<'_>`）、方法回傳 `&'a str` | 第 10 章第 6 集 | 欄位只放擁有的型別；方法回傳擁有的值，或 `&self` 一個參照參數的 `-> &str` |
 | `'static`、`-> &'static str`、`&'static str` 欄位 | 第 10 章第 7 集（第 4 章第 9 集起可以說「`&'static str` 先當成 `&str`」） | 回傳 `String`；enum 轉文字在 `match` 分支裡直接印，或在 `main` 裡寫 `let text = match ...` |
 | 借還是擁有的取捨（生命週期錯誤改成擁有資料） | 第 10 章第 8 集 | 同第 5 章：欄位只放擁有的型別，回傳擁有的值 |
-| 閉包 | 第 11 章第 1 集 | 寫成有名字的函式 |
-| `map` / `filter` 等 adapter | 第 11 章第 10 集 | 用 `for` 迴圈 |
+| 閉包 `\|x\| ...`、擷取環境、`move` 閉包 | 第 11 章第 1～3 集 | 寫成有名字的函式，要用的值當參數傳進去 |
+| `Fn`/`FnMut`/`FnOnce`、閉包當參數 `F: Fn(...)` | 第 11 章第 4、5 集 | 不要出接收閉包的函式；要傳行為就傳有名字的函式（第 5 集起函式名稱能直接傳） |
+| 回傳閉包、`Box<dyn Fn(...)>` | 第 11 章第 6 集 | 不要出回傳閉包的題目 |
+| `Iterator`、`next`、`.iter()`、`nth` | 第 11 章第 7 集 | 用索引 `for i in 0..a.len()`；字元用 `for c in s.chars()` 加累加變數 |
+| `iter_mut`、`into_iter`、`for` 的原理 | 第 11 章第 8 集 | 照 `for x in &v`、`&mut v`、`v` 寫，不解釋為什麼能走訪 |
+| adapter 與 consumer、惰性 | 第 11 章第 9 集 | 用 `for` 迴圈 |
+| `map`、`filter`（接 `for`） | 第 11 章第 10 集 | 用 `for` 加 `if`，結果放進 `Vec`（`push`） |
+| `collect`、`Vec<_>`、`copied()`/`cloned()` | 第 11 章第 11 集 | `for` 加 `push` |
+| `sum`、`count`、`min`、`max`、`chars().count()` | 第 11 章第 12 集 | `for` 加累加變數；字元數用累加變數數 |
+| `enumerate`、`zip`、`rev` | 第 11 章第 13 集 | `for i in 0..a.len()` 加索引；倒著走用 `while` |
+| `fold` | 第 11 章第 14 集 | `let mut` 累加變數加 `for` |
+| `find`、`any`、`all`、`position` | 第 11 章第 15 集 | `for` 加 `if` 與 `break`，用 `bool` 或 `Option` 變數記結果 |
+| `sort_by_key`、`sort_by`（依欄位排序、浮點數排序） | 第 11 章第 16 集 | 只用 `sort`（元素本身要 `Ord`）；不要出依欄位或浮點數排序的題目 |
+| 自己實作 `Iterator`、回傳 `impl Iterator<Item = T>` | 第 11 章第 17 集 | 自己的 trait（例如第 8 章第 17 集的 `Dispenser`）或 `Vec` |
+| `Option`/`Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`map`、`and_then`…） | 第 11 章第 18 集 | `match` / `if let` / `let else`、`unwrap`、`expect` |
+| `entry` 的 `and_modify`、`or_insert_with` | 第 11 章第 19 集 | `or_insert`、`or_default`，或先 `get` 再 `insert` |
 | 模組、多檔案 | 第 12 章第 3、6 集 | 所有程式碼放在同一個 `main.rs` |
 | `cargo test` | 第 12 章第 10 集 | 用 `cargo run` 印結果檢查 |
 | 第三方 crate | 第 12 章第 14 集 | 只用 std |

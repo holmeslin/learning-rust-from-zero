@@ -60,10 +60,10 @@
 | 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章 |
 | 第 1 章第 9 集 | 讀一行輸入：見下方 | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章第 4 集 |
 | 第 1 章第 10 集 | 文字轉數字：見下方 | `FromStr` 第 8 章；`expect` 第 9 章第 4 集 |
-| 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章 |
+| 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章第 8 集 |
 | 第 1 章第 15 集 | 型別的最小、最大值 `i32::MIN`、`i32::MAX`（`u8::MAX` 等） | 關聯常數第 5 章（關聯函式） |
 | 第 2 章第 11 集 | `println!("{:?}", 陣列)`（tuple、`()` 也能這樣印；也可寫成 `{x:?}`） | `Debug` 第 8 章 |
-| 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章 |
+| 第 2 章第 13 集 | `for x in 陣列` | `IntoIterator` 第 11 章第 8 集 |
 | 第 2 章第 15 集 | 方法呼叫 `s.len()`（`String` 與陣列都能用）、`s.push_str("...")`；`String::from("...")` | 方法第 5 章 |
 | 第 3 章第 7 集 | 方法呼叫 `s.clone()`（寫法同上） | 方法第 5 章；`Clone` 第 8 章 |
 | 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
@@ -71,10 +71,10 @@
 | 第 6 章第 14 集 | `matches!(值, 模式)` | 巨集第 16 章 |
 | 第 7 章第 1 集 | `vec![...]`；`{:?}` 也能印 `Vec`（`HashMap`、`HashSet`、`BTreeMap` 也能這樣印，但 `HashMap`、`HashSet` 的順序不固定） | 巨集第 16 章；`Debug` 第 8 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
-| 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章 |
+| 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章第 8 集 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
 | 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章；`'_` 第 10 章第 5、6 集 |
-| 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`） | `Box` 第 13 章 |
+| 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`；第 11 章第 6 集起 `Box<dyn Fn(u32) -> u32>` 同樣照寫） | `Box` 第 13 章 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 
 讀一行輸入（每次要讀一行就重複這三行）：
@@ -150,7 +150,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - 集合相關的範例：
   - 第 7 章第 6 集起，只讀的 `Vec` 參數寫 `&[T]`，不寫 `&Vec<T>`（clippy `ptr_arg` 放行，只是讓第 6 集示範 E0308 用）；要 `push`、`pop` 才寫 `&mut Vec<T>`。第 6 集之前沒有把 `Vec` 傳進函式的範例。
   - clippy 會擋下這些寫法：`let v = vec![...]` 只被讀、索引、`get`、`for x in &v` 或傳成 `&[T]`（`useless_vec`，要不改成陣列，要不讓範例真的 `push` 過）；`v.get(0)`（`get_first`，改用 `first()` 或換成別的索引）；`for (_, v) in &map`（`for_kv_map`，改用 `values()`）；`v.len() == 0`（`len_zero`，用 `is_empty()`）；`loop { match v.pop() { Some(x) => ..., None => break } }`（`while_let_loop`，直接寫 `while let`）；單獨一個 `format!("{s}")`（`useless_format`）。
-  - 第 7 章第 9 集起，`for` 後面可以直接放回傳迭代器的方法呼叫（`s.chars()`、`s.bytes()`、`s.split(',')`、`map.keys()`、`map.values()`），不展開原理（`Iterator` 第 11 章）。不要接 `.count()`、`.nth()`、`.rev()`、`.enumerate()`、`.collect()` 這些迭代器的方法：數字元就用 `for` 加累加變數。
+  - 第 7 章第 9 集起，`for` 後面可以直接放回傳迭代器的方法呼叫（`s.chars()`、`s.bytes()`、`s.split(',')`、`map.keys()`、`map.values()`），不展開原理（`Iterator` 第 11 章第 8 集）。第 11 章之前不要接 `.count()`、`.nth()`、`.rev()`、`.enumerate()`、`.collect()` 這些迭代器的方法：數字元就用 `for` 加累加變數。
   - `HashMap`、`HashSet` 的走訪順序每次執行都不同，貼了整份輸出的話，`fill.py --check` 會時好時壞。驗證過的範例只印跟順序無關的結果（`get`、`len`、加總、計數）；要印整個 map，就只放一組，或改用 `BTreeMap`。需要展示「順序會變」時，輸出標籤寫成「某一次的輸出（順序每次可能不同）：」，fill.py 不認得這個標籤，所以不會比對；整本書只有第 7 章第 14 集這樣用，並在文中說明順序不固定。
   - 第 7 章第 11 集起，`use std::collections::HashMap;` 這類固定句型放在檔案最上面、`fn main` 之前。
 - trait 與泛型相關的範例：
@@ -168,7 +168,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - 錯誤處理相關的範例：
   - 領域沿用飲料店：`split_bill`、`order_total`、`Size`（`S` / `M` / `L`）、`SizeError`、`OrderError`、`TooMany`。避開 The Rust Book 的 `File::open`、`read_username_from_file`、`Guess`。不用 `std::fs`（第 17 章），錯誤的來源只有 `parse`（`std::num::ParseIntError`、`std::str::ParseBoolError`）、`read_line`（`std::io::Error`）與自己定義的型別。
   - 路徑照樣寫完整：`std::error::Error`、`std::str::FromStr`、`std::num::ParseIntError`、`Box<dyn std::error::Error>`；沒有新的 `use`。`impl` 裡不寫 `Self`：`fn from_str(text: &str) -> Result<Size, SizeError>`，`type Err = SizeError;`。
-  - 第 11 章之前不用 `Option` / `Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`is_some`、`ok()`），只有 `unwrap`、`expect`（第 9 章第 4 集）；要把 `Option` 轉成 `Result`，用 `match`；要給預設值，`match` 的 `Err` 分支寫成區塊（先印提醒再回傳預設值）。
+  - 第 11 章第 18 集之前不用 `Option` / `Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_ok`、`is_some`、`ok()`），只有 `unwrap`、`expect`（第 9 章第 4 集）；要把 `Option` 轉成 `Result`，用 `match`；要給預設值，`match` 的 `Err` 分支寫成區塊（先印提醒再回傳預設值）。
   - clippy 會擋下這些寫法：`match r { Ok(v) => v, Err(e) => return Err(e) }`、`if let Err(e) = r { return Err(e); }`、對 `Option` 的 `let Some(x) = o else { return None; }`（`question_mark`）；展示「`?` 之前」的寫法時，用兩層巢狀 `match`，內層與外層的 `Err(e) => Err(e)` 不會被擋。`Ok(v) => v, Err(_) => 0`（`manual_unwrap_or`）；`match r { Ok(_) => true, Err(_) => false }` 與 `matches!(r, Ok(_))`（`redundant_pattern_matching`）；`Some(5).unwrap()`、對字面值 `Ok(...)` 呼叫 `unwrap`（`unnecessary_literal_unwrap`，`"42".parse().unwrap()` 不會）；`Ok(x?)`（`needless_question_mark`）；`if let Some(a) = m.get(k) { Some(*a + 1) } else { None }`（`manual_map`）。
   - 呼叫回傳 `Result` 的函式卻不處理，是 rustc 的 `unused_must_use`，要用 `rust,warn` 展示，並整段貼出警告。
   - 輸出標籤：panic（`exit=101`）寫「執行結果（某一次）：」；`main` 回傳 `Err` 時結束碼是 1（`exit=1`），輸出是 `Error: ` 加 `Debug` 格式，沒有執行緒編號，寫「執行結果：」（stdin 版本寫「輸入 `abc` 的執行結果：」）。
@@ -184,6 +184,27 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 示範 E0597 時，結果要在內層區塊結束「之後」還被用到，否則 NLL 會讓它編譯成功。內層區塊寫成 `let r = { let s = ...; 借用 s 的運算式 };` 這種區塊值的形式，不寫先宣告後賦值的 `let r;`（第 1 章第 5 集說本書不用它，clippy `needless_late_init` 也會擋）。不要同時示範好幾個不同的錯誤。
   - 1.99 的訊息形狀：兩個參照參數回傳參照是 E0106，`help` 只建議 `<'a>`（`'a` 標在全部參照上）；沒有參照參數的 `-> &str` 是 E0106，`help` 先建議 `'static`、再建議回傳擁有的值；標了 `'a` 或 `'static` 卻回傳區域變數的參照是 E0515（`cannot return reference to local variable`，沒有 `help`）；回傳了沒有綁進 `'a` 的參數是 E0621，`help` 建議替它標 `'a`；`impl Receipt`（缺 `<'_>`）是 E0726，`help` 建議 `<'_>`；呼叫端結果超出某個輸入的範圍是 E0597。這些訊息都很短，整段貼出。
   - 進度邊界：不寫生命週期 bound（`'a: 'b`、`T: 'a`、`T: 'static`）、`for<'a>`、`dyn Trait + 'a`；不用 `Self`、閉包與迭代器的方法。`T: 'static` 只在第 7 集用一句話指向第 14 章。
+
+- 閉包與迭代器相關的範例：
+  - 領域沿用飲料店：`prices`、`menu`、`orders`、`Member`（`name`、`points`）、`Tickets`（取餐號碼，第 17 集沿用第 8 章第 17 集的 `Dispenser`）。避開 The Rust Book 的 `Inventory`、`Shirt`、`Rectangle`、`Counter`、`shoes_in_size`、`expensive_closure`、`add_one`。
+  - 用到哪些方法，照 `SUMMARY.md` 的順序：`.iter()` 第 7 集起出現（先當成「依序借出每個元素的參照」，一句話帶過，第 8 集才細講）；`map`、`filter` 第 10 集；`collect`、`copied()`、`cloned()` 第 11 集；`sum`、`count`、`min`、`max` 第 12 集；`enumerate`、`zip`、`rev` 第 13 集；`fold` 第 14 集；`find`、`any`、`all`、`position` 第 15 集；`sort_by_key`、`sort_by` 第 16 集。第 9 集用 `map` 展示惰性，只說「下一集正式教」；第 10 集的結果用 `for` 消耗（`collect` 還沒教）。
+  - `Option` / `Result` 的方法（`unwrap_or`、`ok_or`、`map_err`、`is_some`、`is_ok`、`ok()`、`map`、`and_then`…）第 18 集才教：第 7～17 集裡 `max()`、`find()`、`position()` 回傳的 `Option`，用 `match`、`if let` 或 `.expect(...)` 處理。`collect::<Result<Vec<_>, _>>()` 是 `collect` 的用法，不算這類方法，第 11 集可以出現。
+  - 閉包參數的層數：`iter()` 的元素是 `&T`；`map`、`any`、`all`、`position` 的閉包拿到 `&T`（數字寫 `*p`）；`filter`、`find` 拿到 `&&T`（數字寫 `**p`，缺一個 `*` 是 E0308）。元素是 struct、`&str` 時，用 `.` 讀欄位、呼叫方法會自動解參照，不用寫 `*`。本書不寫 `|&&p|` 這種在參數裡拆參照的寫法，第 10 集只用一句話說「別人的程式碼常這樣寫，意思相同」。
+  - clippy `map_clone` 會擋 `.map(|x| *x)`，要寫 `.copied()`；`.iter().copied().collect()`（中間沒有別的 adapter）被 `iter_cloned_collect` 擋，所以 `copied()` 放在 `filter` 後面示範。
+  - 型別位置的 `_`（`Vec<_>`、`HashMap<_, _>`）第 11 集起可用，教法是「請編譯器自己填」；`collect`、`sum` 沒有型別標註是 E0283（`type annotations needed`）。
+  - `FnMut` 的參數寫 `mut f: F`（第 2 章第 3 集教過的 `mut` 參數）；`Box<dyn Fn(u32) -> u32>` 與 `Box::new(...)` 延續第 8 章第 15 集的固定句型（第 6 集）；`std::cmp::Reverse(...)` 寫完整路徑，不加 `use`；`impl Iterator<Item = u32>` 當回傳型別（第 17 集）。
+  - 不寫 `Self`：`impl Iterator for Tickets` 裡寫 `type Item = u32;` 與 `fn next(&mut self) -> Option<u32>`。第 7 集用 `text` 區塊展示標準函式庫的 `Iterator` 定義，才會出現 `Option<Self::Item>`，並用一句話指向附錄一 e（跟第 8 章第 17 集同一個例外）。
+  - clippy 會擋下這些寫法（都實測過）：
+    - `fold(0, |a, b| a + b)`（`unnecessary_fold`，改用 `sum`；`fold` 的範例要用 tuple、`String` 或 `f64::max` 當累積值）；
+    - `.filter(..).next()`（`filter_next`，改用 `find`）；`.any(|x| *x == y)`（`manual_contains`，`any` 的條件要用比大小或方法）；
+    - `.sort_by(|a, b| a.k.cmp(&b.k))` 與 `b.k.cmp(&a.k)`（`unnecessary_sort_by`，改用 `sort_by_key`，由大到小用 `std::cmp::Reverse(...)`）；整數的 `sort_by(|a, b| b.cmp(a))`、字串欄位 `a.name.cmp(&b.name)`、`partial_cmp(...).expect(...)` 不會被擋；
+    - 手動計數器加 `for x in &v`（`explicit_counter_loop`）；`.nth(0)`（`iter_nth_zero`）；直接對陣列寫 `v.iter().next()`（`iter_next_slice`，先 `let mut it = v.iter();`）；`loop { match it.next() {..} }`（`while_let_loop`）。`while let Some(x) = it.next()` 沒問題（`while_let_on_iterator` 在放行清單）；
+    - `|x| double(x)`、`.map_err(|e| E::Bad(e))`（`redundant_closure`，直接傳函式名稱或 tuple variant）；`(|x| x + 1)(3)`（`redundant_closure_call`）；
+    - `or_insert_with(Vec::new)`（`unwrap_or_default`，改用 `or_default()`）；`unwrap_or_else(|| 0)`（`unnecessary_lazy_evaluations`）；`and_then(|x| Some(..))`（`bind_instead_of_map`）；`map_or(false, ..)`（`unnecessary_map_or`）；對字面值 `Some(5).unwrap_or(0)`（`unnecessary_literal_unwrap`）；先 `is_some()` 再 `unwrap()`（`unnecessary_unwrap`）；
+    - `let v = vec![...]` 只被走訪或排序（`useless_vec`，先 `Vec::new()` 再 `push`，`vec_init_then_push` 已放行）。
+  - 只串了 adapter、沒有 consumer，是 rustc 的 `unused_must_use`（`iterators are lazy and do nothing unless consumed`），第 9 集用 `rust,warn` 展示，整段貼出。
+  - 1.99 的訊息形狀：閉包第二次用別的型別呼叫是 E0308（帶 `closure was earlier called with an argument of type`）；函式裡用外面的區域變數是 E0434（`help` 建議閉包）；閉包借著變數時改它是 E0506、讀它是 E0502（`borrow occurs due to use in closure`）；`move` 之後再用是 E0382（`value moved into closure here`，`help` 建議 `.clone()`）；閉包活得比變數久是 E0373（區塊版寫 `current block`，函式版寫 `current function`，`help` 直接建議 `move`）；沒有 `let mut` 就呼叫 `FnMut` 閉包是 E0596；`FnOnce` 呼叫兩次是 E0382（`closure cannot be invoked more than once`）；要求 `Fn` 卻傳會改動的閉包是 E0594（`change this to accept FnMut instead of Fn`，不是 E0525）；`if`／`else` 各回傳一個擷取了變數的閉包是 E0308（`no two closures, even if identical, have the same type`，`help` 建議 `Box<dyn Fn>`）；`collect`、`sum` 沒標型別是 E0283（訊息夾 `/rustc/<雜湊>/` 路徑，只貼前 7 行）；`Vec<u32>` 收到 `&u32` 是 E0277；`f64` 用 `max`、`sort_by_key` 是 E0277（`the trait bound f64: Ord is not satisfied`，貼前 5 行）；`sort_by_key(|m| &m.name)` 是沒有錯誤碼的 `lifetime may not live long enough`（用不帶碼的 `compile_fail`）；少寫 `type Item` 或 `next` 是 E0046；`1..=3.rev()` 是 E0689。
+  - 兩個沒有擷取變數的閉包，在 `if`／`else` 裡回傳 `impl Fn` 反而編譯成功（會變成函式指標）；示範 E0308 時，兩個閉包都要擷取變數（`move |price| price - off`）。`let add_fee = |price| price + 5;` 後面 `let total: u32 = add_fee(30);` 會是 E0271（先被推成 `i32`），要先宣告 `let price: u32 = 30;` 再傳。
 
 ## 第二部使用 crate
 
