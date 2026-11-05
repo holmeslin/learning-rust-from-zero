@@ -48,14 +48,13 @@ struct Receipt<'a> {
 }
 
 fn main() {
-    let receipt;
-    {
+    let receipt = {
         let customer = String::from("小美");
-        receipt = Receipt {
+        Receipt {
             customer: &customer,
             drink: "咖啡",
-        };
-    }
+        }
+    };
     println!("{} 點了 {}", receipt.customer, receipt.drink);
 }
 ```
@@ -64,18 +63,18 @@ fn main() {
 
 ```text
 error[E0597]: `customer` does not live long enough
-  --> src/main.rs:11:23
+  --> src/main.rs:10:23
    |
- 9 |         let customer = String::from("小美");
+ 7 |     let receipt = {
+   |         ------- borrow later stored here
+ 8 |         let customer = String::from("小美");
    |             -------- binding `customer` declared here
-10 |         receipt = Receipt {
-11 |             customer: &customer,
+ 9 |         Receipt {
+10 |             customer: &customer,
    |                       ^^^^^^^^^ borrowed value does not live long enough
 ...
-14 |     }
+13 |     };
    |     - `customer` dropped here while still borrowed
-15 |     println!("{} 點了 {}", receipt.customer, receipt.drink);
-   |                            ---------------- borrow later used here
 ```
 
 `customer` 在內層 `}` 就 drop，`receipt` 之後還要讀 `receipt.customer`，所以不行。被點名的只有 `customer`：`drink` 是字面值，整個程式執行期間都有效（第 7 集會講），不會有問題。

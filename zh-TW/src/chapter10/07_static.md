@@ -68,11 +68,10 @@ fn main() {
     for status in [Status::Pending, Status::Paid, Status::Shipped] {
         println!("{}", status_text(&status));
     }
-    let text;
-    {
+    let text = {
         let status = Status::Paid;
-        text = status_text(&status);
-    }
+        status_text(&status)
+    };
     println!("{text}");
 }
 ```

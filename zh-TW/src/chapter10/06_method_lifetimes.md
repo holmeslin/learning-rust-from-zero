@@ -74,13 +74,12 @@ impl Receipt<'_> {
 
 fn main() {
     let customer = String::from("小美");
-    let name;
-    {
+    let name = {
         let receipt = Receipt {
             customer: &customer,
         };
-        name = receipt.customer();
-    }
+        receipt.customer()
+    };
     println!("{name}");
 }
 ```
@@ -89,17 +88,17 @@ fn main() {
 
 ```text
 error[E0597]: `receipt` does not live long enough
-  --> src/main.rs:18:16
+  --> src/main.rs:17:9
    |
-15 |         let receipt = Receipt {
+13 |     let name = {
+   |         ---- borrow later stored here
+14 |         let receipt = Receipt {
    |             ------- binding `receipt` declared here
 ...
-18 |         name = receipt.customer();
-   |                ^^^^^^^ borrowed value does not live long enough
-19 |     }
+17 |         receipt.customer()
+   |         ^^^^^^^ borrowed value does not live long enough
+18 |     };
    |     - `receipt` dropped here while still borrowed
-20 |     println!("{name}");
-   |                ---- borrow later used here
 ```
 
 `name` 在 `receipt` 的 `}` 之後還要用，超出了「`receipt` 被借用的那段」，所以編譯器說 `receipt` 活得不夠久。可是實際上 `name` 指的是 `customer`，根本沒有問題，只是簽名沒把這件事說出來。
@@ -121,13 +120,12 @@ impl<'a> Receipt<'a> {
 
 fn main() {
     let customer = String::from("小美");
-    let name;
-    {
+    let name = {
         let receipt = Receipt {
             customer: &customer,
         };
-        name = receipt.customer();
-    }
+        receipt.customer()
+    };
     println!("{name}");
 }
 ```

@@ -53,11 +53,10 @@ fn tail(line: &str, from: usize) -> &str {
 }
 
 fn main() {
-    let rest;
-    {
+    let rest = {
         let line = String::from("小美,咖啡");
-        rest = tail(&line, 7);
-    }
+        tail(&line, 7)
+    };
     println!("{rest}");
 }
 ```
@@ -66,16 +65,16 @@ fn main() {
 
 ```text
 error[E0597]: `line` does not live long enough
-  --> src/main.rs:9:21
-   |
- 8 |         let line = String::from("小美,咖啡");
-   |             ---- binding `line` declared here
- 9 |         rest = tail(&line, 7);
-   |                     ^^^^^ borrowed value does not live long enough
-10 |     }
-   |     - `line` dropped here while still borrowed
-11 |     println!("{rest}");
-   |                ---- borrow later used here
+ --> src/main.rs:8:14
+  |
+6 |     let rest = {
+  |         ---- borrow later stored here
+7 |         let line = String::from("小美,咖啡");
+  |             ---- binding `line` declared here
+8 |         tail(&line, 7)
+  |              ^^^^^ borrowed value does not live long enough
+9 |     };
+  |     - `line` dropped here while still borrowed
 ```
 
 `rest` 借自 `line`，`line` 在內層 `}` 就 drop，`rest` 卻還要用。這跟上一集手寫標註的結果一樣，只是這次是規則 2 替我們寫的。
