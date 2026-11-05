@@ -103,7 +103,7 @@ error[E0308]: `if` and `else` have incompatible types
    | |_____- `if` and `else` have incompatible types
 ```
 
-`if` 回傳 `Tea`、`else` 回傳 `Coffee`，兩邊的型別不同，就是 E0308。這裡只貼前半段，後面的 `help` 建議改成 `Box<dyn Priced>`，那是第 15 集的做法（`Box` 第 13 章才正式介紹），現在不用管。
+`if` 回傳 `Tea`、`else` 回傳 `Coffee`，兩邊的型別不同，就是 E0308。這裡只貼前半段，後面的 `help` 建議改成 `Box<dyn Priced>`，那是第 15 集的做法（`Box` 第 13 章第 1 集才正式介紹），現在不用管。
 
 ### 什麼時候用
 

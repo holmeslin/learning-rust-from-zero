@@ -77,7 +77,7 @@ error[E0308]: `if` and `else` have incompatible types
   = help: consider boxing your closure and/or using it as a trait object
 ```
 
-重點在 `no two closures, even if identical, have the same type`：就算寫得一模一樣，兩個閉包也是不同的型別。這裡只貼前半段，後面的 `help` 給了方向：改成回傳 `Box<dyn Fn(u32) -> u32>`，並把每個閉包用 `Box::new(...)` 包起來。這就是第 8 章第 15 集的 trait 物件：型別在執行時期才決定，所以不同的閉包可以放在同一個型別底下。`Box::new(...)` 照樣先照抄，第 13 章才解釋：
+重點在 `no two closures, even if identical, have the same type`：就算寫得一模一樣，兩個閉包也是不同的型別。這裡只貼前半段，後面的 `help` 給了方向：改成回傳 `Box<dyn Fn(u32) -> u32>`，並把每個閉包用 `Box::new(...)` 包起來。這就是第 8 章第 15 集的 trait 物件：型別在執行時期才決定，所以不同的閉包可以放在同一個型別底下。`Box::new(...)` 照樣先照抄，第 13 章第 1 集才解釋：
 
 ```rust
 fn make_rule(member: bool, off: u32, percent: u32) -> Box<dyn Fn(u32) -> u32> {
@@ -143,5 +143,5 @@ func makeDiscount(off int) func(int) int {
 
 - 從函式回傳閉包：`-> impl Fn(u32) -> u32`；閉包用到參數時，一定要 `move`，否則是 E0373。
 - 每個閉包型別獨一無二，`impl Fn` 又只能是同一種型別，所以不同分支回傳不同的閉包是 E0308（`no two closures, even if identical, have the same type`）。
-- 要回傳不同的閉包，或把好幾個閉包放進 `Vec`，用 `Box<dyn Fn(u32) -> u32>`，每個閉包用 `Box::new(...)` 包起來（照抄，第 13 章解釋 `Box`）。
+- 要回傳不同的閉包，或把好幾個閉包放進 `Vec`，用 `Box<dyn Fn(u32) -> u32>`，每個閉包用 `Box::new(...)` 包起來（照抄，第 13 章第 1 集解釋 `Box`）。
 - 跟 Go 比：Go 的函式值隨便回傳；Rust 要用 `move` 交代誰擁有擷取的變數，型別不同時還得裝箱。

@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、Cargo 與它的指令名稱。
+保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -82,6 +82,12 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 堆積（heap） | heap | 堆 |
 | 懸置參照 | dangling reference | 懸垂引用、野指標 |
 | 內部可變性 | interior mutability | 內部可變 |
+| 參照計數 | reference counting | 引用計數 |
+| 強參照 | strong reference | 強引用 |
+| 弱參照 | weak reference | 弱引用 |
+| 參照循環 | reference cycle | 循環引用 |
+| 記憶體洩漏 | memory leak | 內存洩漏、記憶體洩露 |
+| 解參照轉換 | deref coercion | 解引用強制轉換 |
 | 關聯函式 | associated function | 靜態方法 |
 | 關聯型別 | associated type | 相關類型 |
 | 預設方法 | default method | 預設實作 |
