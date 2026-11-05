@@ -68,6 +68,7 @@
 | 第 3 章第 7 集 | 方法呼叫 `s.clone()`（寫法同上） | 方法第 5 章；`Clone` 第 8 章 |
 | 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
+| 第 6 章第 14 集 | `matches!(值, 模式)` | 巨集第 16 章 |
 | 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
 
 讀一行輸入（每次要讀一行就重複這三行）：
@@ -132,6 +133,14 @@ let n: i32 = line.parse().expect("請輸入整數");
   - `rust` 區塊裡不要寫 `Member { name: name }` 這種多餘的欄位名稱（clippy `redundant_field_names` 不在放行清單）；要對照時只用行內程式碼。
   - 方法不要取名 `to_string`（clippy `inherent_to_string`）；`is_` 開頭的方法要用 `&self`（`wrong_self_convention`）。
   - struct 建立式的大括號內容超過約 18 欄寬，rustfmt 就會拆成每個欄位一行（像 `Account { balance: 500 }` 這麼短才能留在同一行）；`println!` 的引數（含格式字串）合計超過約 60 欄寬也會被拆開，改成兩行 `println!`。
+- enum 與模式相關的範例：
+  - variant 帶的資料要被 `match` 或 `if let` 讀出來；`#[derive(Debug)]` 印出來不算讀過，沒讀到的欄位 rustc 會報 `dead_code`（跟 struct 欄位同一條規則）。第 6 章第 2 集刻意用 `rust,warn` 區塊展示這個警告：「編譯警告：」區塊只接受整段貼出（fill.py 不收節錄），所以那個範例只放兩個帶資料的 variant，警告才不會太長。
+  - 每個 variant 都要在程式裡建立過（例如 `for x in [A, B, C]`），否則會有 `variant never constructed`；不要用 `let _ = Status::Paid;` 這種湊數的寫法。
+  - 函式不要回傳字串字面值（`-> &str` 沒有參照參數可以借，要 `'static`，第 10 章）。要把 enum 轉成文字，在 `match` 分支裡直接 `println!`，或在 `main` 裡寫 `let text = match ... { ... => "文字" };`。
+  - clippy 會擋下「有更短寫法」的程式：`matches!(x, None)`、`matches!(x, Some(_))`（`redundant_pattern_matching`）；`matches!(c, 'a'..='z')`（`manual_is_ascii_check`）；連續整數的 `1 | 2 | 3 | 4`（`manual_range_patterns`，改用不連續的數字，或直接寫範圍）；`if let` 裡面再包一層沒有 `else` 的 `if`（`collapsible_if`，edition 2024）；`Some(x) => Some(f(x)), None => None`（`manual_map`）；`Some(v) => v, None => 預設值`（`manual_unwrap_or` 或 `manual_unwrap_or_default`）。展示巢狀 `if let` 時，內外層都要有 `else`。
+  - `match x { Some(p) => ..., _ => {} }` 沒問題（`single_match` 在放行清單），可以拿來引出 `if let`。
+  - rustfmt 對簡單的 `if a { x } else { y }` 沒有固定規則：函式本體或 `let` 右邊放得下就會摺成一行（`else if` 串不會），`match` 分支的區塊裡則一律拆成多行；let chains 放不下一行時，排成 `if let ... ⏎ && 條件 ⏎ {`。先照 checkcode 的結果寫。
+  - E0004 的訊息（尤其 `Option`）會夾帶 `/rustc/<雜湊>/library/...` 路徑，只貼前 6 到 7 行（到 `|` 或 `= note: the matched value` 為止），並在文中說明後面還有 `note`、`help`。節錄後要用 `fill.py --check` 確認，不要再用 `--fill` 蓋回去。
 
 ## 第二部使用 crate
 
