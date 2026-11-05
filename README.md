@@ -27,13 +27,17 @@ cd zh-TW && mdbook serve                                             # 本機預
 | `rust,warn` | 允許編譯器警告 |
 | `rust,test` | 以 `--test` 編譯並執行測試 |
 | `rust,noplayground` | 網頁上不顯示執行按鈕 |
-| `rust,ignore` | 不驗證（片段、多檔案範例） |
+| `rust,ignore` | 不單獨驗證（片段；前面有路徑標籤的多檔案範例改在專案裡驗證） |
 
 ### 第二部的範例怎麼使用 crate
 
 第一部只用 std。第二部（第 13 章起）的範例可以用 tokio、tokio-util、clap、axum、tower、http-body-util、serde、serde_json、tracing、rand、uuid、thiserror、anyhow、rusqlite（bundled）。範例照常寫 ```` ```rust ````，不必加標註：程式裡出現 `tokio::` 這類 `<crate>::` 路徑，checkcode 就會把區塊放進 `tools/checkcode/deps/` 的共用依賴 package，所有用到 crate 的區塊一次批次編譯與 lint，再逐一執行；上表的標註規則照樣適用。清單以外的 crate 會驗證失敗。
 
 版本統一鎖在 `tools/checkcode/deps/Cargo.toml`，`Cargo.lock` 一併提交。升級版本時改該檔，再執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`。第一次驗證會花幾分鐘編譯所有 crate，之後使用 `tools/checkcode/deps/target` 的快取，CI 也會快取這個目錄。
+
+### 多檔案專案
+
+第 12 章起，一集裡分散在好幾個檔案的範例，用「`src/lib.rs`：」這樣的路徑標籤加程式區塊寫成專案，後面接「`cargo run` 的輸出：」之類的區塊。checkcode 把它們組成暫時的 Cargo 專案，執行書上寫的指令，確認編譯、clippy、rustfmt 都通過，成功或失敗跟書上貼的相符（輸出文字不逐字比對）。第 18～20 章的專案同樣用 `deps/` 裡固定版本的 crate。
 
 詳細規則見 `docs/style-guide.md`。
 
