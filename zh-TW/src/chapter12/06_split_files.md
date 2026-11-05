@@ -121,7 +121,10 @@ pub fn extra(size: &str) -> u32 {
 ```rust,ignore
 fn main() {
     let extra = teashop::menu::size::extra("L");
-    println!("大杯奶茶：{} 元", teashop::bill::total_for("奶茶", 1) + extra);
+    println!(
+        "大杯奶茶：{} 元",
+        teashop::bill::total_for("奶茶", 1) + extra
+    );
 }
 ```
 
