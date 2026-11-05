@@ -140,7 +140,7 @@ error[E0515]: cannot return reference to local variable `s`
   |     ^^ returns a reference to data owned by the current function
 ```
 
-結果跟第 2 集的 `make<'a>` 一樣是 E0515。`'static` 是一個承諾：「這個參照整個程式都有效」。`s` 是區域變數，`}` 就 drop 了，承諾是假的，編譯器照樣抓出來。只有真的活整個程式的資料（字面值、`static`），才配得上 `'static`；編譯器叫你加 `'static` 時，先想想資料到底活多久。第 14 章的 `thread::spawn` 還會再遇到它。
+結果跟第 2 集的 `make<'a>` 一樣是 E0515。`'static` 是一個承諾：「這個參照整個程式都有效」。`s` 是區域變數，`}` 就 drop 了，承諾是假的，編譯器照樣抓出來。只有真的活整個程式的資料（字面值、`static`），才配得上 `'static`；編譯器叫你加 `'static` 時，先想想資料到底活多久。第 14 章第 3 集的 `thread::spawn` 還會再遇到它：它要求閉包是 `'static`。
 
 ## 重點整理
 
