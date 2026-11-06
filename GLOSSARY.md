@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、Cargo 與它的指令名稱。
+保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -113,3 +113,11 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 範圍執行緒 | scoped thread | 作用域線程 |
 | 生產者、消費者 | producer、consumer | 生產方、消費方 |
 | 鎖中毒 | poisoned | 鎖污染 |
+| 任務 | task（`tokio::spawn` 開出來的） | 協程、工作項 |
+| 輪詢 | polling（`Future::poll`） | 輪巡 |
+| 取消 | cancellation | 撤銷、終止 |
+| 逾時 | timeout | 超時 |
+| 非同步 | asynchronous | 異步 |
+| 協作式 | cooperative | 合作式 |
+| 搶佔 | preemption | 搶占 |
+| 排程 | scheduling | 調度 |
