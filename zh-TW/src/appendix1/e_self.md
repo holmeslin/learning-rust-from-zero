@@ -144,8 +144,7 @@ Err(SizeError)
 
 ## 重點整理
 
-- 在 `impl 型別 { ... }` 裡，`Self` 就是那個型別：`-> Self`、`Self { ... }`、`Self::new(...)`、`Self::CONST` 都能用，跟寫完整名稱等價。
-- enum 的 `impl` 裡可以寫 `Self::variant`；型別帶 `<T>` 或 `<'a>` 時，`Self` 不用重寫它們。
+- 在 `impl 型別 { ... }` 裡，`Self` 就是那個型別：`-> Self`、`Self { ... }`、`Self::new(...)`、`Self::CONST` 都能用，跟寫完整名稱等價。enum 的 `impl` 裡可以寫 `Self::variant`；型別帶 `<T>` 或 `<'a>` 時，`Self` 不用重寫它們。
 - `self` 是值，`Self` 是型別；`&self` 是 `self: &Self` 的簡寫。
 - trait 定義裡的 `Self` 代表將來實作的型別，`Self::Item`、`Self::Err` 是它的關聯型別。
 - `Self` 只能用在 `impl`、trait、型別定義裡，其他地方是 E0411。
