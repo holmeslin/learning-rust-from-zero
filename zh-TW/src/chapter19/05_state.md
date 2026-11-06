@@ -77,7 +77,7 @@ mod tests;
 - `AppState` 是自己定義的 struct，裡面放要共用的東西。`orders` 是 `Arc<Mutex<Vec<Order>>>`（第 14 章第 9 集）：`Arc` 讓每個 handler 都拿得到同一份，`Mutex` 讓一次只有一個 handler 改它。
 - `Router` 要能為每個請求取得一份 state，所以 `AppState` 要 `Clone`；`Arc` 的 clone 只是計數加一，不是複製整個 `Vec`。
 - `with_state(state)` 把 state 交給 `Router`；handler 寫 `State(state): State<AppState>`，拆開就拿到 `AppState`。`State` 跟 `Json` 一樣是 extractor，`Json` 照樣放最後。
-- 鎖只在需要的那一行拿著，沒有 `.await`，用標準函式庫的 `Mutex` 就夠（第 15 章第 11 集）。state 放在記憶體，重啟就清空，要持久保存，第 20 章換成 SQLite。
+- 鎖只在需要的那一行拿著，沒有 `.await`，用標準函式庫的 `Mutex` 就夠（第 15 章第 11 集）。state 放在記憶體，重啟就清空，要持久保存，第 20 章第 8 集換成 SQLite。
 
 ### 忘了 `with_state`
 
