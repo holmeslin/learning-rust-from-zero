@@ -3,6 +3,9 @@
 //! - 「`路徑`：」加程式區塊：專案裡這個檔案現在的內容（同一路徑再出現就覆蓋，像讀者一路在改它）。
 //! - 「`cargo …` 的輸出：」加 `text` 區塊：檢查點。這一刻把所有檔案寫進暫時專案，執行那條指令，
 //!   檢查成功或失敗跟書上貼的相符；cargo 輸出的文字不逐字比對（雜湊、秒數、路徑每次都不同）。
+//!   標籤括號裡可以寫「結束碼 N」（例如「省略編譯進度，結束碼 2」）：指令必須剛好以 N 結束；
+//!   寫了「結束碼」卻不是整數（「結束碼二」）會報錯。編譯失敗的結束碼也是 101，不能當成程式的 101 通過，
+//!   除非書上貼的就是編譯錯誤。
 //! - 「`cargo fmt` 之後的 `路徑`：」加 `rust` 區塊：前一個版本排版亂掉的示範，檢查 rustfmt 真的排成這樣。
 //!
 //! 規則全文與理由見 `docs/style-guide.md` 的「多檔案專案」。
@@ -47,17 +50,48 @@ enum Step {
         code: String,
         line: usize,
     },
-    Check {
-        cmd: Vec<String>,
-        shown: String,
-        line: usize,
-    },
+    Check(Check),
+}
+
+/// 「`cargo …` 的輸出：」檢查點：指令、書上貼的輸出，加上標籤括號裡的結束碼。
+struct Check {
+    cmd: Vec<String>,
+    shown: String,
+    line: usize,
+    exit: Exit,
+}
+
+/// 標籤括號裡的「結束碼 N」。
+enum Exit {
+    /// 沒寫：只看成功或失敗。
+    Unmarked,
+    /// 指令必須剛好以 N 結束。
+    Code(i32),
+    /// 寫了「結束碼」卻不是「結束碼 N」（N 是整數）：標籤寫錯了，檢查點要報錯，不能當成沒寫。
+    Malformed(String),
+}
+
+impl Exit {
+    /// 括號說明裡的「結束碼 N」（例如「省略編譯進度，結束碼 2」）。
+    fn parse(note: &str) -> Self {
+        let Some((_, rest)) = note.split_once("結束碼") else {
+            return Exit::Unmarked;
+        };
+        let digits: String = rest
+            .trim_start()
+            .chars()
+            .take_while(char::is_ascii_digit)
+            .collect();
+        digits
+            .parse()
+            .map_or_else(|_| Exit::Malformed(note.to_string()), Exit::Code)
+    }
 }
 
 enum Label {
     File(String),
     FmtAfter(String),
-    Out(Vec<String>),
+    Out(Vec<String>, Exit),
 }
 
 struct Entry {
@@ -84,7 +118,7 @@ impl Project {
     pub fn checkpoints(&self) -> usize {
         self.steps
             .iter()
-            .filter(|step| matches!(step, Step::Check { cmd, .. } if supported(cmd)))
+            .filter(|step| matches!(step, Step::Check(check) if supported(&check.cmd)))
             .count()
     }
 }
@@ -115,9 +149,9 @@ fn valid_path(path: &str) -> bool {
 /// 標籤整行只有一個行內程式碼加全形冒號，句尾可以多一段（說明）。
 fn parse_label(line: &str) -> Option<Label> {
     let line = line.strip_suffix('：')?;
-    let line = match line.strip_suffix('）') {
-        Some(rest) => rest.rsplit_once('（')?.0,
-        None => line,
+    let (line, note) = match line.strip_suffix('）') {
+        Some(rest) => rest.rsplit_once('（')?,
+        None => (line, ""),
     };
     if let Some(path) = line
         .strip_prefix("`cargo fmt` 之後的 `")
@@ -129,9 +163,10 @@ fn parse_label(line: &str) -> Option<Label> {
         .strip_suffix("` 的輸出")
         .and_then(|rest| rest.strip_prefix('`'))
     {
-        return cmd
-            .starts_with("cargo ")
-            .then(|| Label::Out(cmd.split_whitespace().map(str::to_string).collect()));
+        return cmd.starts_with("cargo ").then(|| {
+            let cmd = cmd.split_whitespace().map(str::to_string).collect();
+            Label::Out(cmd, Exit::parse(note))
+        });
     }
     let path = line.strip_prefix('`')?.strip_suffix('`')?;
     valid_path(path).then(|| Label::File(path.to_string()))
@@ -166,11 +201,12 @@ fn step_of(label: Label, info: &str, code: String, line: usize) -> Option<Step> 
             })
         }
         Label::FmtAfter(path) => (lang == "rust").then_some(Step::FmtAfter { path, code, line }),
-        Label::Out(cmd) => (lang == "text").then_some(Step::Check {
+        Label::Out(cmd, exit) => (lang == "text").then_some(Step::Check(Check {
             cmd,
             shown: code,
             line,
-        }),
+            exit,
+        })),
     }
 }
 
@@ -293,13 +329,13 @@ impl Project {
                     };
                     files.insert(path.clone(), entry);
                 }
-                Step::Check { cmd, shown, line } if supported(cmd) => {
+                Step::Check(check) if supported(&check.cmd) => {
                     never_built = None;
-                    if let Err(msg) = checkpoint(dir, &files, cmd, shown) {
-                        bad.push((*line, msg));
+                    if let Err(msg) = checkpoint(dir, &files, check) {
+                        bad.push((check.line, msg));
                     }
                 }
-                Step::Check { .. } => {}
+                Step::Check(_) => {}
             }
         }
         if let Some((path, line)) = never_built {
@@ -419,7 +455,7 @@ fn cargo(
     target: &Path,
     warn: bool,
     limit: Duration,
-) -> Result<(bool, String), String> {
+) -> Result<(i32, String), String> {
     let mut lints = Vec::new();
     if !warn {
         lints.extend(["-D".to_string(), "warnings".to_string()]);
@@ -438,18 +474,21 @@ fn cargo(
         .env("CARGO_PROFILE_DEV_DEBUG", "0")
         .env("CARGO_PROFILE_DEV_STRIP", "none");
     let scratch = proj.parent().unwrap_or(proj);
-    let (code, text) = run_limited(&mut cmd, scratch, "", limit)?;
-    Ok((code == 0, text))
+    run_limited(&mut cmd, scratch, "", limit)
 }
 
 /// 這個檢查點的結果：書上貼了 `error…` 或 `test result: FAILED` 就必須失敗（而且書上的錯誤碼都要出現），
 /// 否則必須成功。
-fn checkpoint(
-    dir: &Path,
-    files: &BTreeMap<String, Entry>,
-    cmd: &[String],
-    shown: &str,
-) -> Result<(), String> {
+fn checkpoint(dir: &Path, files: &BTreeMap<String, Entry>, check: &Check) -> Result<(), String> {
+    let Check {
+        cmd, shown, exit, ..
+    } = check;
+    let command = cmd.join(" ");
+    if let Exit::Malformed(note) = exit {
+        return Err(format!(
+            "`{command}` 標籤括號裡的「{note}」看不懂，結束碼要寫成「結束碼 N」，N 是整數"
+        ));
+    }
     let crates = uses_pinned_crates(files);
     // 共用的 target 同一時間只讓一個 cargo 用（跟批次編譯一樣）。
     let _guard = crates.then(|| CARGO_LOCK.lock().unwrap_or_else(PoisonError::into_inner));
@@ -475,14 +514,15 @@ fn checkpoint(
         other => vec![other],
     };
     build.extend(flags);
-    let (mut ok, mut text) = cargo(&build, &proj, &target, warn, Duration::MAX)?;
-    if ok && matches!(sub, "run" | "test" | "doc") {
-        let (run_ok, run_text) = cargo(&args, &proj, &target, warn, RUN_TIMEOUT)?;
-        ok = run_ok;
+    let (mut code, mut text) = cargo(&build, &proj, &target, warn, Duration::MAX)?;
+    let compiled = code == 0;
+    if compiled && matches!(sub, "run" | "test" | "doc") {
+        let (run_code, run_text) = cargo(&args, &proj, &target, warn, RUN_TIMEOUT)?;
+        code = run_code;
         text.push_str(&run_text);
     }
+    let ok = code == 0;
 
-    let command = cmd.join(" ");
     if let Ok(lock) = fs::read_to_string(proj.join("Cargo.lock")) {
         let unpinned = unpinned_packages(&lock);
         if !unpinned.is_empty() {
@@ -492,8 +532,25 @@ fn checkpoint(
             ));
         }
     }
-    let expect_fail = shown.lines().any(|l| l.trim_start().starts_with("error"))
+    let shown_fails = shown.lines().any(|l| l.trim_start().starts_with("error"))
         || shown.contains("test result: FAILED");
+    // 編譯失敗的結束碼也是 101，跟 panic 一樣：沒編譯成功，結束碼就跟程式無關，除非書上貼的就是錯誤。
+    if !compiled && !shown_fails {
+        return Err(format!(
+            "`{command}` 書上貼的不是編譯錯誤，實際卻編譯失敗（編譯失敗的結束碼 101 不算程式的）。{}\n{text}",
+            blamed_files(&text, files)
+        ));
+    }
+    let expect_fail = shown_fails || matches!(exit, Exit::Code(n) if *n != 0);
+    // 標籤寫了「結束碼 N」：實際的結束碼要剛好是 N（Linux、macOS 的 `cargo run` 不會印出結束碼）。
+    if let Exit::Code(n) = exit
+        && code != *n
+    {
+        return Err(format!(
+            "`{command}` 標籤寫結束碼 {n}，實際是 {code}。{}\n{text}",
+            blamed_files(&text, files)
+        ));
+    }
     match (expect_fail, ok) {
         (false, true) => Ok(()),
         (false, false) => Err(format!(

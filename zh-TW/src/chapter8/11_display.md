@@ -96,7 +96,7 @@ fn main() {
 
 - `impl std::fmt::Display for Tea { ... }`：`Display` 住在 `std::fmt` 裡，這裡直接寫出完整路徑。
 - `fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result` 整行照抄。`&self`、`&mut` 都學過；回傳的 `Result` 第 9 章才會解釋。
-- `write!(f, "奶茶（{} 種料）", self.toppings)`：格式字串的寫法跟 `println!` 一樣，只是內容寫進 `f`，不是印到螢幕。巨集的原理第 16 章才說。
+- `write!(f, "奶茶（{} 種料）", self.toppings)`：格式字串的寫法跟 `println!` 一樣，只是內容寫進 `f`，不是印到螢幕。巨集的原理第 16 章第 1 集才說。
 - `write!` 那一行沒有分號，它的值就是整個函式的回傳值（第 2 章第 4 集）。
 - enum 的 `Display` 是每個分支各寫一個 `write!`，搭配 `match self`（第 6 章第 16 集）。
 

@@ -6,7 +6,7 @@
 
 ## 正文
 
-`String` 和 `&str` 都能呼叫這些方法（原理第 13 章），下面的範例不特別分。
+`String` 和 `&str` 都能呼叫這些方法（原理第 13 章第 3 集），下面的範例不特別分。
 
 ### 回傳新字串：原字串不變
 
@@ -119,4 +119,4 @@ fn main() {
 - `contains`、`starts_with`、`ends_with`、`is_empty` 回傳 `bool`；要找的可以是 `&str` 或 `char`。
 - `split(分隔)` 和 `split_whitespace()` 切開字串，可以直接用 `for` 走訪，每一段是 `&str`。
 - `find` 回傳 `Option<usize>`，位置是位元組位置，常搭配 `&s[起..迄]`。
-- 這些方法 `String` 與 `&str` 都能用，原理第 13 章解釋。
+- 這些方法 `String` 與 `&str` 都能用，原理第 13 章第 3 集解釋。

@@ -68,7 +68,7 @@ s: [ ptr | len 5 | cap 5 ] ---> H e l l o
 
 ### 放哪裡，由型別決定
 
-Go 也有 stack 和 heap，但你看不到：編譯器用逃逸分析自己決定每個變數放哪，寫程式時不用管。Rust 是由型別決定：整數、tuple、陣列放 stack；`String` 的內容放 heap。想把別的東西放進 heap，要自己用 `Box`（第 13 章）。
+Go 也有 stack 和 heap，但你看不到：編譯器用逃逸分析自己決定每個變數放哪，寫程式時不用管。Rust 是由型別決定：整數、tuple、陣列放 stack；`String` 的內容放 heap。想把別的東西放進 heap，要自己用 `Box`（第 13 章第 1 集）。
 
 這一章裡的 move、`Copy`、`clone`，都是在處理同一件事：heap 上那塊資料，到底歸誰。
 
