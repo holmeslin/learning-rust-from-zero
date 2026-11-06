@@ -108,8 +108,8 @@ tue.txt 1 筆
 幾個重點：
 
 - **`read_dir` 的順序不保證**（第 17 章第 3 集），每個作業系統、每次都可能不同。工具的輸出要固定，所以先 `collect` 成 `Vec`，用 `sort_by_key` 依檔名排好再走。`collect::<Result<Vec<_>, _>>()?` 在任何一筆讀取失敗時整個回傳錯誤。
-- 判斷是不是資料夾，用 `entry.file_type()?.is_dir()`，不要用 `path.is_dir()`。`DirEntry::file_type` 不會跟著符號連結走：連到資料夾的符號連結，`is_dir()` 是 `false`、`is_symlink()` 是 `true`。`path.is_dir()` 會跟過去：指回上層的符號連結會讓同一批檔案被重複走很多層（直到作業系統的連結層數上限才停），筆數就全錯了（實測：上面的資料加一個指回上層的連結，總數從 4 變成 164）。
-- `"  ".repeat(depth)` 把字串重複 `depth` 次，拿來縮排；字串的 `lines()` 跟第 17 章的 `BufRead::lines` 一樣一行一行切，`count()` 數有幾行；`is_some_and(|ext| ext == "txt")` 是「有副檔名，而且是 `txt`」。
+- 判斷是不是資料夾，用 `entry.file_type()?.is_dir()`，不要用 `path.is_dir()`。`DirEntry::file_type` 不會跟著符號連結走：連到資料夾的符號連結，`is_dir()` 是 `false`、`is_symlink()` 是 `true`。`path.is_dir()` 會跟過去。遇到指回上層的符號連結，同一批檔案會被重複走很多層，直到作業系統的連結層數上限才停，筆數就全錯了（實測：上面的資料加一個指回上層的連結，總數從 4 變成 164）。
+- `"  ".repeat(depth)` 把字串重複 `depth` 次，拿來縮排；字串的 `lines()` 跟第 17 章的 `BufRead::lines` 一樣逐行切開，`count()` 數有幾行；`is_some_and(|ext| ext == "txt")` 是「有副檔名，而且是 `txt`」。
 - 檔案名稱是 `OsString`（第 17 章第 4 集），顯示用 `to_string_lossy()`；只看路徑的最後一段，輸出就不會夾著各作業系統不同的路徑分隔符號。
 - 錯誤用 `?` 往上傳，`main` 只印 `kind()`（`NotFound`），不印作業系統的原文，輸出才跟平台無關。
 
@@ -132,7 +132,7 @@ filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 ```
 
 - Go 的標準函式庫有 `filepath.WalkDir`：遞迴、依檔名排序、不跟符號連結，每個項目呼叫一次你的函式，錯誤也交給它。Rust 的標準函式庫只有一層的 `read_dir`，遞迴、排序、符號連結都得自己處理。
-- `WalkDir` 的 callback 傳進來的是完整路徑，`Ext` 帶點（`.txt`）；Rust 的 `extension()` 不帶點（`txt`），而且回傳 `Option`。
+- `WalkDir` 的 callback 拿到完整路徑，`Ext` 帶點（`.txt`）；Rust 的 `extension()` 不帶點（`txt`），而且回傳 `Option`。
 
 ## 重點整理
 

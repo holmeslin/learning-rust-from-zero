@@ -160,7 +160,7 @@ if fi.Mode()&os.ModeCharDevice != 0 {
 ```
 
 - Go 要用 `Stat` 加 `ModeCharDevice` 判斷 stdin 是不是終端機，Rust 是一個方法 `is_terminal()`。
-- 寫到已關閉的管線，Go 的行為跟傳統的 Unix 工具一樣：標準輸出或標準錯誤寫入失敗時，runtime 直接讓程式被 SIGPIPE 結束，安靜地死掉（接上 `head -n 1`，shell 看到的狀態是 141）。Rust 預設忽略 SIGPIPE，`println!` 會 panic；想要安靜結束，要自己處理 `BrokenPipe`。
+- 寫到已關閉的管線，Go 的行為跟傳統的 Unix 工具一樣：標準輸出或標準錯誤寫入失敗時，runtime 直接讓程式被 SIGPIPE 結束，悄悄死掉（接上 `head -n 1`，shell 看到的狀態是 141）。Rust 預設忽略 SIGPIPE，`println!` 會 panic；想要安靜結束，要自己處理 `BrokenPipe`。
 
 ## 重點整理
 
@@ -168,4 +168,4 @@ if fi.Mode()&os.ModeCharDevice != 0 {
 - 沒指定檔案時從 stdin 讀；`io::stdin().is_terminal()` 判斷 stdin 是不是終端機，是的話印用法，不要讓程式默默等待輸入。
 - 看不懂的輸入行印到 stderr 後繼續，最後用 `ExitCode` 讓呼叫端知道有沒有全部成功。
 - Rust 預設忽略 SIGPIPE：對方提早關掉管線時，`println!` 會 panic（結束碼 101）；改用 `writeln!` 並把 `ErrorKind::BrokenPipe` 當成正常結束。
-- 跟 Go 比：Go 寫到關閉的管線會被 SIGPIPE 安靜地結束；Go 用 `Stat` 判斷終端機，Rust 用 `is_terminal()`。
+- 跟 Go 比：Go 寫到關閉的管線會被 SIGPIPE 悄悄結束；Go 用 `Stat` 判斷終端機，Rust 用 `is_terminal()`。
