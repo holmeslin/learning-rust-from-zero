@@ -238,6 +238,43 @@ error[E0425]: cannot find function `member_price` in crate `teashop`
 27
 ```
 
+## 結束碼：標籤括號裡寫「結束碼 N」，實際要剛好是 N
+
+Linux、macOS 的 `cargo run` 不會印出結束碼，所以寫在標籤裡；輸出區塊不必有 `error` 開頭的行。
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    println!("缺引數");
+    std::process::exit(2);
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 2）：
+
+```text
+     Running `target/debug/teashop`
+缺引數
+```
+
+標了結束碼 0 也可以：
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    println!("好了");
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 0）：
+
+```text
+     Running `target/debug/teashop`
+好了
+```
+
 ## `warn`：刻意示範警告的區塊，允許警告
 
 `src/main.rs`：

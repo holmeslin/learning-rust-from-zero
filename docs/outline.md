@@ -87,6 +87,8 @@ a 數字字面值（`1_000`、`0x`、`0b`、`10u8`）· b 標籤 `'outer` · c �
 ## 第 18 章 實戰：CLI 工具
 01 `std::env::args` · 02 `clap` derive · 03 子命令 · 04 結束碼 `ExitCode` · 05 stdin/stdout 管線 · 06 走訪目錄 · 07 處理 Ctrl-C · 08 完整範例
 
+邊界：第一部全部與第 13～17 章都可用。第 1 集只用 std；第 2～4 集用 `clap`（`derive`），第 4 集另加 `thiserror`；第 7 集用 `tokio`（`full`）與 `tokio-util`；版本以 `tools/checkcode/deps/Cargo.toml` 為準，不加清單外的 crate（`ctrlc`、`walkdir`、`assert_cmd` 最多一句話帶過、標明「這本書不展開」）。`clap` 只教 derive 的 `Parser` 與 `Subcommand`（`#[arg(short, long, default_value_t)]`、`#[command(version)]`、`Option`／`Vec`／`bool` 欄位），不教 builder API、`ValueEnum`、自訂說明樣板、shell 補全。每集一個多檔案專案（`rust,ignore` 加路徑標籤，`` `cargo run -- 引數` 的輸出 `` 檢查點），例外是第 5 集：專案的檢查點沒有 stdin，所以用單檔的 `stdin=` 區塊（值不能含逗號與空白，訂單格式用 `飲料:杯數`）。結束碼寫在檢查點標籤的括號裡（「結束碼 N」，checkcode 與 projfill 都會驗證）。輸出不依賴平台：不印 `argv[0]`、路徑、`{e}` 的作業系統訊息，改印 `kind()` 或固定的字串，目錄走訪先排序。第 7 集沒辦法替讀者按 Ctrl-C，所以程式用 `kill -INT` 送給自己（時間點綁在處理進度上，不用計時器；只有 Linux、macOS）。第 8 集的完整範例只有 `price` 與 `total`，不含第 6、7 集的 `scan` 與 Ctrl-C，文字裡說明怎麼接上。`eprintln!`、`IsTerminal`、`split_once` 這類第一次出現的標準函式庫用法，在該集一句話解釋。
+
 ## 第 19 章 實戰：Web 服務
 01 第一個 axum 伺服器 · 02 路由 · 03 extractor：`Path` 與 `Query` · 04 JSON API · 05 共享狀態 `State` · 06 錯誤回應 `IntoResponse` · 07 middleware（tower）· 08 graceful shutdown · 09 用 `oneshot` 測試
 

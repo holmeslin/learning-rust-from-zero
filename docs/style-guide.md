@@ -111,7 +111,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 標註 | 用在 |
 | --- | --- |
 | `rust,compile_fail=E0382` | 故意展示編譯錯誤，錯誤碼必須相符。只有錯誤沒有錯誤碼時（例如語法錯誤）才寫不帶碼的 `compile_fail` |
-| `rust,stdin=Andy,noplayground` / `rust,stdin=3\n5,noplayground` | 讀輸入的範例（`\n` 代表換行）；一定要同時加 `noplayground` |
+| `rust,stdin=Andy,noplayground` / `rust,stdin=3\n5,noplayground` | 讀輸入的範例（`\n` 代表換行，值裡不能有空白或逗號）；一定要同時加 `noplayground` |
 | `rust,exit=101` | 故意 panic（Rust 的 panic 結束碼是 101） |
 | `rust,no_run` | 會一直執行或需要外部環境，只編譯（mdBook 也會隱藏執行按鈕） |
 | `rust,warn` | 故意展示編譯器警告，只有這種區塊允許警告 |
@@ -334,6 +334,19 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 「跟 Go 比一比」第 17 章用在：01（`io.EOF` 與 `n > 0` 同時成立、`Write` 寫不完一定回傳錯誤、trait 要先 `use`）、02（`Scanner` 64 KiB 上限、`Flush`）、03（`ReadDir` 已排序、權限參數、`defer f.Close()`）、04（`Join` 遇到絕對路徑、`Ext` 帶點）、05（`Getenv` 分不出沒設定與空字串、`Setenv` 是普通函式）、06（`Duration` 可為負、`time.Now()` 兼具兩種時鐘）、07（`Output()` 在結束碼不是 0 時回傳 `err`）、08（解到 `any` 的數字一律 `float64`）、09（缺欄位悄悄是零值）、10（`slog` 預設會印、沒有 span）、11（`IntN` 從 0 起算、`rand.Seed` 不再需要）、14（`%w` 的字串含整條鏈，`{e}` 只印最外層）；12、13 沒有加。
   - 篇幅：每集 98～162 行（第 9 集最長）。省行數的辦法：靠散文加離線驗證就夠的範例改成一句話（`read_to_string` 的第二次讀取、`Path` 的 `components` 之外的拆解、`serde` 的帶資料 variant、`cups` 多餘欄位、`skip_serializing_if` 與 `deny_unknown_fields`、`anyhow` 的 `downcast_ref`）、表格改成一句列舉（`fs` 的其他函式）。
 
+- 實戰 CLI 相關的範例（第 18 章）：
+  - 領域沿用飲料店：package 叫 `teashop`，菜單紅茶 30、咖啡 45、奶茶 38，訂單檔每行 `飲料:杯數`（用冒號：單檔 `stdin=` 的值不能含逗號與空白），資料夾 `orders/`。避開 The Rust Book 的 minigrep（`Config`、`search`、`CASE_INSENSITIVE`）與 clap 文件、教學慣用的範例（greet、`name`／`count`）。
+  - **每集一個專案，除了第 5 集**：`Cargo.toml` 與每個檔案用路徑標籤，`.rs` 一律 `rust,ignore`（`rust` 加路徑標籤會同時被當單檔驗證，`Cli::parse()` 沒給引數就會失敗，也會多出沒有意義的執行按鈕），輸出用「`cargo run -- 引數` 的輸出（省略編譯進度）：」。第 5 集用單檔 `rust,stdin=…,noplayground`，因為專案的檢查點沒有 stdin（stdin 是空的）。專案的 `Cargo.toml` 與 `deps/Cargo.toml` 一致：`clap = { version = "4.6.7", features = ["derive"] }`、`thiserror = "2.0.21"`、`tokio = { version = "1.54.1", features = ["full"] }`、`tokio-util = "0.7.20"`，不新增也不升級 crate。
+  - **結束碼寫在標籤的括號裡**：「`cargo run -- 烏龍` 的輸出（省略編譯進度，結束碼 3）：」，見「多檔案專案」。`clap` 自己報的錯（`error: …`、結束碼 2）也要寫；結束碼 0 不用寫。`cargo run` 的 `Running` 行會把非 ASCII 的引數加上單引號（`'紅茶'`），是 cargo 的顯示方式，第一次出現時在文中說明；`--` 之後的引數不能含空白與引號（標籤是用空白切的）。
+  - 輸出不依賴平台（延續第 16、17 章的規則）：不印 `argv[0]`（`target/debug/teashop`，Windows 是 `teashop.exe`）；錯誤只印 `kind()`，不印 `{e}` 的作業系統訊息；目錄走訪輸出只印檔名的最後一段，先 `sort_by_key` 再走；`clap` 的說明與錯誤訊息固定是英文，`Usage: teashop …` 的名稱來自 package 名稱。
+  - `kill -INT` 的 Ctrl-C 範例（第 7 集）：書上沒辦法替讀者按 Ctrl-C，所以程式用 `Command::new("kill").args(["-INT", &std::process::id().to_string()])` 送給自己（只有 Linux、macOS，文中說明，真的專案拿掉）。**送出的時間點綁在處理進度上**（處理第 2 筆、`println!` 之後），不用計時器，輸出才不會因為機器忙碌而變動；先印再送，輸出順序才固定。tokio 的處理程式在父行程把 SIGINT 設成忽略時（例如背景執行的 shell，實測 `trap '' INT`）一樣裝得上，所以這個範例不受執行環境影響；**沒有處理程式的版本不貼成 `cargo run` 區塊**（這種環境下預設動作不會生效），只用文字描述（實測：被 SIGINT 結束時 shell 看到 130，drop 沒跑）。`ctrl_c()` 裝上的處理程式到行程結束都不會還原（實測：送兩次 SIGINT，程式照常跑完）。
+  - 管線的 `bash` 區塊（第 5 集的 `printf … | total > report.txt`、`slow | head -n 1`）工具不驗證，由撰寫者實際跑過：stdout／stderr 分流、`2>` 重新導向、`script -q /dev/null` 模擬終端機（`is_terminal()` 為 `true`，印用法、結束碼 2）都核對過。`println!` 遇到 `BrokenPipe` 會 panic（`failed printing to stdout: Broken pipe (os error 32)`，位置是 `/rustc/<雜湊>/library/std/src/io/stdio.rs`，書上用 `…` 省略，結束碼 101）；改用 `writeln!` 比對 `ErrorKind::BrokenPipe` 就安靜結束（結束碼 0）。Go 版對同樣的管線被 SIGPIPE 結束（shell 看到 141，沒有任何訊息）。
+  - 實測過的 `clap` 行為（版本 4.6.7）：位置引數與選項可以交錯；`-c2`、`--cups=3` 都行；`Option<T>` 的選項寫兩次是 `error: the argument '--note <NOTE>' cannot be used multiple times`；`--cup` 會建議 `tip: a similar argument exists: '--cups'`；子命令拼錯是 `error: unrecognized subcommand 'pirce'` 加 `tip: a similar subcommand exists: 'price'`；沒給子命令會印整份說明（結束碼 2）；variant 名稱 `OpenShop` 變成 `open-shop`；`help price` 與 `price --help` 相同；`Command` 少一個 `match` 分支是 E0004；引數不是合法 UTF-8 時，`clap` 回 `error: invalid UTF-8 was detected in one or more arguments`（結束碼 2），`std::env::args()` 則是 panic（``called `Result::unwrap()` on an `Err` value: "\xFF"``，結束碼 101）。
+  - 實測過的標準函式庫行為：`main` 回傳 `Result<ExitCode, String>`，`Err` 印 `Error: "boom"`、結束碼 1；`std::process::exit` 不執行 `main` 裡的 drop，回傳 `ExitCode` 會；`DirEntry::file_type().is_dir()` 不跟符號連結，`path.is_dir()` 會（指回上層的連結讓總數從 4 變成 164，沒有報錯）。Go 1.27 都跑過：`flag` 遇到第一個非旗標引數就停止解析（`./prog 紅茶 --cups 2` 的 `flag.Args()` 是 `[紅茶 --cups 2]`），錯誤值的旗標結束碼 2，`-h` 結束碼 0；`panic` 結束碼 2、`os.Exit(3)` 不執行 `defer`。
+  - clippy 與 rustfmt 沒有新的地雷；rustfmt 會把 `.and_then(|(a, b)| Some(...))` 的鏈拆成每個呼叫一行，先照 checkcode 的結果寫。`Option` 的 `?` 比 `and_then` 加 `Some(...)` 的閉包短，也不會觸發 `bind_instead_of_map`，`parse_order` 這類函式優先這樣寫。
+  - 「跟 Go 比一比」第 18 章用在：01（`flag` 套件、`os.Args` 不會因編碼出事）、02（`flag` 遇到第一個非旗標就停止解析）、03（子命令要自己 `switch`，漏掉的 `case` 編譯器看不出）、04（`os.Exit` 不執行 `defer`、panic 結束碼 2）、05（`Stat` 判斷終端機、SIGPIPE）、06（`filepath.WalkDir`）、07（`signal.NotifyContext`）；08 沒有加。
+  - 篇幅：每集 127～232 行（第 8 集最長，因為是完整專案，含五個檔案與測試；其餘都在 175 行以內，比前面章節的 162 行上限略長，因為每個專案都要貼檔案與 `cargo run` 的輸出，作者若要壓回 150 行，最先拿掉的是檢查點的輸出區塊）。省行數的辦法：第 4 集的 `price_of` 內嵌成 `match`、第 3 集的菜單內嵌在 `main.rs`、拿掉 `--version`、`price --help`、沒給子命令這幾個檢查點（改成文字，行為已實測）、第 8 集不放單元測試與 `scan`。
+
 ## 多檔案專案
 
 第 12 章起，有些範例分散在好幾個檔案，要靠 `cargo` 才能展示。checkcode 依「路徑標籤」把一集裡的區塊組成暫時的 Cargo 專案，驗證它們編譯得過、clippy 沒警告、rustfmt 通過，書上有 `cargo test` 的地方測試真的會跑。第 18～20 章的 CLI、Web、SQLite 專案用同一套標籤。
@@ -345,7 +358,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 標籤 | 後面的區塊 | 意思 |
 | --- | --- | --- |
 | `` `src/lib.rs`： `` | 任何語言，通常是 `rust,ignore`、`toml` | 專案裡這個檔案現在的內容。路徑只能有英數與 `_ . / -`，檔名要有副檔名，不能是絕對路徑或含 `..`，相對於專案根目錄（workspace 成員寫 `teashop/src/lib.rs`） |
-| `` `cargo run` 的輸出（省略編譯進度）： `` | `text` | 檢查點。這一刻把所有檔案寫進暫時專案，執行這條指令，結果要跟區塊相符。指令要是 `cargo` 開頭，可以帶 `--features`、`-p` 之類的參數；括號裡的說明不影響驗證 |
+| `` `cargo run` 的輸出（省略編譯進度）： `` | `text` | 檢查點。這一刻把所有檔案寫進暫時專案，執行這條指令，結果要跟區塊相符。指令要是 `cargo` 開頭，可以帶 `--features`、`-p` 之類的參數；括號裡的說明不影響驗證，只有「結束碼 N」例外（見下） |
 | `` `cargo fmt` 之後的 `src/main.rs`： `` | `rust` | 前一個版本排版亂掉的示範（見下）：這個檔案接著變成區塊的內容 |
 
 標籤拼錯（例如半形冒號、少了反引號）不會報錯，那一行就只是普通文字，後面的區塊也就不會進專案。改完標籤要看 checkcode 最後印出的專案、檔案、檢查點數量有沒有變。
@@ -360,8 +373,9 @@ let n: i32 = line.parse().expect("請輸入整數");
 
 **檢查點怎麼判定。** 看 `text` 區塊裡有沒有 `error` 開頭的行（`error[E0603]: …`、`error: test failed…`）或 `test result: FAILED`：
 
-- 沒有：指令必須成功。`cargo run` 與 `cargo test` 也會實際執行（30 秒內，超過算失敗；不給 stdin），結束碼必須是 0。
+- 沒有：指令必須成功。`cargo run` 與 `cargo test` 也會實際執行（30 秒內，超過算失敗；不給 stdin），結束碼必須是 0（除非括號說明寫了「結束碼 N」，見下）。
 - 有：指令必須失敗，而且書上出現的每個 `error[E....]` 錯誤碼，實際輸出都要有。只有 `error:` 沒有錯誤碼的（例如 `a bin target must be available`），只要求失敗。
+- 括號說明裡寫了「結束碼 N」（例如「省略編譯進度，結束碼 2」）：指令的結束碼必須剛好是 N，`projfill.py` 也會確認。N 不是 0 時，輸出區塊不必有 `error` 開頭的行。Linux、macOS 的 `cargo run` 用 exec 把控制權直接交給程式，結束碼不是 0 時不會印 `error: process didn't exit successfully`，輸出看不出成敗，所以要寫在標籤裡（第 18 章的 CLI 專案用它）。結束碼是 0 的檢查點不用寫。
 - 輸出的文字不逐字比對（雜湊、秒數、路徑、執行緒編號每次都不同），逐字比對由撰寫者用 `projfill.py` 做。
 - 支援 `run`、`test`、`check`、`build`、`doc`、`clippy`；`cargo new`、`cargo add`、`cargo fmt` 這類改檔案、不編譯的指令不驗證，不算檢查點。`clippy` 當 `check` 驗（lint 本來就會跑）。
 - 會一直執行的程式（伺服器）不能放 `cargo run` 的輸出區塊，會逾時失敗；改展示 `cargo build` 或 `cargo test`。
@@ -382,7 +396,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - **照常寫 ```` ```rust ````，不用加標註。** checkcode 看程式裡有沒有出現 `<crate>::`（連字號換成底線，例如 `tokio::`、`serde_json::`、`http_body_util::`；`use tokio::time::sleep;` 和 `#[tokio::main]` 都算）：有的話，這個區塊就放進共用依賴 package 一起編譯，沒有的話照第一部的方式單檔編譯。清單外的 crate（例如 `reqwest::`）不會被認出來，單檔編譯時找不到 crate，區塊直接失敗。
 - 區塊要用到 crate 的名字，一定要寫成 `crate名::` 的路徑形式（`use tokio::spawn;` 或 `tokio::spawn(...)`）。`use tokio as t;` 這種別名寫法不會被認出來。
 - rustfmt、clippy（`-D warnings` 與 `clippy-allow.txt` 放行清單）、結束碼、`stdin`、`no_run`、`warn`、`test`、`compile_fail=E....` 的規則跟 std 區塊完全相同；一個區塊失敗不會影響其他區塊。
-- Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。2026-11 查過 rust-lang/rust-playground 的 `compiler/base/Cargo.toml`：`tokio`（1.54.1，含 `full`）、`tokio-util`（0.7.20）、`tower`、`http-body-util`、`serde`、`serde_json`、`tracing`、`tracing-subscriber`（0.3.23）、`rand`、`uuid`、`thiserror`、`anyhow` 都有，版本跟 `deps/Cargo.toml` 相同；`clap` 有（4.6.7，清單裡開了 `unstable-doc`，`clap_derive` 也單獨列在清單裡，但沒有實際在 Playground 上跑過 derive）；`axum` 與 `rusqlite` 沒有，用到它們的區塊要加 `noplayground`。第 15 章只用 tokio 與 tokio-util，所以不加 `noplayground`（只比對了 crate 清單與版本，沒有逐一在 Playground 上執行）。
+- Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。2026-11 查過 rust-lang/rust-playground 的 `compiler/base/Cargo.toml`：`tokio`（1.54.1，含 `full`）、`tokio-util`（0.7.20）、`tower`、`http-body-util`、`serde`、`serde_json`、`tracing`、`tracing-subscriber`（0.3.23）、`rand`、`uuid`、`thiserror`、`anyhow` 都有，版本跟 `deps/Cargo.toml` 相同；`clap` 有（4.6.7，清單裡開了 `unstable-doc`，`clap_derive` 也單獨列在清單裡，但沒有實際在 Playground 上跑過 derive）；`axum` 與 `rusqlite` 沒有，用到它們的區塊要加 `noplayground`。第 15 章只用 tokio 與 tokio-util，所以不加 `noplayground`（只比對了 crate 清單與版本，沒有逐一在 Playground 上執行）。第 18 章的 `clap`、`tokio` 都在專案的 `rust,ignore` 檔案裡，本來就沒有執行按鈕；單檔區塊只用 std（第 5 集），不受影響。
 - 多檔案專案（第 18～20 章的實戰章）的 `Cargo.toml` 也只能用這份清單，版本要與 `deps/Cargo.toml` 一致，規則見上一節「多檔案專案」。
 - 版本統一鎖在 `tools/checkcode/deps/Cargo.toml`，`Cargo.lock` 一併提交。新增 feature 或升級版本：改該檔，執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`，再把 `Cargo.lock` 一起提交。不得在書中另外加清單外的 crate。
 - 該檔的 `[lints.clippy]` 必須與 `tools/checkcode/clippy-allow.txt` 一致；改放行清單時兩邊一起改（checkcode 的測試會檢查）。
