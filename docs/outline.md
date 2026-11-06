@@ -67,7 +67,7 @@ a 數字字面值（`1_000`、`0x`、`0b`、`10u8`）· b 標籤 `'outer` · c �
 ## 第 14 章 並行
 01 `thread::spawn` · 02 `join` · 03 把資料 `move` 進執行緒 · 04 `thread::scope` · 05 `mpsc` channel · 06 多個生產者 · 07 `Mutex` · 08 `Arc` · 09 `Arc<Mutex<T>>` · 10 `RwLock` · 11 `Send` 與 `Sync` · 12 atomic · 13 `OnceLock` 與 `LazyLock` · 14 死結 · 15 data race 為什麼編譯不過（跟 Go 的 `-race` 比一比）· 16 `sync_channel` 與背壓 · 17 worker pool
 
-邊界：只用 std，不寫 async（第 15 章）。`thread::sleep(Duration::from_millis(n))` 是固定句型（`Duration` 第 17 章第 6 集）；`Ordering` 只用 `SeqCst`；`unsafe`、`static mut` 只在文字帶過（第 16 章）。範例的輸出要固定：執行緒裡不印東西（第 1 集的交錯示範除外），結果由主執行緒依 `join` 順序或排序後印；會卡住的範例（死結、忘了 `drop(tx)`）用 `rust,no_run`。
+邊界：只用 std，不寫 async（第 15 章）。`thread::sleep(Duration::from_millis(n))` 是固定句型（`Duration` 第 17 章第 6 集）；`Ordering` 只用 `SeqCst`；`unsafe`、`static mut` 只在文字帶過（第 16 章第 5 集）。範例的輸出要固定：執行緒裡不印東西（第 1 集的交錯示範除外），結果由主執行緒依 `join` 順序或排序後印；會卡住的範例（死結、忘了 `drop(tx)`）用 `rust,no_run`。
 
 ## 第 15 章 async
 01 為什麼需要 async（跟 goroutine 比一比）· 02 `async fn` 與 `.await` · 03 `Future` 是惰性的 · 04 tokio 與 `#[tokio::main]` · 05 `tokio::spawn` · 06 `JoinSet` · 07 `tokio::sync::mpsc` · 08 `select!` · 09 `timeout` · 10 `CancellationToken`（跟 Go 的 context 比一比）· 11 async 裡的 `Mutex` · 12 不要阻塞 runtime：`spawn_blocking` · 13 async 閉包 · 14 跨 `.await` 的 `Send` 限制
@@ -75,7 +75,9 @@ a 數字字面值（`1_000`、`0x`、`0b`、`10u8`）· b 標籤 `'outer` · c �
 邊界：第一次用 crate，只用 `tokio` 與 `tokio-util`（第 10 集的 `CancellationToken`），版本以 `tools/checkcode/deps/Cargo.toml` 為準。第 1 集只用 std，不寫 async；`#[tokio::main]` 加 `async fn main()`、`tokio::time::sleep(Duration::from_millis(n)).await` 是固定句型，第 2 集起照抄，第 4 集解釋。`async { }` 區塊第 3 集教、`tokio::spawn` 第 5 集教，之前不用。不用 `futures` crate、`async-trait`、`join!`、`Pin`（附錄二 d）、`LocalSet`、`unbounded_channel`、`select!` 的 `biased;`，最多一句話帶過、標明「這本書不展開」。範例的輸出要固定：任務之間用 `sleep` 隔開至少 100 毫秒，順序重要的示範用 `flavor = "current_thread"`；任務 panic 一律用 `handle.await` 或 `join_next` 接住；會永遠卡住的範例用 `rust,no_run`。
 
 ## 第 16 章 進階語言功能
-01 巨集是什麼（揭曉 `println!`）· 02 `macro_rules!` · 03 重複 `$(...)*` · 04 程序巨集與 derive 簡介 · 05 `unsafe` · 06 原始指標 · 07 FFI 與 `unsafe extern "C"` · 08 const 泛型 · 09 `const fn` · 10 `#[cfg]` 條件編譯 · 11 `build.rs` 簡介 · 12 `include_str!`（跟 Go 的 `//go:embed` 比一比）
+01 巨集是什麼（揭曉 `println!`）· 02 `macro_rules!` · 03 重複 `$(...)*` · 04 程序巨集與 derive 簡介 · 05 `unsafe` · 06 原始指標 · 07 FFI 與 `unsafe extern "C"` · 08 const 泛型 · 09 `const fn` · 10 `#[cfg]` 條件編譯 · 11 `build.rs` 簡介 · 12 `include_str!`（跟 Go 的 `//go:embed` 比一比）· 13 `TryFrom` 與 `TryInto`
+
+邊界：第一部全部與第 13～15 章都可用；不用清單外的 crate（`syn`、`quote`、`cc`、`bindgen` 最多一句話帶過、標明「這本書不展開」）。第 4 集的程序巨集只用標準函式庫的 `proc_macro`，做成 `path` 相依的獨立 crate（多檔案專案）。`unsafe` 範例（第 5～7 集）都要有安全的包裝，不執行會造成未定義行為的程式；edition 2024：`unsafe fn` 本體仍要包 `unsafe { }`、不取 `static mut` 的參照、`extern` 區塊要寫 `unsafe extern`、`no_mangle` 要寫 `#[unsafe(no_mangle)]`。FFI 只呼叫每個平台的 C 標準函式庫都有的 `toupper`、`strlen`、`atoi`。第 10 集的單檔輸出只依賴所有平台都相同的條件（`debug_assertions`、`target_pointer_width = "64"`）；`unexpected_cfgs` 只有 cargo 會檢查，用專案展示。`build.rs` 的輸出只用寫死的值（`std::env`、`std::fs` 是第 17 章）。第 13 集 `TryFrom`／`TryInto` 是寫第 16 章時，由作者決定補上的（附錄一 i 指向它）。
 
 ## 第 17 章 進階 std 與常用 crate
 01 `Read` 與 `Write` · 02 `BufRead` 與 `BufReader` · 03 `std::fs` 檔案操作 · 04 `Path` 與 `PathBuf` · 05 `std::env` · 06 `std::time` · 07 `std::process::Command` · 08 `serde` 與 `serde_json` · 09 derive `Serialize` / `Deserialize` · 10 `tracing` · 11 `rand` · 12 `uuid` · 13 `thiserror` · 14 `anyhow`
