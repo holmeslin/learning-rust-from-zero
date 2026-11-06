@@ -95,7 +95,7 @@ while let Ok(order) = job_rx.lock().expect("工作佇列壞了").recv() {
 
 - 工作不只是數字：把佇列的訊息型別換成 `Box<dyn FnOnce() + Send>`，工人收到之後直接呼叫，就是能執行任何閉包的 pool。`Send` 是第 11 集的限制，因為閉包要搬到工人的執行緒。
 - 工作佇列有上限：把 `mpsc::channel` 換成第 16 集的 `mpsc::sync_channel(n)`，`main` 送太快就會被擋住，不會堆出無限長的佇列。
-- 需要現成的、更有效率的工具：第 15 章的 tokio 與 `spawn_blocking` 就是這件事的延伸。
+- 需要現成的、更有效率的工具：第 15 章的 tokio（第 4 集起）與 `spawn_blocking`（第 12 集）就是這件事的延伸。
 
 ### 跟 Go 比一比
 
