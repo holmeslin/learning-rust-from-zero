@@ -6,11 +6,11 @@
 
 ## 正文
 
-### Ctrl-C 是一個訊號
+### Ctrl-C 其實是訊號
 
-在終端機按 Ctrl-C，終端機會送一個叫 SIGINT 的訊號給正在執行的程式。程式沒有特別處理的話，作業系統預設的動作是**立刻結束它**：不會跑任何 drop、緩衝區裡的資料不會寫出、寫到一半的檔案就留在那裡。批次處理訂單、寫報表這類工具，應該收到 Ctrl-C 時做完手上這一筆、印出進度再結束。
+在終端機按 Ctrl-C，終端機會把 SIGINT 這個訊號送給正在執行的程式。程式沒有特別處理的話，作業系統預設的動作是**立刻結束它**：不會跑任何 drop、緩衝區裡的資料不會寫出、寫到一半的檔案就留在那裡。批次處理訂單、寫報表這類工具，應該收到 Ctrl-C 時做完手上這一筆、印出進度再結束。
 
-標準函式庫沒有處理訊號的功能。這一章已經有 tokio（第 15 章），它的 `tokio::signal::ctrl_c()` 是一個 async 函式，收到 Ctrl-C（Linux、macOS 的 SIGINT，Windows 的 Ctrl-C 事件）就完成。社群的 `ctrlc` crate 做同樣的事，不用 async，這本書不展開。
+標準函式庫沒有處理訊號的功能。這一章已經有 tokio（第 15 章），它的 `tokio::signal::ctrl_c()` 是 async 函式，收到 Ctrl-C（Linux、macOS 的 SIGINT，Windows 的 Ctrl-C 事件）就完成。社群的 `ctrlc` crate 做同樣的事，不用 async，這本書不展開。
 
 ### 做完這筆再收工
 
@@ -115,7 +115,7 @@ for i, drink := range orders {
 ```
 
 - `signal.NotifyContext` 讓 SIGINT 把 `context` 取消，用法跟 `CancellationToken` 一一對應：`ctx.Err() != nil` 是 `is_cancelled()`，`ctx.Done()` 是 `cancelled().await`。
-- Go 呼叫 `stop()` 之後，SIGINT 恢復預設動作，再按一次就會殺掉程式；tokio 的處理程式一旦裝上就不會拿掉，要強制結束得自己寫。
+- Go 呼叫 `stop()` 之後，SIGINT 還原成預設動作，再按一次就會殺掉程式；tokio 的處理程式一旦裝上就不會拿掉，要強制結束得自己寫。
 - 沒有處理程式時，兩邊都是被直接殺掉：Go 的 `defer`、Rust 的 drop 都不會執行。
 
 ## 重點整理

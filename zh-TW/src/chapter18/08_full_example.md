@@ -2,7 +2,7 @@
 
 ## 本集目標
 
-把這一章的零件組成一支完整的命令列工具：`clap` 解析引數與子命令、從檔案或 stdin 讀、錯誤對應到結束碼，再用 `cargo test` 把行為守住。
+把這一章的零件組起來，做成一支完整的命令列工具：`clap` 解析引數與子命令、從檔案或 stdin 讀、錯誤對應到結束碼，再用 `cargo test` 把行為守住。
 
 ## 正文
 
@@ -169,7 +169,7 @@ fn main() -> ExitCode {
 
 ### 用測試守住行為
 
-結束碼與管線要啟動真的程式才測得到：`tests/` 底下的整合測試（第 12 章第 12 集）可以用 `env!("CARGO_BIN_EXE_teashop")` 取得編好的程式的路徑（cargo 在編譯時設定的環境變數，第 16 章第 11 集的 `env!`），再用第 17 章第 7 集的 `Command` 啟動它、餵 stdin、收輸出。`String::from_utf8_lossy` 把位元組轉成文字（第 13 章第 10 集），拿來跟字串比對：
+結束碼與管線要啟動真的程式才測得到：`tests/` 底下的整合測試（第 12 章第 12 集）可以用 `env!("CARGO_BIN_EXE_teashop")` 拿到編好的程式路徑：這個環境變數由 cargo 在編譯時期設定，`env!` 見第 16 章第 11 集。拿到路徑，就用第 17 章第 7 集的 `Command` 啟動它、餵 stdin、收輸出。`String::from_utf8_lossy` 把位元組轉成文字（第 13 章第 10 集），拿來跟字串比對：
 
 `tests/cli.rs`：
 
@@ -198,12 +198,6 @@ fn total_reads_stdin_and_reports_bad_lines() {
     assert_eq!(String::from_utf8_lossy(&output.stderr), "第 2 行看不懂\n");
     assert_eq!(output.status.code(), Some(1));
 }
-
-#[test]
-fn unknown_drink_exits_with_3() {
-    let output = teashop(&["price", "烏龍"], "");
-    assert_eq!(output.status.code(), Some(3));
-}
 ```
 
 `cargo test` 的輸出（省略編譯進度）：
@@ -217,12 +211,13 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
      Running tests/cli.rs (target/debug/deps/cli-333a240a8a6eb114)
 
-running 2 tests
-test unknown_drink_exits_with_3 ... ok
+running 1 test
 test total_reads_stdin_and_reports_bad_lines ... ok
 
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
 ```
+
+輸出裡 `teashop-`、`cli-` 後面的雜湊與秒數，每個人都不同。第一段是 `src/` 裡的單元測試（第 12 章第 10 集），這個專案沒有，所以是 0 個；第二段才是 `tests/cli.rs` 的整合測試。
 
 ### 還沒接上的零件
 

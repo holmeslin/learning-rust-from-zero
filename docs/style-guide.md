@@ -345,7 +345,7 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 實測過的標準函式庫行為：`main` 回傳 `Result<ExitCode, String>`，`Err` 印 `Error: "boom"`、結束碼 1；`std::process::exit` 不執行 `main` 裡的 drop，回傳 `ExitCode` 會；`DirEntry::file_type().is_dir()` 不跟符號連結，`path.is_dir()` 會（指回上層的連結讓總數從 4 變成 164，沒有報錯）。Go 1.27 都跑過：`flag` 遇到第一個非旗標引數就停止解析（`./prog 紅茶 --cups 2` 的 `flag.Args()` 是 `[紅茶 --cups 2]`），錯誤值的旗標結束碼 2，`-h` 結束碼 0；`panic` 結束碼 2、`os.Exit(3)` 不執行 `defer`。
   - clippy 與 rustfmt 沒有新的地雷；rustfmt 會把 `.and_then(|(a, b)| Some(...))` 的鏈拆成每個呼叫一行，先照 checkcode 的結果寫。`Option` 的 `?` 比 `and_then` 加 `Some(...)` 的閉包短，也不會觸發 `bind_instead_of_map`，`parse_order` 這類函式優先這樣寫。
   - 「跟 Go 比一比」第 18 章用在：01（`flag` 套件、`os.Args` 不會因編碼出事）、02（`flag` 遇到第一個非旗標就停止解析）、03（子命令要自己 `switch`，漏掉的 `case` 編譯器看不出）、04（`os.Exit` 不執行 `defer`、panic 結束碼 2）、05（`Stat` 判斷終端機、SIGPIPE）、06（`filepath.WalkDir`）、07（`signal.NotifyContext`）；08 沒有加。
-  - 篇幅：每集 126～235 行（第 8 集最長，因為是完整專案，含五個檔案與測試）。省行數的辦法：第 4 集的 `price_of` 內嵌成 `match`、第 3 集的菜單內嵌在 `main.rs`、拿掉 `--version`、`price --help`、沒給子命令這幾個檢查點（改成文字，行為已實測）、第 8 集不放單元測試與 `scan`。
+  - 篇幅：每集 127～232 行（第 8 集最長，因為是完整專案，含五個檔案與測試；其餘都在 175 行以內，比前面章節的 162 行上限略長，因為每個專案都要貼檔案與 `cargo run` 的輸出，作者若要壓回 150 行，最先拿掉的是檢查點的輸出區塊）。省行數的辦法：第 4 集的 `price_of` 內嵌成 `match`、第 3 集的菜單內嵌在 `main.rs`、拿掉 `--version`、`price --help`、沒給子命令這幾個檢查點（改成文字，行為已實測）、第 8 集不放單元測試與 `scan`。
 
 ## 多檔案專案
 
@@ -373,7 +373,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 
 **檢查點怎麼判定。** 看 `text` 區塊裡有沒有 `error` 開頭的行（`error[E0603]: …`、`error: test failed…`）或 `test result: FAILED`：
 
-- 沒有：指令必須成功。`cargo run` 與 `cargo test` 也會實際執行（30 秒內，超過算失敗；不給 stdin），結束碼必須是 0。
+- 沒有：指令必須成功。`cargo run` 與 `cargo test` 也會實際執行（30 秒內，超過算失敗；不給 stdin），結束碼必須是 0（除非括號說明寫了「結束碼 N」，見下）。
 - 有：指令必須失敗，而且書上出現的每個 `error[E....]` 錯誤碼，實際輸出都要有。只有 `error:` 沒有錯誤碼的（例如 `a bin target must be available`），只要求失敗。
 - 括號說明裡寫了「結束碼 N」（例如「省略編譯進度，結束碼 2」）：指令的結束碼必須剛好是 N，`projfill.py` 也會確認。N 不是 0 時，輸出區塊不必有 `error` 開頭的行。Linux、macOS 的 `cargo run` 用 exec 把控制權直接交給程式，結束碼不是 0 時不會印 `error: process didn't exit successfully`，輸出看不出成敗，所以要寫在標籤裡（第 18 章的 CLI 專案用它）。結束碼是 0 的檢查點不用寫。
 - 輸出的文字不逐字比對（雜湊、秒數、路徑、執行緒編號每次都不同），逐字比對由撰寫者用 `projfill.py` 做。

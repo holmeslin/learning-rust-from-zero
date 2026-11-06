@@ -99,7 +99,7 @@ fn main() {
 
 ### 免費的 `--help`、`--version` 與錯誤訊息
 
-`///` 文件註解（第 12 章第 8 集）會變成說明文字，`#[command(version)]` 從 `Cargo.toml` 取版本號（`--version` 印 `teashop 0.1.0`）。
+`///` 文件註解（第 12 章第 8 集）會變成說明文字，`#[command(version)]` 從 `Cargo.toml` 取版本號碼（`--version` 印 `teashop 0.1.0`）。
 
 `cargo run -- --help` 的輸出（省略編譯進度）：
 
