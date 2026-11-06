@@ -25,11 +25,8 @@ clap = { version = "4.6.7", features = ["derive"] }
 `src/cli.rs`：
 
 ```rust,ignore
-use std::path::PathBuf;
-
 use clap::{Parser, Subcommand};
 
-/// 飲料店的小工具
 #[derive(Parser)]
 #[command(version)]
 pub struct Cli {
@@ -39,22 +36,19 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// 算出一筆訂單的金額
     Price {
-        /// 飲料名稱
         drink: String,
-        /// 杯數
         #[arg(short, long, default_value_t = 1)]
         cups: u32,
     },
     /// 加總訂單檔，每行「飲料:杯數」；沒給檔案或寫 `-` 就讀 stdin
-    Total { file: Option<PathBuf> },
+    Total { file: Option<std::path::PathBuf> },
 }
 ```
 
 ### 計算與讀取分開
 
-`sum_orders` 收 `impl BufRead`（第 17 章第 2 集）：檔案、stdin、記憶體裡的 `&[u8]` 都行，計算本身不知道資料從哪來，也不印任何東西：
+`sum_orders` 收 `impl BufRead`（第 17 章第 2 集）：檔案、stdin、記憶體裡的 `&[u8]` 都行，回傳（總金額，看不懂的行號）。計算本身不知道資料從哪來，也不印任何東西：
 
 `src/orders.rs`：
 
@@ -70,13 +64,11 @@ pub fn price_of(drink: &str) -> Option<u32> {
     }
 }
 
-/// 一行「飲料:杯數」的金額；格式不對，或飲料不在菜單上，就是 `None`。
 fn line_total(line: &str) -> Option<u32> {
     let (drink, cups) = line.split_once(':')?;
     Some(price_of(drink)? * cups.parse::<u32>().ok()?)
 }
 
-/// 加總一份訂單，回傳（總金額，看不懂的行號）。
 pub fn sum_orders(reader: impl BufRead) -> io::Result<(u32, Vec<usize>)> {
     let mut total = 0;
     let mut bad = Vec::new();
@@ -103,14 +95,12 @@ mod orders;
 use std::error::Error;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
-use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
 use cli::{Cli, Command};
 
-/// 有給檔案（而且不是 `-`）就讀檔案，否則讀 stdin。
-fn open(file: Option<PathBuf>) -> Result<Box<dyn BufRead>, Box<dyn Error>> {
+fn open(file: Option<std::path::PathBuf>) -> Result<Box<dyn BufRead>, Box<dyn Error>> {
     match file {
         Some(path) if path.to_str() != Some("-") => {
             let file = File::open(&path)
@@ -153,20 +143,6 @@ fn main() -> ExitCode {
 }
 ```
 
-`cargo run -- price 紅茶 -c 2` 的輸出（省略編譯進度）：
-
-```text
-     Running `target/debug/teashop price '紅茶' -c 2`
-紅茶 × 2 = 60
-```
-
-`cargo run -- total no-such.txt` 的輸出（省略編譯進度，結束碼 3）：
-
-```text
-     Running `target/debug/teashop total no-such.txt`
-開不了 no-such.txt：NotFound
-```
-
 ### 用測試守住行為
 
 結束碼與管線要啟動真的程式才測得到：`tests/` 底下的整合測試（第 12 章第 12 集）可以用 `env!("CARGO_BIN_EXE_teashop")` 拿到編好的程式路徑：這個環境變數由 cargo 在編譯時期設定，`env!` 見第 16 章第 11 集。拿到路徑，就用第 17 章第 7 集的 `Command` 啟動它、餵 stdin、收輸出。`String::from_utf8_lossy` 把位元組轉成文字（第 13 章第 10 集），拿來跟字串比對：
@@ -200,15 +176,11 @@ fn total_reads_stdin_and_reports_bad_lines() {
 }
 ```
 
-`cargo test` 的輸出（省略編譯進度）：
+`--test cli` 只跑 `tests/cli.rs`，不跑 `src/` 裡的單元測試（第 12 章第 10 集，這個專案沒有）；輸出裡 `cli-` 後面的雜湊與秒數，每個人都不同。
+
+`cargo test --test cli` 的輸出（省略編譯進度）：
 
 ```text
-     Running unittests src/main.rs (target/debug/deps/teashop-6a6bb165f5e07371)
-
-running 0 tests
-
-test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
      Running tests/cli.rs (target/debug/deps/cli-333a240a8a6eb114)
 
 running 1 test
@@ -217,16 +189,12 @@ test total_reads_stdin_and_reports_bad_lines ... ok
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
 ```
 
-輸出裡 `teashop-`、`cli-` 後面的雜湊與秒數，每個人都不同。第一段是 `src/` 裡的單元測試（第 12 章第 10 集），這個專案沒有，所以是 0 個；第二段才是 `tests/cli.rs` 的整合測試。
-
-### 還沒接上的零件
-
-第 6 集的 `walk` 放進 `src/scan.rs`、在 `Command` 加一個 `Scan` variant，`run` 的 `match` 就會要求你補上分支：窮盡檢查替你列出所有漏接的地方。第 7 集的 Ctrl-C 則是把 `main` 改成 `#[tokio::main]`，批次處理的迴圈照那一集檢查 `CancellationToken`。這支工具跑得很快，用不上，所以這一集沒放進去。
+第 6 集的 `walk` 放進 `src/scan.rs`、在 `Command` 加一個 `Scan` variant，`run` 的 `match` 就會要求你補上分支；第 7 集的 Ctrl-C 要把 `main` 改成 `#[tokio::main]`。這支工具跑得很快，用不上，所以沒放進去。
 
 ## 重點整理
 
 - 命令列工具的分工：`cli.rs` 只描述引數、`orders.rs` 只做計算、`main.rs` 把 `Result` 轉成輸出與結束碼；計算函式收 `impl BufRead`，檔案、stdin、`&[u8]` 都能傳，不印東西。
-- 結束碼的約定：0 成功、1 資料有問題、2 用法錯誤（`clap`）、3 做不下去；成功的結果寫 stdout，訊息寫 stderr。
-- 檔案或 stdin 二選一，用 `Box<dyn BufRead>`；輸出不依賴作業系統，錯誤只印 `kind()`。
+- 結束碼的約定：0 成功、1 資料有問題、2 用法錯誤（`clap`）、3 做不下去；成功的結果寫 stdout，訊息寫 stderr，錯誤只印 `kind()`。
+- 檔案或 stdin 二選一，用 `Box<dyn BufRead>`。
 - `tests/` 的整合測試可以用 `env!("CARGO_BIN_EXE_<名稱>")` 啟動編好的程式，驗證結束碼、stdout、stderr，也能餵 stdin。
 - 新增子命令：`Command` 加 variant，`run` 的 `match` 補分支，編譯器會指出所有沒處理的地方。
