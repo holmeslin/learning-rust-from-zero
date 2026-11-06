@@ -92,6 +92,8 @@ a 數字字面值（`1_000`、`0x`、`0b`、`10u8`）· b 標籤 `'outer` · c �
 ## 第 19 章 實戰：Web 服務
 01 第一個 axum 伺服器 · 02 路由 · 03 extractor：`Path` 與 `Query` · 04 JSON API · 05 共享狀態 `State` · 06 錯誤回應 `IntoResponse` · 07 middleware（tower）· 08 graceful shutdown · 09 用 `oneshot` 測試
 
+邊界：第一部全部與第 13～18 章都可用。用 `axum` 0.8（預設 feature，不開 `macros`，所以不教 `#[debug_handler]`）搭配 `tokio`（`full`）；`serde`（`derive`，第 3 集起）、`thiserror`（第 6 集）、`serde_json`（第 9 集，`dev-dependencies`）照各集需要加；`tower`（`util`）與 `http-body-util` 只放在 `[dev-dependencies]`，測試用；`tokio-util`（`CancellationToken`）第 8 集放 `dev-dependencies`。版本以 `tools/checkcode/deps/Cargo.toml` 為準，不加清單外的 crate 或 feature（`tower-http`、`reqwest`、`axum-test` 最多一句話帶過、標明「這本書不展開」；`ws`、`multipart`、`Form`、`Extension`、`Html`、`Redirect`、cookie、`IntoResponseParts`、手寫 `tower::Layer`／`Service` 不教）。每集一個專案：`Cargo.toml`、`src/lib.rs`（`pub fn app() -> Router`）、`src/tests.rs`，`rust,ignore` 加路徑標籤；`src/main.rs` 只在第 1、8 集貼出。測試是從第 1 集起照抄的固定句型（`send` 輔助函式、`#[tokio::test]`、`oneshot`），第 9 集才解釋；檢查點是 `cargo test --lib`（第 8 集另有 `cargo build`，輸出標籤寫「（省略相依套件的編譯進度）」）。伺服器不會結束，不放 `cargo run` 的輸出區塊；書上的 `curl` 對話是 `$` 開頭的 `text` 區塊，由撰寫者在本機對真的伺服器逐條重播，不由 checkcode 驗證。測試不綁固定連接埠，只有第 8 集的測試綁 `127.0.0.1:0`。輸出不依賴平台：路徑與值用 ASCII，`date` 標頭每次不同要說明。單檔的 axum 區塊（第 5 集的 `compile_fail=E0308`）要加 `noplayground`。每集篇幅放寬到約 200 行。
+
 ## 第 20 章 實戰：SQLite
 01 `Connection::open` 與 bundled · 02 `execute` · 03 `query_row` · 04 `prepare` 與 `query_map` · 05 參數綁定 · 06 交易 · 07 `NULL` 與 `Option` · 08 在 axum 裡使用
 
