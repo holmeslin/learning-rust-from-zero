@@ -239,7 +239,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 
 - 智慧指標相關的範例（第 13 章）：
   - 領域沿用飲料店：`Price`（價格樹）、`Step`（製作步驟）、`Tea`／`Coffee`、`Priced`（`Box`）；`Sleeve<T>`（杯套，`Deref`）；`Cup`（`Drop`，印「洗杯子」）；`Menu`／`Branch`（`Rc`）；`Till`（`RefCell`）；`Card`／`Member`（`Rc<RefCell<T>>`）；`Shop`、`Hq`／`Store`（`Weak`）；`Kiosk`（`Cell`）；`normalize`（`Cow`）。避開 The Rust Book 的 cons list（`List`、`Cons`、`Nil`）、`MyBox`、`CustomSmartPointer`、`Messenger`／`LimitTracker`、`Node`／`leaf`／`branch`。
-  - 第 13 章只用 std（大綱沒有指定 crate）。`use` 可以用（第 12 章第 5 集），`Self` 可寫可不寫；不寫執行緒、`size_of`（附錄二）、`unsafe`、`Pin`。`Arc` 只在第 5、7 集各用一句話指向第 14 章第 8、9 集，不展開；「`Rc`、`RefCell`、`Cell` 只能在單一執行緒用」一句話帶過，不談 `Send`／`Sync`。
+  - 第 13 章只用 std（大綱沒有指定 crate）。`use` 可以用（第 12 章第 5 集），`Self` 可寫可不寫；不寫執行緒、`size_of`（附錄二 a）、`unsafe`、`Pin`（附錄二 d）。`Arc` 只在第 5、7 集各用一句話指向第 14 章第 8、9 集，不展開；「`Rc`、`RefCell`、`Cell` 只能在單一執行緒用」一句話帶過，不談 `Send`／`Sync`。
   - 第 1、2 集用到「`&Box<T>` 傳給要 `&T` 的參數」，只說「編譯器自動轉換，原理下一集」，第 3 集才解釋解參照轉換。前面各章指向第 13 章的地方，都已改成指名第 1 集（`Box`）、第 3 集（`Deref`）、第 4 集（`Drop`）。
   - 用語：參照計數（reference counting）、強參照（strong reference，`Rc` 的擁有者）、弱參照（weak reference，`Weak`）、參照循環（reference cycle）、記憶體洩漏（memory leak）、內部可變性（interior mutability）、解參照轉換（deref coercion，前面各章稱「自動轉換」）、clone-on-write（寫入時才複製）。第 5 集先用「擁有者數量」讀 `strong_count`，第 8 集才引入強、弱參照。
   - 觀察 drop 與計數用 `impl Drop`（`println!`）與 `Rc::strong_count`／`Rc::weak_count`，輸出文字寫成「擁有者：2」「強參照 1，弱參照 1」。`Drop` 的 struct 欄位要在 `drop` 裡被讀到（`self.name`），否則 `dead_code`。
@@ -376,6 +376,18 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 本機可驗、CI 不驗的：第 8 集 `cargo run` 之後 `curl` 送訂單、停掉重開、`GET /orders` 訂單還在（實測過，書上只用文字說明，不貼 `$ curl` 對話；重開由 `cargo test --lib` 的 `orders_survive_a_restart` 驗證）。
   - 「跟 Go 比一比」第 20 章用在：01（`sql.Open` 不連線、`*sql.DB` 是連線池）、02（`Exec` 要另外呼叫 `RowsAffected()`／`LastInsertId()`、跑 `SELECT` 不報錯）、03（`Scan` 會轉型）、04（`rows.Close()`／`rows.Err()`）、06（`db.Exec` 與 `tx.Exec` 混用、`defer tx.Rollback()`）、07（`sql.NullString`）、08（`*sql.DB` 可直接共用）；05（Go 的 `?` 佔位符一樣）沒有加。
   - 篇幅：每集 108～210 行（第 8 集最長，因為是完整專案，含四個檔案與測試）。省行數的辦法：第 8 集不貼 `curl` 對話、只留一個重開測試、`use` 合併成一行、`list_orders` 不另外抽函式；單檔範例的初始資料用 `execute_batch`。
+
+- 附錄二相關的範例（a～e）：
+  - 進度邊界：可用第一部、附錄一與第 13～20 章的全部內容。全部只用 std：不加 crate、不用 tokio，每集一個或幾個單檔的 `rust` 區塊，沒有專案，也不需要 `noplayground`。各集可以引用字母較前的集（b 用 a 的 `size_of`、d 用 c 的 `dyn`、e 回頭量 b 的承諾），要預告較後的集只用一句話。
+  - 領域沿用飲料店：`Money`、`Tea`、`Coffee`、`Priced`、`Drink`；a 的欄位排列用 `Mixed`／`InOrder`，d 的手寫 `Future` 是 `Countdown`，e 比較 `by_loop`／`by_iter`。避開 The Rust Book、Rustonomicon 與 std 文件的 `Pin` 範例（自我參照的 `Test`、`Unmovable`）以及慣用的 `Shape`／`Circle`／`Draw`。
+  - **數字要固定、不依賴平台**（延續第 16 章第 10 集的規則）：只假設 64 位元（`target_pointer_width = "64"`，CI 與 Playground 共同的條件）；不印位址；不印 `u128` 的對齊、`Mutex` 的大小、`Vec` 成長後的容量（容量只印 `>= 1000` 這種比較）。`repr(Rust)` 的大小與欄位順序是 1.99 的實作細節，文中要說明「語言沒有保證」；有保證的只有 `#[repr(C)]` 與 `Option<&T>`、`Option<Box<T>>` 的空位，`Option<String>`、`Option<bool>` 只是目前的結果。`size_of`、`size_of_val`、`align_of` 在 prelude，不寫 `use`；`type_name` 只用在基本型別（自己的型別會帶 crate 名稱，`fill.py`、checkcode、讀者的專案各不相同）。
+  - clippy `size_of_ref`：對參照變數取 `size_of_val(&r)`（`r: &str`）會被擋，量指標寫 `size_of::<&str>()`、量資料寫 `size_of_val(r)`；`useless_vec`（`vec!` 只被讀）照樣會擋。只量大小、不讀欄位的 struct 用附錄一 j 的 `#[allow(dead_code)]`。rustfmt 會把有三個 `size_of::<…>()` 引數的 `println!` 拆成多行，一行放兩個；`println!` 裡的長運算式先 `let` 起來。
+  - 不貼組合語言、LLVM IR（依平台而異，checkcode 也驗證不了）。零成本抽象只用 `size_of`、輸出相同的兩種寫法與文字說明；Go 的對照只寫實測過的（`go build -gcflags=-m` 印 `escapes to heap`、`testing.AllocsPerRun` 的結果、`unsafe.Sizeof`）。
+  - c 集：E0038 在 1.99 的措辭是 `the trait X is not dyn compatible`（`note: for a trait to be dyn compatible it needs to allow building a vtable`）；方法回傳 `Self` 是 `references the Self type in its return type`，泛型方法是 `has generic type parameters`，沒有 `self` 的關聯函式是 `has no self parameter`（`help` 另外建議 `where Self: Sized`）；只有一個 `impl` 時多一則 `help: only type X implements …`，文中說不用管。`total_generic(&[Tea, Coffee])` 是 E0308。`&[Box::new(Tea), Box::new(Coffee)]` 傳給 `&[Box<dyn Priced>]` 可以編譯（期望型別會往陣列元素傳）。
+  - d 集：手動 `poll` 用 `Context::from_waker(Waker::noop())` 加 `std::pin::pin!`，回傳 `Pending` 前呼叫 `cx.waker().wake_by_ref()`；`Pin::new(&mut async 區塊)` 是 E0277（`cannot be unpinned`，`note` 提示 `pin!` 與 `Box::pin`；最後一則 `note: required by a bound in Pin::<Ptr>::new` 夾 `/rustc/<雜湊>/library/core/src/pin.rs`，只貼到前一則，並在文中說明）；`PhantomPinned` 加 `Pin::new`、`Pin::into_inner` 一樣是 E0277；對 `pin!` 得到的 `!Unpin` 值要 `&mut`（`push_str`、`mem::swap`）是 E0596（`DerefMut` 沒有實作）。不寫 `unsafe` 的自我參照 struct，用 `text` 圖示：兩行的方框前綴字數要相同，免得中英文字寬不同對不齊。
+  - e 集：**計時的數字每次不同，不放進「執行結果」區塊**：驗證過的 `rust` 區塊後面不接任何輸出標籤；要給讀者看數字，用沒有標籤、`$ cargo run` 開頭的 `text` 區塊（跟第 19 章的 `curl` 對話同一個慣例，checkcode 與 `fill.py` 都不碰），文中說明那是作者電腦上某一次的結果、只看比例。數字用真的 `cargo run` 與 `cargo run --release` 量到的，不改。計時用 `best_of`（重複量取最小值）加 `black_box`，輸入與結果都包。不安裝任何工具：`perf`、`cargo flamegraph`、`criterion` 最多一句話、標明「這本書不展開」；`#[bench]` 在 1.99 仍只有 nightly 能用（stable 是 E0554）。
+  - 「跟 Go 比一比」附錄二用在：a（Go 不重排 struct 欄位，順序決定大小）、b（成本藏在編譯器與 runtime：`escapes to heap`）、d（Go 搬動 stack 時改寫指標，所以不需要 `Pin`）、e（`go run` 本來就最佳化、內建 `testing.B` 與 `pprof`）；c 沒有加（第 8 章第 15 集已有）。
+  - 篇幅：每集 105～154 行（d 最長）。省行數的辦法：靠散文加離線驗證就夠的範例改成一句話（`is_unpin` 的檢查、`where Self: Sized` 的修正版、`PhantomPinned` 的 E0596）、每個 `compile_fail` 只貼前半段、三個引數的 `println!` 拆成兩個。
 
 ## 多檔案專案
 
