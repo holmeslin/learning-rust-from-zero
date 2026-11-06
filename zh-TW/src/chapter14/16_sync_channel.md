@@ -2,7 +2,7 @@
 
 ## 本集目標
 
-用 `mpsc::sync_channel` 建立有容量上限的通道，看懂「滿了就讓生產者等」的背壓（backpressure），也會用 `try_send` 在滿的時候不等待。
+用 `mpsc::sync_channel` 建立有容量上限的 channel，看懂「滿了就讓生產者等」的背壓（backpressure），也會用 `try_send` 在滿的時候不等待。
 
 ## 正文
 
@@ -10,7 +10,7 @@
 
 前面幾集的 `mpsc::channel()` 是沒有上限的：`send` 永遠不會等，訊息先全部排進佇列。如果生產者做得比消費者收得快，佇列就一直長，記憶體跟著一直用，直到程式被系統砍掉。
 
-想讓生產者「慢下來配合消費者」，要用 `mpsc::sync_channel(n)`。`n` 是通道最多能排幾則訊息：
+想讓生產者「慢下來配合消費者」，要用 `mpsc::sync_channel(n)`。`n` 是 channel 最多能排幾則訊息：
 
 ```rust
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -32,7 +32,7 @@ fn main() {
         println!("櫃台還沒收，已經送出 {} 筆", sent.load(Ordering::SeqCst));
         let mut received = Vec::new();
         for _ in 1..=6 {
-            received.push(rx.recv().expect("通道關閉了"));
+            received.push(rx.recv().expect("channel 關閉了"));
         }
         println!("櫃台依序收到 {received:?}");
     });
@@ -49,8 +49,8 @@ fn main() {
 ```
 
 - `sync_channel(2)` 回傳 `(SyncSender, Receiver)`，`SyncSender` 的 `send` 用法跟 `Sender` 一樣，也能 `clone`。
-- 生產者要送 6 筆，櫃台睡了 300 毫秒都沒收。通道只排得下 2 筆，所以第 3 筆的 `send` 卡在那裡，`sent` 停在 2。
-- 櫃台開始 `recv`，通道有空位，生產者才逐筆送完，最後 `sent` 是 6。
+- 生產者要送 6 筆，櫃台睡了 300 毫秒都沒收。channel 只排得下 2 筆，所以第 3 筆的 `send` 卡在那裡，`sent` 停在 2。
+- 櫃台開始 `recv`，channel 有空位，生產者才逐筆送完，最後 `sent` 是 6。
 - 這就是背壓：消費者慢，生產者被迫跟著慢，佇列的長度有上限，記憶體不會暴增。
 - 換成 `mpsc::channel()`，同一支程式會在 300 毫秒後印出「已經送出 6 筆」：生產者一口氣送完，完全不等。
 
@@ -58,7 +58,7 @@ fn main() {
 
 ### `try_send`：滿了就別等
 
-有時候不想卡住等，滿了就放棄、或先做別的事。`try_send` 不等，通道滿了就回傳 `Err(TrySendError::Full(值))`，把沒送出去的值還給你：
+有時候不想卡住等，滿了就放棄、或先做別的事。`try_send` 不等，channel 滿了就回傳 `Err(TrySendError::Full(值))`，把沒送出去的值還給你：
 
 ```rust
 use std::sync::mpsc::{self, TrySendError};
@@ -72,7 +72,7 @@ fn main() {
             Err(TrySendError::Disconnected(_)) => println!("櫃台打烊了"),
         }
     }
-    println!("櫃台收了 {}", rx.recv().expect("通道關閉了"));
+    println!("櫃台收了 {}", rx.recv().expect("channel 關閉了"));
     println!("騰出一格，再試一次：{:?}", tx.try_send("奶茶"));
 }
 ```

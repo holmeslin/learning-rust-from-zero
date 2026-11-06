@@ -170,4 +170,4 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 內嵌 | inline（編譯器把函式本體放進呼叫的地方） | 內聯 |
 | dyn 相容 | dyn compatible（trait 能做成 `dyn Trait`；舊稱 object safe） | 物件安全 |
 | 基準測試 | benchmark | 跑分 |
-| 效能剖析 | profiling | 性能分析 |
+| 效能剖析 | profiling（「效能分析」也可以；附錄二 e 的集名「效能分析工具簡介」沿用大綱，不改） | 性能分析 |

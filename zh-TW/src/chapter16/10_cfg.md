@@ -149,6 +149,5 @@ Go 也有條件編譯，叫 build constraint，單位是**整個檔案**：檔�
 - `#[cfg(條件)]` 加在項目前面：條件不成立，編譯器把它丟掉，不編譯、不做型別檢查（但語法要能解析）。組合用 `not(…)`、`all(…)`、`any(…)`。
 - 常見條件：`test`、`debug_assertions`、`feature = "名字"`、`unix`／`windows`、`target_os = "…"`、`target_pointer_width = "64"`。
 - `cfg!(條件)` 展開成 `true`／`false`，兩個分支都會編譯，型別都要正確。
-- `#[cfg(test)]` 與 `#[cfg(feature = "…")]` 的條件由 cargo 傳給 rustc（`--cfg test`、`--cfg 'feature="…"'`）。
-- 在 cargo 專案裡，不認得的條件名稱或值（打錯字、沒宣告的 feature）是 `unexpected_cfgs` 警告。
+- `#[cfg(test)]` 與 `#[cfg(feature = "…")]` 的條件由 cargo 傳給 rustc（`--cfg test`、`--cfg 'feature="…"'`）；在 cargo 專案裡，不認得的條件名稱或值（打錯字、沒宣告的 feature）是 `unexpected_cfgs` 警告。
 - Go 的 build constraint 以整個檔案為單位；Rust 的 `#[cfg]` 可以加在任何項目上。
