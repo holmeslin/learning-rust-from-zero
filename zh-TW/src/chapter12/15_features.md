@@ -100,7 +100,7 @@ member = []
 
 ### 替相依的 crate 開 feature
 
-這個機制更常用在別人的 crate 上。許多 crate 把進階功能做成 feature，加相依套件時用大括號寫出要開哪些。例如第二部會用到的 `clap`，要打開 `derive` 才有後面介紹的寫法：
+這個機制更常用在別人的 crate 上。許多 crate 把進階功能做成 feature，加相依套件時用大括號寫出要開哪些。例如第 18 章第 2 集會用到的 `clap`，要打開 `derive` 才有後面介紹的寫法：
 
 ```toml
 [dependencies]

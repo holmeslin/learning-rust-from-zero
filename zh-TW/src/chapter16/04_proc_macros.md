@@ -110,7 +110,7 @@ Coffee
 
 上面靠「找 `struct` 後面那個 token」過日子，遇到 `pub struct`、泛型、欄位上的屬性就會出錯。實務上，寫程序巨集的人會用 `syn`（把 token 解析成語法樹）和 `quote`（用範本產生 token）這兩個 crate，它們不在這本書的清單裡，所以不展開。
 
-身為使用者，你只要會用別人寫好的：第 17 章第 9 集的 `serde` 用 `#[derive(Serialize, Deserialize)]` 替型別產生轉成 JSON 的程式，第 18 章的 `clap` 用 `#[derive(Parser)]` 替型別產生解析命令列的程式。
+身為使用者，你只要會用別人寫好的：第 17 章第 9 集的 `serde` 用 `#[derive(Serialize, Deserialize)]` 替型別產生轉成 JSON 的程式，第 18 章第 2 集的 `clap` 用 `#[derive(Parser)]` 替型別產生解析命令列的程式。
 
 ### 跟 Go 比一比
 

@@ -54,7 +54,7 @@ Error: "庫存不足"
 
 ### 想印給使用者看，自己處理
 
-`Error: ` 加 `Debug` 的格式是寫給開發者看的。想讓使用者看到 `{e}` 的說明文字，就像上一集那樣，在 `main` 裡自己 `match` 或 `if let Err(e)`，再 `println!("出錯了：{e}")`。想要別的結束碼，第 18 章的 `ExitCode` 會教。
+`Error: ` 加 `Debug` 的格式是寫給開發者看的。想讓使用者看到 `{e}` 的說明文字，就像上一集那樣，在 `main` 裡自己 `match` 或 `if let Err(e)`，再 `println!("出錯了：{e}")`。想要別的結束碼，第 18 章第 4 集的 `ExitCode` 會教。
 
 ### 跟 Go 比一比
 
@@ -75,5 +75,5 @@ func main() {
 - `main` 可以寫成 `fn main() -> Result<(), E>`：成功要自己回傳 `Ok(())`，這樣 `main` 裡就能用 `?`。
 - `E` 常寫 `Box<dyn std::error::Error>`，可以收下各種錯誤；`E` 只要實作了 `Debug`。
 - `main` 回傳 `Err` 時，stderr 印 `Error: ` 加 `{:?}` 的結果，結束碼是 1；panic 的結束碼是 101。
-- 想印給使用者看的訊息（`Display`），在 `main` 裡自己處理錯誤；想要別的結束碼，第 18 章的 `ExitCode`。
+- 想印給使用者看的訊息（`Display`），在 `main` 裡自己處理錯誤；想要別的結束碼，第 18 章第 4 集的 `ExitCode`。
 - 跟 Go 比：Go 的 `main` 沒有回傳值，要自己 `log.Fatal`；Rust 回傳 `Err` 就會以結束碼 1 結束，但印的是 `Debug` 格式。
