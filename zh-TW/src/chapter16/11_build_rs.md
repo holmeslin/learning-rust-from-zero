@@ -60,7 +60,7 @@ warning: teashop@0.1.0: build.rs 執行了
 現在是 happy hour
 ```
 
-- `env!("SHOP_NAME")` 在**編譯時期**讀環境變數，結果是 `&'static str`，值直接寫進程式。環境變數不存在，是編譯錯誤，不是 panic。
+- `env!("SHOP_NAME")` 在**編譯時期**讀環境變數，結果是 `&'static str`，值直接寫在程式裡。環境變數不存在，是編譯錯誤，不是 panic。
 - `cfg!(happy_hour)` 成立，是因為 `build.rs` 印了 `rustc-cfg=happy_hour`。
 - `warning` 那一行就是 `build.rs` 印的，前面的 `teashop@0.1.0` 是 package 名稱與版本。
 
@@ -83,5 +83,5 @@ Go 沒有編譯前會自動跑的程式。要在編譯前產生程式碼，習�
 - 放在 package 最上層的 `build.rs`，cargo 在編譯 package 之前先編譯並執行它，不用改 `Cargo.toml`。
 - 用 `println!("cargo::…")` 跟 cargo 溝通：`rerun-if-changed=檔案`、`rustc-env=名稱=值`（程式用 `env!`）、`rustc-cfg=名稱`（搭配 `rustc-check-cfg=cfg(名稱)`）、`warning=訊息`。
 - 常見用途：編譯 C 程式碼、產生程式碼、偵測環境決定 `cfg`；產生的檔案放在 `OUT_DIR`；`build.rs` 的相依套件寫在 `[build-dependencies]`。
-- `build.rs` 與程序巨集一樣會在編譯時執行任意程式；能用 `cfg`、feature、`const fn` 解決就不要寫它。
+- `build.rs` 與程序巨集一樣會在編譯的時候執行任意程式；能用 `cfg`、feature、`const fn` 解決就不要寫它。
 - Go 的 `go generate` 要手動執行、產物要提交；`build.rs` 是 `cargo build` 的一部分。

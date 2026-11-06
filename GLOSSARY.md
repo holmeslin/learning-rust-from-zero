@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、Cargo 與它的指令名稱。
+保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -121,3 +121,12 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 協作式 | cooperative | 合作式 |
 | 搶佔 | preemption | 搶占 |
 | 排程 | scheduling | 調度 |
+| 宣告式巨集 | declarative macro（`macro_rules!`） | 聲明式宏 |
+| 程序巨集 | procedural macro | 過程宏 |
+| 展開 | expand（巨集的） | 擴展 |
+| 片段類型 | fragment specifier（`expr`、`ident`） | 片段指示符 |
+| 衛生 | hygiene（巨集的） | 衛生性 |
+| 原始指標 | raw pointer（`*const T`、`*mut T`） | 裸指標、生指標 |
+| 未定義行為 | undefined behavior | 未定義的行為 |
+| 條件編譯 | conditional compilation（`#[cfg]`） | 條件式編譯 |
+| const 泛型 | const generics | 常數泛型 |

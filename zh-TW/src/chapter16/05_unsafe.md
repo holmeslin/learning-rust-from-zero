@@ -139,7 +139,7 @@ error[E0499]: cannot borrow `cups` as mutable more than once at a time
 
 ### `unsafe trait`
 
-有些 trait 要求實作的人保證編譯器看不出來的性質，要宣告成 `unsafe trait`，實作時也得寫 `unsafe impl`，少寫是 E0200。第 14 章第 11 集的 `Send` 和 `Sync` 就是：編譯器依欄位自動推斷，推斷不出來、而你確定沒問題時，才需要自己寫 `unsafe impl`。下一集會看到實際的例子。
+有些 trait 附帶一個編譯器檢查不了的條件，要由實作的人自己保證。這種 trait 要宣告成 `unsafe trait`，實作時也得寫 `unsafe impl`，少寫是 E0200。第 14 章第 11 集的 `Send` 和 `Sync` 就是：編譯器依欄位自動推斷，推斷不出來、而你確定沒問題時，才需要自己寫 `unsafe impl`。下一集會看到實際的例子。
 
 ### 跟 Go 比一比
 

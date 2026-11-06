@@ -34,7 +34,7 @@ fn main() {
 - `FULL_TRAY` 的值是編譯器在編譯時期呼叫 `tray_price(6)` 算出來的，程式跑起來的時候，它就是常數 180，沒有計算。
 - `const fn` 並不是「只能在編譯時期」的函式。同一個函式照樣可以在執行時呼叫，像 `tray_price(cups)`，`cups` 是執行時才有的值。
 
-`const fn` 算出來的值可以用在需要編譯時期常數的地方，例如陣列的長度（附錄一 h 說過，陣列長度不能用普通變數）：`const SLOTS: usize = slots_for(10);` 之後，`[0u32; SLOTS]` 就是合法的陣列型別。
+`const fn` 算出來的值，可以用在需要編譯時期常數的地方，例如陣列的長度（附錄一 h 說過，陣列長度不能用普通變數）：`const SLOTS: usize = slots_for(10);` 之後，`[0u32; SLOTS]` 就是合法的陣列型別。
 
 ### 沒有標 `const` 的函式不能呼叫
 
@@ -73,7 +73,7 @@ note: function `price_of` is not const
 
 ### 在編譯時期檢查
 
-`const fn` 裡面如果 panic，就會變成編譯錯誤，因為這個 panic 發生在編譯時期。利用這一點，可以把「不可能出錯的前提」寫成編譯時期的檢查：
+`const fn` 裡面如果 panic，就會變成編譯錯誤，因為這個 panic 發生在編譯時期。利用這一點，可以把前提寫成編譯時期檢查，前提不成立就編譯失敗：
 
 ```rust,compile_fail=E0080
 const fn tray_price(cups: u32) -> u32 {
@@ -97,7 +97,7 @@ error[E0080]: evaluation panicked: assertion failed: tray_price(6) == 100
   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ evaluation of `_` failed here
 ```
 
-`const _: () = ...;` 是一個沒有名字的 `const`，不用拿來做什麼，只是為了讓編譯器去算右邊的運算式。算不出來就是 E0080（`evaluation panicked`）。如果把 `100` 改成 `180`，檢查通過，編譯器什麼也不會說，程式照常編譯。
+`const _: () = ...;` 是沒有名字的 `const`，不用拿來做什麼，只是為了讓編譯器去算右邊的運算式。算不出來就是 E0080（`evaluation panicked`）。把 `100` 改成 `180` 的話，檢查成立，編譯器什麼也不會說，程式照常編譯。
 
 ### `const fn` 的限制
 

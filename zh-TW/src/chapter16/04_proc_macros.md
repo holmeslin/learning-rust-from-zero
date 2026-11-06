@@ -8,7 +8,7 @@
 
 ### 跟 `macro_rules!` 差在哪
 
-`macro_rules!` 是「比對樣子、換成別的樣子」。**程序巨集**（procedural macro）則是一個普通的 Rust 函式：收到一串程式碼（型別是 `TokenStream`），想怎麼分析都行，最後回傳另一串程式碼。能用 `if`、迴圈、讀整個型別的欄位，所以能做 `macro_rules!` 做不到的事。
+`macro_rules!` 是「比對樣子、換成別的樣子」。**程序巨集**（procedural macro）則是普通的 Rust 函式：收到一串程式碼（型別是 `TokenStream`），想怎麼分析都行，最後回傳另一串程式碼。能用 `if`、迴圈、讀整個型別的欄位，所以能做 `macro_rules!` 做不到的事。
 
 代價是兩條規定：
 
@@ -116,7 +116,7 @@ Coffee
 
 Go 的 `json:"name"` 是 struct 的 tag，`encoding/json` 在**執行時期**用反射（reflection）讀它，每次編碼都要走一遍。想在編譯前產生程式碼，得用 `go generate` 跑外部工具（像 `stringer`），產生的檔案要自己放進版本控制。
 
-Rust 的 derive 在**編譯時期**展開成一般的程式碼，之後就跟手寫的沒有差別：型別都被檢查過，執行時沒有反射的成本。不用另外跑工具，`cargo build` 就包辦了。
+Rust 的 derive 在**編譯時期**就展開成一般程式碼，跟手寫的沒有差別：型別都被檢查過，執行時沒有反射的成本。不用另外跑工具，`cargo build` 就包辦了。
 
 ## 重點整理
 

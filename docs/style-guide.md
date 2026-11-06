@@ -58,7 +58,7 @@
 | 首次出現 | 固定句型 | 正式解釋 |
 | --- | --- | --- |
 | 第 1 章第 2 集 | `cargo new <名稱>`、`cargo run`；程式骨架 `fn main() { ... }` | 函式第 2 章；Cargo 第 12 章第 1 集 |
-| 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章 |
+| 第 1 章第 2 集 | `println!("文字")`、`println!("{x}")`、`println!("{}", 運算式)` | 巨集第 16 章第 1 集 |
 | 第 1 章第 9 集 | 讀一行輸入：見下方 | `&mut` 第 4 章；方法第 5 章；`Result` 第 9 章第 4 集 |
 | 第 1 章第 10 集 | 文字轉數字：見下方 | `FromStr` 第 8 章；`expect` 第 9 章第 4 集 |
 | 第 1 章第 14 集 | `for i in 0..n`、`for i in 0..=n` | `Iterator` 第 11 章第 8 集 |
@@ -69,12 +69,12 @@
 | 第 3 章第 7 集 | 方法呼叫 `s.clone()`（寫法同上） | 方法第 5 章；`Clone` 第 8 章 |
 | 第 4 章第 1 集 | 對參照呼叫方法：`r.len()`、`r.push_str("...")`（`r` 是 `&mut String`），`&str` 與 slice 的 `len` 也一樣；第 11 集起 `{:?}` 也能印 slice | 自動參照與解參照第 5 章第 10 集；`Debug` 第 8 章 |
 | 第 5 章第 6 集 | `#[derive(Debug)]`、`{:?}`、`{:#?}` | `derive` 第 8 章 |
-| 第 6 章第 14 集 | `matches!(值, 模式)` | 巨集第 16 章 |
-| 第 7 章第 1 集 | `vec![...]`；`{:?}` 也能印 `Vec`（`HashMap`、`HashSet`、`BTreeMap` 也能這樣印，但 `HashMap`、`HashSet` 的順序不固定） | 巨集第 16 章；`Debug` 第 8 章 |
-| 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章 |
+| 第 6 章第 14 集 | `matches!(值, 模式)` | 巨集第 16 章第 1 集 |
+| 第 7 章第 1 集 | `vec![...]`；`{:?}` 也能印 `Vec`（`HashMap`、`HashSet`、`BTreeMap` 也能這樣印，但 `HashMap`、`HashSet` 的順序不固定） | 巨集第 16 章第 1 集；`Debug` 第 8 章 |
+| 第 7 章第 7 集 | `format!(...)` | 巨集第 16 章第 1 集 |
 | 第 7 章第 9 集 | `for` 後面直接放回傳迭代器的方法呼叫：`for c in s.chars()`、`for b in s.bytes()`、`for part in s.split(',')`、`for k in map.keys()`（不接 `.count()`、`.nth()`、`.rev()` 等迭代器的方法） | `Iterator` 第 11 章第 8 集 |
 | 第 7 章第 11 集 | `use std::collections::HashMap;`（`HashSet`、`BTreeMap` 同） | `use` 第 12 章第 5 集 |
-| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章；`'_` 第 10 章第 5、6 集 |
+| 第 8 章第 11 集 | `impl std::fmt::Display for 型別 { fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "...", ...) } }`（骨架照抄，只改型別名稱與 `write!` 的內容；enum 搭配 `match self`，每個分支一個 `write!`）；實作 `Display` 之後型別自動有 `.to_string()`；帶生命週期的 struct 寫成 `impl std::fmt::Display for Receipt<'_>`，第 10 章第 6 集起 `Formatter` 可以寫完整的 `std::fmt::Formatter<'_>` | `Result` 第 9 章第 8 集；`write!` 巨集第 16 章第 1 集；`'_` 第 10 章第 5、6 集 |
 | 第 8 章第 15 集 | `Box<dyn Trait>`、`Box::new(...)`（照寫，不解釋 `Box`；第 11 章第 6 集起 `Box<dyn Fn(u32) -> u32>` 同樣照寫） | `Box` 第 13 章第 1 集 |
 | 第 8 章第 17 集 | trait 定義裡的 `Self::Item`（只出現在 trait 定義；`impl` 裡仍寫完整型別） | `Self` 附錄一 e |
 | 第 12 章第 2 集 | 函式前面的 `pub`（開放給別的 crate 使用，照抄） | `pub` 第 12 章第 4 集 |
@@ -226,7 +226,7 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 排版亂掉的示範不能用 `rust`（checkcode 會因 `rustfmt --check` 擋下）：用 `rust,ignore`，後面接「`cargo fmt` 之後的 `src/main.rs`：」與排好的 `rust` 區塊；checkcode 會確認 rustfmt 真的把前一個區塊排成後面那個。展示 clippy 警告用 `rust,warn`（`len_zero` 這類不在放行清單的 lint），輸出標籤用「`cargo clippy` 的輸出（省略編譯進度）：」。
 
 - 附錄一相關的範例（a～j）：
-  - 進度邊界：可用第 1～12 章的全部內容與固定句型，不用第 13 章起的東西（`Deref`、`Rc`、執行緒、`size_of`……）。附錄一各集可以引用字母較前的集（i 用 g 的 `{:b}`），要預告字母較後的集時只用一句話（a 的 `{:x}` 標明「附錄一 g 才教」），不展開。非得提到書裡完全沒教的東西（`TryFrom`、`char::from_u32`），一句話帶過並寫「這本書不展開」，不寫範例。
+  - 進度邊界：可用第 1～12 章的全部內容與固定句型，不用第 13 章起的東西（`Deref`、`Rc`、執行緒、`size_of`……）。附錄一各集可以引用字母較前的集（i 用 g 的 `{:b}`），要預告字母較後的集時只用一句話（a 的 `{:x}` 標明「附錄一 g 才教」），不展開。非得提到書裡完全沒教的東西（`char::from_u32`），一句話帶過並寫「這本書不展開」，不寫範例。`TryFrom` 第 16 章第 13 集才教，附錄一 i 只用一句話指向它。
   - `Self` 在 e 之前（a～d）不用，從 e 起可用（見「進度邊界」）；`#[allow(...)]`、`#[deny(...)]` 在 j 之前不用，需要避開警告時改寫範例，不要靠屬性。
   - 領域沿用飲料店：`prices`、`Account`、`Status`、`Size`、`Member`、`Menu`、`Money`、`Meters`／`Seconds`（第 5 章第 5 集的 tuple struct 對照）。
   - clippy 的雷（都實測過）：`010`（`zero_prefixed_literal`，只有 clippy 會擋，rustc 照常編譯，所以用 `rust,warn` 展示，fill.py 只抓 rustc 的警告，clippy 的訊息改用文字說明）；對字面值 `300 as u8`（`unnecessary_cast`，另外 rustc 的 deny lint `overflowing_literals` 也會擋），轉換要用有型別的變數；`let x = x;` 只在 `x` 沒被改過時才會被 `redundant_locals` 擋，先 `let mut` 改過再 `let x = x;` 凍結沒事；`'outer: loop { loop { break 'outer; } }` 外層從不重複（`never_loop`，deny），外層要真的會迴圈；`println!("{}", format!(...))`（`format_in_format_args`）；`println!("{0} {1}", "a", "b")` 引數是字面值（`print_literal`）；`stock > 0 && println!(...)` 不是 clippy 而是 E0308（`println!` 回傳 `()`）。
@@ -249,7 +249,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 
 - 並行相關的範例（第 14 章）：
   - 領域沿用飲料店：`Till`（`total`、`orders`）、`cups`／`beans`、`menu`、`board`、`NEXT_TICKET`、`SHOP_NAME`、`ORDERS`、worker pool 的 `job_tx`／`done_tx`。避開 The Rust Book 的 `hi number … from the spawned thread!`、`vec![1, 2, 3]` 的 `v`、`Mutex::new(5)` 的 `m`、10 條執行緒加總的 `counter`、`ThreadPool`／`Worker`／`Job`、`val` 的 `hi`、`from`、`the`、`thread` 訊息。
-  - 只用 std。`use` 可用（`use std::thread;`、`use std::sync::{Arc, Mutex, mpsc};`），不用 `Self`、不寫 async、不用 crate。`Duration` 是固定句型（見上表），`Instant`、`std::time` 的其他東西不用；`Ordering` 只寫 `Ordering::SeqCst`，其他選項（`Relaxed`、`Acquire`、`Release`）一句話帶過「本書不展開」；`Send`／`Sync` 在第 11 集之前只說「先讀成能安全交給別的執行緒」；`unsafe`、`static mut` 只在文字帶過（E0133，第 16 章）；`Condvar`、`Barrier`、`thread::park`、`thread::Builder`、`recv_timeout`、`compare_exchange` 不教，最多提名字。
+  - 只用 std。`use` 可用（`use std::thread;`、`use std::sync::{Arc, Mutex, mpsc};`），不用 `Self`、不寫 async、不用 crate。`Duration` 是固定句型（見上表），`Instant`、`std::time` 的其他東西不用；`Ordering` 只寫 `Ordering::SeqCst`，其他選項（`Relaxed`、`Acquire`、`Release`）一句話帶過「本書不展開」；`Send`／`Sync` 在第 11 集之前只說「先讀成能安全交給別的執行緒」；`unsafe`、`static mut` 只在文字帶過（E0133，第 16 章第 5 集）；`Condvar`、`Barrier`、`thread::park`、`thread::Builder`、`recv_timeout`、`compare_exchange` 不教，最多提名字。
   - **輸出要固定**（這章最大的風險）：
     - 執行緒裡面不 `println!`。結果靠 `join` 的回傳值或 channel 帶回主執行緒，由主執行緒依 handle 的順序印出；好幾條執行緒的結果先收進 `Vec` 再 `sort`，或只印跟順序無關的值（總和、`len()`、`is_ok()`、`> 0`）。
     - 第 14 章第 1 集刻意展示交錯：標籤寫「某一次的輸出（順序每次可能不同）：」，`fill.py` 不比對，貼的是實際跑出來的其中一次；除了這一處，不要再用。
@@ -286,6 +286,36 @@ let n: i32 = line.parse().expect("請輸入整數");
   - Go 的輸出區塊：本章沒有貼 Go 的輸出（Go 區塊只當程式對照，都在 Go 1.27 跑過：三杯飲料 `go` 加 channel 的順序是咖啡、奶茶、紅茶；`runtime.GOMAXPROCS(1)` 加一個空迴圈 goroutine，主程式照樣醒來；`WithTimeout` 逾時的 `err` 是 `context deadline exceeded`；`WithCancel` 之後 `ctx.Err()` 是 `context canceled`）。
   - 「跟 Go 比一比」第 15 章用在：01（runtime 內建、可搶佔、`go f()` 立刻開跑）、02（函式沒有顏色）、03（`go f()` 立刻開跑、丟掉 `Future` 就取消）、05（`JoinHandle`、goroutine panic 讓整個程式結束）、06（goroutine 沒有人能丟掉，`JoinSet` 丟掉就取消）、07（`make(chan T, n)` 對應 `channel(n)`、沒有 `close`、`channel(0)` panic）、08（`select` 的 `case` 是 channel 操作，Rust 的分支是整個 `Future`）、09（`context.WithTimeout` 要函式配合）、10（`context` 對照表）、11（Go 只有一種鎖）、12（Go 的 runtime 自動處理卡住的 goroutine）。04、13、14 沒有 Go 直覺會錯的地方。
   - 篇幅：每集 110～149 行。省行數的辦法：靠散文加離線驗證就夠的行為（一萬個任務、`try_send`、`spawn` 之後就開跑、`MutexGuard` 版的 `Send` 錯誤）不貼成區塊；同一種錯誤只貼一次；`compile_fail` 的訊息只貼前半段。
+
+- 進階語言功能相關的範例（第 16 章）：
+  - 領域沿用飲料店：`tray_price`／`FULL_TRAY`（`const fn`）、`prices!`／`order!`／`drink_fn!`／`say!`／`total!`（巨集）、`Tray<const N>`（杯架）、`CupsPtr`／`CUPS`（`unsafe`）、`Size`／`SizeError`（`TryFrom`）、`SHOP_NAME`、`menu.txt`。避開 The Rust Book 的 `hello_macro`／`HelloMacro`／`vec!` 的簡化版 `my_vec!`、`split_at_mut` 的重寫、FFI 的 `abs`、`static mut COUNTER`、`r1`／`r2` 的原始指標範例。
+  - 第 16 章用到的 crate 只有標準函式庫；第 4 集的程序巨集只用 `proc_macro`（不用 `syn`、`quote`），做成 `path` 相依的獨立 crate：根的 `Cargo.toml` 寫 `tea_macros = { path = "tea_macros" }`，`tea_macros/Cargo.toml` 寫 `[lib]` 加 `proc-macro = true`，檔案前面一行用路徑標籤（`` `tea_macros/src/lib.rs`： ``），不需要 workspace。找型別名稱的辦法是 `tokens.iter().position(...)` 找 `struct`，再取下一個 token；用 `format!` 組出程式碼字串、`.parse()` 成 `TokenStream`。
+  - 巨集（第 1～3 集）：
+    - 巨集的錯誤大多沒有錯誤碼（用不帶碼的 `compile_fail`）：``no rules expected `,` ``、`unexpected end of macro invocation`（後面都帶 `note: while trying to match meta-variable`）、``variable `x` is still repeating at this depth``、``meta-variable `a` repeats 3 times, but `b` repeats 2 times``、``recursion limit reached while expanding `forever!` ``、``cannot find macro `double` in this scope``（定義在呼叫之後，會多一則 `unused macro definition` 警告）、`` `$name:expr` is followed by `-`, which is not allowed for `expr` fragments ``、`the ? macro repetition operator does not take a separator`、`2 positional arguments in format string, but there is 1 argument`；`{name}` 找不到變數則是 E0425。
+    - clippy 與 rustc 會擋：`println![...]`、`matches!{...}` 這類不慣用的括號（`nonstandard_macro_braces`，只能在文字提，不能貼成 `rust` 區塊）；沒被呼叫的 `macro_rules!`（`unused_macros`）；`match x { 1..=5 => true, _ => false }`（`match_like_matches_macro`，展開對照用 `text` 區塊）；巨集本體的 `let mut` 在某次展開沒被改到（例如重複零次的 `prices!()`）會有 `unused_mut`，所以每個範例呼叫都要帶至少一組引數。
+    - 展開結果在運算式位置又要放 `let` 時，規則本體用 `{{ ... }}`；巨集必須定義在使用之前。
+  - `unsafe`（第 5～7 集）：
+    - 不要執行會造成未定義行為的程式（`get_unchecked` 越界、解參照已失效的指標），只用文字說明；每個 `unsafe` 範例都附安全的包裝（先檢查前提）。
+    - edition 2024：`unsafe fn` 的本體不再自動算 `unsafe`，裡面不安全的操作要再包 `unsafe { }`，不包是 `unsafe_op_in_unsafe_fn`（rustc 預設警告，`-D warnings` 判失敗）；對 `static mut` 取參照是 deny lint `static_mut_refs`（沒有錯誤碼，`println!("{CUPS}")` 也算取參照，要先 `let total = unsafe { CUPS };` 複製出來）；`extern` 區塊不寫 `unsafe` 是沒有錯誤碼的 `extern blocks must be unsafe`；`#[no_mangle]` 要寫 `#[unsafe(no_mangle)]`（否則 `unsafe attribute used without unsafe`）。
+    - clippy：`unsafe fn`、`unsafe trait` 都要有 `# Safety` 文件小節（`missing_safety_doc`，私有的也要）；`0 as *const u32` 被 `zero_ptr` 擋，改用 `std::ptr::null()`；`unsafe` 區塊裡沒有任何不安全的操作是 `unused_unsafe`，示範「`unsafe` 不關掉借用檢查」的 E0499 時，要用 `get_unchecked_mut` 這種真的需要 `unsafe` 的呼叫。
+    - 訊息形狀（實測）：E0133 有三種（`call to unsafe function ... is unsafe and requires unsafe block`、`use of mutable static is unsafe and requires unsafe block`、`dereference of raw pointer is unsafe and requires unsafe block`，後者的 `note` 列出原始指標的五種危險），都很短；`unsafe trait` 少寫 `unsafe impl` 是 E0200；原始指標進 `thread::spawn` 是 E0277（`` `*mut u32` cannot be sent between threads safely ``，貼前 14 行，後面的 `note` 夾 `/rustc/<雜湊>/library/std/src/thread/functions.rs`）。
+    - 閉包只擷取用到的欄位：閉包裡直接寫 `*ptr.0 += 5` 只會搬進欄位 `*mut u32`，替包裝型別寫的 `unsafe impl Send` 派不上用場，仍是 E0277；範例一律透過方法 `ptr.add_five()` 使用整個包裝型別。
+    - FFI 只呼叫每個平台的 C 標準函式庫都有、輸出固定的函式：`toupper`、`strlen`、`atoi`；用 `c"..."` 字串字面值（`manual_c_str_literals` 會擋位元組陣列的寫法）；不貼 callback、不連結自訂的 C 程式庫；`std::ffi::{c_char, c_int}`。
+  - const 泛型與 `const fn`（第 8、9 集）：
+    - const 泛型的參數型別只能是整數、`bool`、`char`（`&'static str` 是沒有錯誤碼的 `` `&'static str` is forbidden as the type of a const generic parameter ``）；型別裡寫 `[u32; N * 2]` 是沒有錯誤碼的 `generic parameters may not be used in const operations`；`total::<n>`（`n` 是 `let` 變數）同時有 E0435 與 E0747 兩個錯誤，所以只在文字提 E0435，不貼成 `compile_fail`；不同 `N` 的型別混用是 E0308（`` expected `3`, found `2` ``）。
+    - `const fn`：在 `const` 初始值裡呼叫普通函式是 E0015（`note: function ... is not const`）；`const fn` 裡寫 `for` 是 E0015（``cannot use `for` loop on ... in constant functions``）、`String::from` 也是 E0015，`while` 可以；`const _: () = assert!(...)` 失敗是 E0080（`evaluation panicked: assertion failed: ...`，很短）；`const fn` 裡 `assert!(.., "訊息")` 失敗時，訊息後面還有幾則 `erroneous constant encountered`，所以示範用 `const _` 的版本。
+  - `#[cfg]`（第 10 集）：
+    - **單檔的輸出只能依賴所有平台都相同的條件**：`fill.py` 在作者的 macOS 上跑，CI 在 Linux 上跑，checkcode 只看結束碼，所以平台相關的輸出會悄悄通過 CI，卻違反「執行結果逐字相符」。範例只用 `debug_assertions`（`cargo run` 一律成立）與 `target_pointer_width = "64"`；`unix`、`windows`、`target_os` 只放在表格或文字裡，不貼成輸出。
+    - `--release` 的結果不貼成區塊（checkcode、`fill.py` 都只編譯 debug），用 `rustc -C opt-level=3 -C debug-assertions=off` 實測過會印 `release`。
+    - `unexpected_cfgs`（打錯條件名稱、沒宣告的 feature）只有 cargo 會檢查（單檔的 rustc 沒有 `--check-cfg`，不會警告），所以示範用專案：`src/main.rs` 寫成 `rust,warn` 區塊，後面接 `cargo run` 的輸出；警告的 `help` 很長，整段貼。
+    - `cfg!(...)` 的兩個分支都會編譯，`else { "no" }` 配 `let x: u32` 是 E0308；`#[cfg(any())]` 這種永遠不成立的項目不做型別檢查，但仍要能解析（語法錯誤照樣報錯）。
+  - `build.rs` 與 `include_str!`（第 11、12 集）是多檔案專案：
+    - `build.rs` 的輸出只用寫死的值，不用 `std::env`、`std::fs`、`std::path`、時間（都在第 17 章，也會讓輸出不固定）；`cargo::` 雙冒號寫法；`cargo::warning=...` 會在 cargo 輸出裡印成 `warning: teashop@0.1.0: ...`，沒有 `Compiling` 以外的前綴。`build.rs` 與 `src/main.rs` 都用 `rust,ignore` 加路徑標籤，後面接 `cargo run` 的檢查點。
+    - `include_str!` 的專案依序放：缺檔的 `cargo run`（``error: couldn't read `src/menu.txt`: No such file or directory (os error 2)``，沒有錯誤碼，這是 Unix 的訊息）、補上 `src/menu.txt`（`text` 區塊加路徑標籤，projfill 認得任何語言的檔案）、再改一次內容後的 `cargo run`（cargo 自動重編）。
+    - **專案的輸出區塊還是 `TBD` 的時候，checkcode 會判失敗**：檢查點看貼出的 `text`（沒有 `error` 行就必須成功），`TBD` 會被當成「預期成功」。先用 `projfill.py` 填好輸出，再跑 checkcode。
+  - `TryFrom` 與 `TryInto`（第 13 集）：1.99 的 `TryFromIntError` 的 `{:?}` 是 `TryFromIntError(PosOverflow)` 或 `TryFromIntError(NegOverflow)`（不是舊版的 `TryFromIntError(())`）；`.try_into()` 沒有型別標註是 E0283；`u8::from(300_i32)` 的 E0277 `help` 會夾 `/rustc/<雜湊>/library/core/...` 路徑，所以只用文字提；自己的錯誤型別用 unit struct（`struct SizeError;`）。
+  - 「跟 Go 比一比」第 16 章用在：01（`fmt` 是 `...any` 的函式，格式錯了要靠 `go vet`）、04（struct tag 加執行時期反射、`go generate`）、05（`unsafe` 套件 vs 區塊）、06（Go 的 `*T` 對應 Rust 的參照）、07（cgo）、08（泛型只有型別參數）、09（`const` 不能呼叫函式）、10（build constraint 以檔案為單位）、11（`go generate`）、12（`//go:embed`）、13（轉換悄悄截斷）。02、03 沒有（Go 沒有巨集）。Go 版的行為都在 Go 1.27 跑過：`fmt.Printf("%d 賣 %d 元\n", "紅茶")` 輸出 `%!d(string=紅茶) 賣 %!d(MISSING) 元`、cgo 的 `C.strlen` 是 6、`const x = f()` 是 `... is not constant`、`//go:embed` 範例、`uint8(int32(300))` 是 44。
+  - 篇幅：每集 87～154 行（第 5、10 集最長）。省行數的辦法：靠散文加離線驗證就夠的範例改成一句話（`get_unchecked` 的 E0133、`const` 陣列長度、切片版的 `total`、`?` 搭配 `Box<dyn Error>`）、補上的修正版用 `rust,ignore` 片段、編譯錯誤只貼前半段。
 
 ## 多檔案專案
 
