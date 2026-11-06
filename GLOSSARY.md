@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、Cargo 與它的指令名稱。
+保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -139,3 +139,11 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 亂數 | random number | 隨機數 |
 | 種子 | seed（亂數的） | 種籽 |
 | 錯誤鏈 | error chain（`source()` 一層層往下） | 錯誤堆疊 |
+| 引數 | argument（命令列的，也指呼叫函式時傳的值） | 參數（那是 parameter） |
+| 位置引數 | positional argument（`teashop 紅茶` 的 `紅茶`） | 位置參數 |
+| 選項 | option（`--cups 2`、`-c 2`） | 選項參數、開關（`bool` 的那種可以說「開關」） |
+| 子命令 | subcommand（`cargo run` 的 `run`） | 子指令 |
+| 結束碼 | exit code | 退出碼、返回碼、離開碼 |
+| 管線 | pipe（shell 的 `\|`） | 管道 |
+| 訊號 | signal（SIGINT、SIGPIPE） | 信號 |
+| 符號連結 | symbolic link（symlink） | 軟連結、符號鏈接 |
