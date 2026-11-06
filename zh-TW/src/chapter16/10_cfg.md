@@ -34,7 +34,7 @@ debug
 
 `debug_assertions` 在 `cargo run`、`cargo build` 的預設（debug）編譯下成立，用 `--release` 就不成立，所以 `cargo run --release` 印出 `release`。兩個函式同名卻不衝突，因為編譯器只留下其中一個。
 
-被丟掉的程式碼不會被編譯，也就不會做名稱解析和型別檢查。它仍然要能被**解析**（語法要正確），但裡面可以呼叫只有某個平台才有的函式，在別的平台上編譯器根本不看。
+編譯器丟掉的程式碼不會編譯，也不會做名稱解析和型別檢查。它仍然要能**解析**（語法要正確），但裡面可以呼叫只有某個平台才有的函式，在別的平台上編譯器根本不看。
 
 ### 常見的條件
 
@@ -71,7 +71,7 @@ fn main() {
 true
 ```
 
-跟 `#[cfg]` 不同，`cfg!` 的兩個分支**都會**被編譯，只是其中一邊永遠不會執行。所以兩邊都必須通過型別檢查：
+跟 `#[cfg]` 不同，`cfg!` 的兩個分支**都會**被編譯，只是其中一邊永遠不會執行。所以兩邊的型別都必須正確：
 
 ```rust,compile_fail=E0308
 fn main() {
@@ -96,12 +96,12 @@ error[E0308]: mismatched types
 
 第 12 章先照抄的兩種寫法，其實都是 `#[cfg]`，只是條件由 cargo 決定：
 
-- `cargo test` 編譯時，cargo 會替 rustc 加上 `--cfg test`，所以 `#[cfg(test)] mod tests { ... }` 只有測試的時候存在，`cargo build`、`cargo run` 的成品裡沒有它。
-- `cargo run --features member` 會加上 `--cfg 'feature="member"'`。沒打開的時候，`#[cfg(feature = "member")]` 的項目被丟掉，用到它就是第 12 章第 15 集看到的 E0425，`note` 說它是 `configured out`。
+- `cargo test` 編譯的時候，cargo 會替 rustc 加上 `--cfg test`，所以 `#[cfg(test)] mod tests { ... }` 只有測試的時候存在，`cargo build`、`cargo run` 的成品裡沒有它。
+- `cargo run --features member` 會加上 `--cfg 'feature="member"'`。沒打開的時候，`#[cfg(feature = "member")]` 的項目就像沒寫過，用到它就是第 12 章第 15 集看到的 E0425，`note` 說它是 `configured out`。
 
 ### 打錯字的警告
 
-`cfg` 的條件寫錯字，不會編譯失敗，只是條件永遠不成立，程式碼靜靜地消失，很難察覺。所以在 cargo 專案裡，rustc 會檢查條件的名字和值是不是認得的，不認得就警告：
+`cfg` 的條件寫錯字，不會編譯失敗，只是條件永遠不成立，程式碼悄悄消失，很難察覺。所以在 cargo 專案裡，rustc 會檢查條件的名字與值，不認得就警告：
 
 `src/main.rs`：
 
@@ -148,7 +148,7 @@ Go 也有條件編譯，叫 build constraint，單位是**整個檔案**：檔�
 
 - `#[cfg(條件)]` 加在項目前面：條件不成立，編譯器把它丟掉，不編譯、不做型別檢查（但語法要能解析）。組合用 `not(…)`、`all(…)`、`any(…)`。
 - 常見條件：`test`、`debug_assertions`、`feature = "名字"`、`unix`／`windows`、`target_os = "…"`、`target_pointer_width = "64"`。
-- `cfg!(條件)` 展開成 `true`／`false`，兩個分支都會被編譯，都要通過型別檢查。
+- `cfg!(條件)` 展開成 `true`／`false`，兩個分支都會編譯，型別都要正確。
 - `#[cfg(test)]` 與 `#[cfg(feature = "…")]` 的條件由 cargo 傳給 rustc（`--cfg test`、`--cfg 'feature="…"'`）。
 - 在 cargo 專案裡，不認得的條件名稱或值（打錯字、沒宣告的 feature）是 `unexpected_cfgs` 警告。
 - Go 的 build constraint 以整個檔案為單位；Rust 的 `#[cfg]` 可以加在任何項目上。

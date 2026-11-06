@@ -12,7 +12,7 @@
 
 ### 宣告要呼叫的 C 函式
 
-C 的函式沒有 Rust 的簽名可以讀，要自己用 `unsafe extern "C"` 區塊把簽名寫出來：
+C 函式沒有 Rust 簽名可以讀，要自己用 `unsafe extern "C"` 區塊把簽名寫出來：
 
 ```rust
 use std::ffi::{c_char, c_int};
@@ -43,7 +43,7 @@ A
 
 - `extern "C"` 指定呼叫慣例是 C 的。大括號裡只寫簽名，沒有本體；函式由系統的 C 函式庫提供。
 - edition 2024 的區塊一定要寫成 `unsafe extern`，省略 `unsafe` 是編譯錯誤：``extern blocks must be unsafe``。因為簽名是你寫的，編譯器看不到 C 的標頭檔，簽名寫錯就是未定義行為，這份責任由你簽名承擔。
-- 區塊裡的函式預設是 `unsafe`，呼叫要寫 `unsafe { }`，不寫是 E0133。如果某個函式不管收到什麼值都不會出事，可以標成 `safe fn`，呼叫時就不用 `unsafe`，例如 `toupper`，它只是收一個整數。
+- 區塊裡的函式預設是 `unsafe`，呼叫要寫 `unsafe { }`，不寫是 E0133。某個函式不管收到什麼值都不會出事的話，可以標成 `safe fn`，呼叫時就不用 `unsafe`，例如 `toupper`，它只是收一個整數。
 - `std::ffi` 有對應 C 型別的名字：`c_int` 是 C 的 `int`，`c_char` 是 `char`，`*const c_char` 就是 `const char *`，`usize` 對應 `size_t`。
 
 ### C 的字串
@@ -89,7 +89,7 @@ defer C.free(unsafe.Pointer(text))
 fmt.Println(C.strlen(text))
 ```
 
-這要求機器上有 C 編譯器，而且 `C.CString` 配置的記憶體要自己 `free`。cgo 的呼叫比一般函式貴，交叉編譯也麻煩，所以許多 Go 專案會盡量避開 cgo。Rust 的 FFI 沒有額外的工具：宣告簽名就能呼叫，成本跟一般函式呼叫差不多。代價是 Rust 不會替你讀 C 的標頭檔，簽名完全靠你手寫（大型的函式庫通常用 `bindgen` 這類工具自動產生，這本書不展開）。
+這要求機器上有 C 編譯器，而且 `C.CString` 配置的記憶體要自己 `free`。cgo 的呼叫比一般函式貴，交叉編譯也麻煩，所以許多 Go 專案會盡量避開 cgo。Rust 的 FFI 不需要額外工具：宣告簽名就能呼叫，成本跟一般函式呼叫差不多。代價是 Rust 不會替你讀 C 的標頭檔，簽名完全靠你手寫（大型的函式庫通常用 `bindgen` 這類工具自動產生，這本書不展開）。
 
 ## 重點整理
 
