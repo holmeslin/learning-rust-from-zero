@@ -140,7 +140,7 @@ note: required by a bound in `is_send`
 
 `Arc<T>` 要 `Send`，需要 `T` 同時是 `Send` 與 `Sync`；`RefCell` 不是 `Sync`，所以整個 `Arc<RefCell<u32>>` 都不能搬走。訊息裡的 `required for Arc<RefCell<u32>> to implement Send` 說的就是這件事。解法是把 `RefCell` 換成 `Mutex`，也就是第 9 集的 `Arc<Mutex<T>>`。
 
-自己替型別宣告 `Send`／`Sync`（`unsafe impl`）是可以的，但要保證執行緒安全的人是你，不是編譯器。那屬於第 16 章 `unsafe` 的範圍，這本書不展開。
+自己替型別宣告 `Send`／`Sync`（`unsafe impl`）是可以的，但要保證執行緒安全的人是你，不是編譯器。`unsafe` 在第 16 章第 5 集教，第 6 集有一個替包了原始指標的型別寫 `unsafe impl Send` 的例子。
 
 ## 重點整理
 

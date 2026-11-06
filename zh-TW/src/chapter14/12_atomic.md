@@ -79,7 +79,7 @@ error[E0277]: `Cell<u32>` cannot be shared between threads safely
   = note: shared static variables must have a type that implements `Sync`
 ```
 
-最後一則 `note` 說得很直接：`shared static variables must have a type that implements Sync`，前一則 `note` 順便建議了 `RwLock` 或 `AtomicU32`。想改的全域值，可以放 atomic，或是第 7 集的 `Mutex`（下一集會看到）；另一種 `static mut` 要靠 `unsafe` 才碰得到（E0133），第 16 章再談。
+最後一則 `note` 說得很直接：`shared static variables must have a type that implements Sync`，前一則 `note` 順便建議了 `RwLock` 或 `AtomicU32`。想改的全域值，可以放 atomic，或是第 7 集的 `Mutex`（下一集會看到）；另一種 `static mut` 要靠 `unsafe` 才碰得到（E0133），第 16 章第 5 集再談。
 
 ### 旗標：叫另一條執行緒收工
 

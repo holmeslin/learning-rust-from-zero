@@ -82,7 +82,7 @@ help: consider borrowing here
 
 ### `format!`：組合多段，不拿走任何東西
 
-要接的片段很多，或者夾雜數字，`+` 就很難讀。`format!` 的格式字串跟 `println!` 一樣，不同的是它不印出來，而是回傳一個 `String`。`format!` 的原理是巨集，第 16 章才會解釋，現在照 `println!` 的寫法用就好：
+要接的片段很多，或者夾雜數字，`+` 就很難讀。`format!` 的格式字串跟 `println!` 一樣，不同的是它不印出來，而是回傳一個 `String`。`format!` 的原理是巨集，第 16 章第 1 集才會解釋，現在照 `println!` 的寫法用就好：
 
 ```rust
 fn main() {
@@ -121,5 +121,5 @@ Rust 的 `+` 會拿走左邊的 `String`（直接在它後面接文字，省掉�
 
 - `s.push(c)` 加一個字元（`char`，單引號）；`s.push_str("...")` 和 `s += "..."` 加一段文字；`s` 要 `let mut`。
 - `a + &b`：左邊必須是 `String`，而且會被 move；右邊要 `&str`（`&String` 會自動轉換）；`a + b` 是 E0308。
-- `format!("...")` 格式字串跟 `println!` 一樣，回傳 `String`，不拿走任何變數；原理第 16 章解釋。
+- `format!("...")` 格式字串跟 `println!` 一樣，回傳 `String`，不拿走任何變數；原理第 16 章第 1 集解釋。
 - 跟 Go 比：Go 的 `+` 兩邊都還能用；Rust 的 `+` 會 move 左邊。
