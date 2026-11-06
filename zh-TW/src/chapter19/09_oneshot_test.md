@@ -202,7 +202,6 @@ fmt.Println(rec.Code, rec.Body.String())
 
 - `Router` 是 tower 的 `Service`：`tower::ServiceExt::oneshot(request)` 把請求直接交給它，不開伺服器、不佔連接埠。
 - `Request::builder()` 組請求；`oneshot` 會用掉 `Router`，所以 `app.clone().oneshot(...)`，clone 出來的共用同一份 state。
-- 回應的 body 是串流：`response.into_body().collect().await` 收齊，`to_bytes()` 取位元組。
-- JSON 用 `serde_json::Value` 比對，標頭用 `response.headers()`。
+- 回應的 body 是串流：`response.into_body().collect().await` 收齊，`to_bytes()` 取位元組；JSON 用 `serde_json::Value` 比對，標頭用 `response.headers()`。
 - `oneshot` 測得到路由到 handler 的一切，測不到真的 TCP 與 `serve`，那些另外開伺服器測。
 - 跟 Go 比：Go 的 `httptest.NewRecorder` 直接給你寫好的 body；Rust 的 body 要 `collect`。

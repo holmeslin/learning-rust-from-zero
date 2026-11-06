@@ -6,9 +6,9 @@
 
 ## 正文
 
-### 設計：兩條通道，三位工人
+### 設計：兩條 channel，三位工人
 
-飲料店有 8 張訂單，只請 3 位店員（worker），誰有空誰就領下一張。需要兩條通道：
+飲料店有 8 張訂單，只請 3 位店員（worker），誰有空誰就領下一張。需要兩條 channel：
 
 ```text
 main --job_tx--> [ 工作佇列 ] ---> 工人 1、工人 2、工人 3 --done_tx--> [ 結果佇列 ] ---> main
@@ -72,8 +72,8 @@ fn main() {
 ```
 
 - 每位工人跑一個 `loop`：領一張、做一張，直到領不到。`let job = job_rx.lock()....recv();` 這一行，guard 在行尾就 drop，鎖只在「領工作」那一瞬間被拿著，做飲料（`make_drink`）的時候鎖是放開的。
-- 收工靠通道關閉（第 5 集）：`main` 送完 8 張就 `drop(job_tx)`，工作佇列的 `Sender` 沒了。工人把剩下的訂單領完，再 `recv()` 就是 `Err`，於是 `break` 下班。
-- `done_rx.iter()` 是 `Receiver` 的走訪方法，意思跟 `for x in done_rx` 一樣，一直收到通道關閉，接上第 11 章的 `collect` 收進 `Vec`。
+- 收工靠 channel 關閉（第 5 集）：`main` 送完 8 張就 `drop(job_tx)`，工作佇列的 `Sender` 沒了。工人把剩下的訂單領完，再 `recv()` 就是 `Err`，於是 `break` 下班。
+- `done_rx.iter()` 是 `Receiver` 的走訪方法，意思跟 `for x in done_rx` 一樣，一直收到 channel 關閉，接上第 11 章的 `collect` 收進 `Vec`。
 - `drop(done_tx)` 是第 6 集的老問題：`main` 手上那個原始的 `done_tx` 不丟，結果佇列永遠不會關，`done_rx.iter()` 就收不完。
 - 每張訂單由哪位工人做、誰先做完，每次都不同，所以先收集、`sort`，再印，輸出才固定。最後 `join` 每位工人，確認沒人出事。
 
@@ -113,7 +113,7 @@ for w := 0; w < 3; w++ {
 }
 ```
 
-Rust 的 `mpsc` 是單一消費者（multiple producer, single consumer），一條通道只有一個 `Receiver`，所以多位工人共用要自己包 `Arc<Mutex<Receiver<T>>>`，多寫兩層，換來的是型別系統替你保證：每張訂單只會被一位工人領走。另一個差別在收工：Go 要自己 `close(jobs)` 並用 `WaitGroup` 等工人；Rust 是 `drop(job_tx)`，通道自己關。
+Rust 的 `mpsc` 是單一消費者（multiple producer, single consumer），一條 channel 只有一個 `Receiver`，所以多位工人共用要自己包 `Arc<Mutex<Receiver<T>>>`，多寫兩層，換來的是型別系統替你保證：每張訂單只會被一位工人領走。另一個差別在收工：Go 要自己 `close(jobs)` 並用 `WaitGroup` 等工人；Rust 是 `drop(job_tx)`，channel 自己關。
 
 ## 重點整理
 

@@ -139,4 +139,4 @@ Go 的 goroutine 開出去之後，沒有人能「丟掉」它：沒有 `WaitGro
 - `JoinSet<T>` 裡所有任務的結果型別都是 `T`，不同會是 E0271。
 - 丟掉 `JoinSet`，還沒做完的任務全部被取消；`abort_all()` 可主動取消，取消的任務是 `Err`，`is_cancelled()` 為 `true`。
 - 丟掉單一 `JoinHandle` 不會取消任務，丟掉 `JoinSet` 會。
-- 跟 Go 比：goroutine 沒有人能丟掉，`JoinSet` 讓一批任務的壽命跟著擁有它的人走。
+- 跟 Go 比：goroutine 沒有人能丟掉，`JoinSet` 讓一批任務跟著擁有它的人一起結束。

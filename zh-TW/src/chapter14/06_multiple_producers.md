@@ -2,13 +2,13 @@
 
 ## 本集目標
 
-用 `tx.clone()` 讓好幾條執行緒往同一條通道送訊息，並記得把 `main` 手上那個原始的 `tx` drop 掉，不然 `for x in rx` 永遠不會結束。
+用 `tx.clone()` 讓好幾條執行緒往同一條 channel 送訊息，並記得把 `main` 手上那個原始的 `tx` drop 掉，不然 `for x in rx` 永遠不會結束。
 
 ## 正文
 
 ### 每位生產者拿一個 `tx.clone()`
 
-`mpsc` 的 `m` 是 multiple producer：`Sender` 可以 `clone`，每個複本都通到同一條通道。三位店員各做兩杯，各自送出（店員編號、第幾杯）：
+`mpsc` 的 `m` 是 multiple producer：`Sender` 可以 `clone`，每個複本都通到同一條 channel。三位店員各做兩杯，各自送出（店員編號、第幾杯）：
 
 ```rust
 use std::sync::mpsc;
@@ -43,12 +43,12 @@ fn main() {
 ```
 
 - 每一圈用 `let tx = tx.clone();` 把外面的 `tx` 遮蔽成複本，再 `move` 進那一圈的執行緒。這是開多條執行緒時很常見的寫法。
-- 這次沒有 `join`：每條執行緒做完，它的 `tx` 複本就 drop；等到全部的 `Sender` 都不在了，通道關閉，`for order in rx` 自然結束。通道關閉本身就是「大家都做完了」的訊號。
+- 這次沒有 `join`：每條執行緒做完，它的 `tx` 複本就 drop；等到全部的 `Sender` 都不在了，channel 關閉，`for order in rx` 自然結束。channel 關閉本身就是「大家都做完了」的訊號。
 - 同一位店員送的訊息保持順序（上一集），但三位店員的訊息怎麼交錯，每次都可能不同。所以先收進 `Vec`，`sort` 之後再印，輸出才固定。
 
 ### 忘了 `drop(tx)`：永遠等下去
 
-注意上面那行 `drop(tx)`。`main` 一開始建立的 `tx` 也是一個 `Sender`，三個複本都用完了，它還活著，通道就不會關。拿掉那一行：
+注意上面那行 `drop(tx)`。`main` 一開始建立的 `tx` 也是一個 `Sender`，三個複本都用完了，它還活著，channel 就不會關。拿掉那一行：
 
 ```rust,no_run
 use std::sync::mpsc;
@@ -101,12 +101,12 @@ go func() {
 }()
 ```
 
-提早關掉，還在送的 goroutine 會 panic；忘了關，收的人永遠等下去。Rust 把「還有幾個送的人」記在型別裡：每個 `Sender` 複本代表一位送的人，最後一個 drop 通道就關，不用自己數。要小心的反而是 `main` 手上多留的那一個。
+提早關掉，還在送的 goroutine 會 panic；忘了關，收的人永遠等下去。Rust 把「還有幾個送的人」記在型別裡：每個 `Sender` 複本代表一位送的人，最後一個 drop channel 就關，不用自己數。要小心的反而是 `main` 手上多留的那一個。
 
 ## 重點整理
 
-- `tx.clone()` 得到另一個通向同一條通道的 `Sender`；每條生產者執行緒各拿一個，用 `move` 搬進去。
-- 全部的 `Sender`（含 `main` 手上的原始 `tx`）都被 drop，通道才關，`for x in rx` 才會結束。
+- `tx.clone()` 得到另一個通向同一條 channel 的 `Sender`；每條生產者執行緒各拿一個，用 `move` 搬進去。
+- 全部的 `Sender`（含 `main` 手上的原始 `tx`）都被 drop，channel 才關，`for x in rx` 才會結束。
 - 忘了 `drop(tx)`，`for x in rx` 會永遠等下去，沒有任何錯誤訊息。
 - 同一個 `Sender` 送的訊息保持順序，不同 `Sender` 之間的交錯順序每次可能不同；要固定輸出就先收集、排序再印。
 - 跟 Go 比：Go 要自己決定誰來 `close`；Rust 靠最後一個 `Sender` drop 自動關閉。
