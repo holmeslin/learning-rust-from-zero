@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、handler、extractor、middleware、listener、axum 的 `Router`／`State`、tower 的 `Service`／`Layer`、Cargo 與它的指令名稱。
+保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、handler、extractor、middleware、listener、axum 的 `Router`／`State`、tower 的 `Service`／`Layer`、SQL、SQLite、`NULL`、`bundled`、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -149,3 +149,14 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 符號連結 | symbolic link（symlink） | 軟連結、符號鏈接 |
 | 連接埠 | port（`127.0.0.1:3000` 的 3000） | 端口 |
 | 優雅關閉 | graceful shutdown | 平滑關機 |
+| 資料表 | table（資料庫的） | 數據表 |
+| 資料列 | row | 記錄、行 |
+| 資料欄 | column（資料表的） | 列（那是大陸的說法）、字段 |
+| 預備陳述式 | prepared statement（`Statement`） | 預編譯語句、預處理語句 |
+| 佔位符 | placeholder（SQL 裡的 `?1`） | 占位符 |
+| 參數綁定 | parameter binding | 參數繫結 |
+| SQL 注入 | SQL injection | SQL 注射 |
+| 交易 | transaction（資料庫的） | 事務 |
+| 提交 | commit（交易的，`tx.commit()`） | 確認提交、遞交 |
+| 復原 | rollback（交易的，`tx.rollback()`） | 回滾、回退 |
+| 連線池 | connection pool | 連接池 |
