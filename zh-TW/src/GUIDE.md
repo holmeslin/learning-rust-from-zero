@@ -443,7 +443,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 | `spawn_blocking`、不要在任務裡卡住執行緒 | 第 15 章第 12 集 | 不要出需要在 async 裡做耗時運算的題目 |
 | async 閉包、`AsyncFn`／`AsyncFnMut`／`AsyncFnOnce`、`async move \|x\| { }` | 第 15 章第 13 集 | 回傳 async 區塊的普通閉包（要 `Fut` 泛型）或 `async fn` |
 | 跨 `.await` 的 `Send` 限制、`future cannot be sent between threads safely` | 第 15 章第 14 集 | 第 14 章第 11 集的 `Send`；不要出需要讓非 `Send` 的值跨 `.await` 的題目 |
-| 巨集的概念（展開、宣告式與程序巨集）、`stringify!`、`cfg!`、`write!`（`String` 當目的地要 `use std::fmt::Write;`） | 第 16 章第 1 集 | `println!`、`vec!`、`format!`、`matches!`、`write!(f, …)` 照前面各章的固定句型使用，只說「這是巨集」，不談展開 |
+| 巨集的概念（展開、宣告式與程序巨集）、`stringify!`、`format_args!`、`write!`（`String` 當目的地要 `use std::fmt::Write;`） | 第 16 章第 1 集 | `println!`、`vec!`、`format!`、`matches!`、`write!(f, …)` 照前面各章的固定句型使用，只說「這是巨集」，不談展開 |
 | `macro_rules!`、`$x:expr`、`ident`、`ty`、衛生、`{{ }}` | 第 16 章第 2 集 | 不要出自己寫巨集的題目；用函式 |
 | 巨集的重複 `$(...)*`、`$(,)?`、遞迴巨集、`$($arg:tt)*` | 第 16 章第 3 集 | 函式加切片 `&[T]` |
 | 程序巨集（`TokenStream`、`proc-macro = true`、derive／屬性／像函式） | 第 16 章第 4 集 | 只說 `#[derive(Debug)]`、`#[tokio::main]` 是「替你產生程式碼的巨集」；不要出寫程序巨集的題目 |
