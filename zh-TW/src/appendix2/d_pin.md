@@ -146,8 +146,7 @@ Go 沒有 `Pin`。goroutine 的 stack 不夠大時，Go 的 runtime 會把整個
 
 ## 重點整理
 
-- 搬動（move）會讓指向自己的參照失效；`async` 產生的 `Future` 就是這種值，被 `poll` 之後不能再搬。
-- `Pin<P>` 包住指標（`&mut T`、`Box<T>`）並承諾值不再被搬動；安全的程式碼拿不到裡面的 `&mut T`。`Pin` 沒有執行時期成本。
+- 搬動（move）會讓指向自己的參照失效；`async` 產生的 `Future` 就是這種值，被 `poll` 之後不能再搬。`Pin<P>` 包住指標（`&mut T`、`Box<T>`）並承諾值不再被搬動：安全的程式碼拿不到裡面的 `&mut T`，也沒有執行時期成本。
 - `Unpin` 是編譯器自動實作的 trait，表示搬了也沒關係；大部分型別都是，這時 `Pin<&mut T>` 跟 `&mut T` 一樣好用。`async` 區塊、`async fn` 與 `PhantomPinned` 不是。
 - 要 pin 一個 `!Unpin` 的值：`std::pin::pin!`（固定在目前的作用域）或 `Box::pin`（放進 heap）；`Pin::new` 只接受 `Unpin`，否則是 E0277。
 - `Future::poll` 的簽名是 `fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>`；`Context` 帶著 `Waker`，回傳 `Pending` 前要安排好喚醒。

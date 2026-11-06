@@ -136,6 +136,5 @@ type Sleeve struct{ Cup } // Sleeve 也有 Label()
 - `*` 靠 `Deref` trait：`*x` 就是 `*(x.deref())`；`type Target` 是解參照後的型別，`deref` 回傳 `&Target`。
 - 要用 `*` 寫入，再實作 `DerefMut`（`deref_mut` 回傳 `&mut Target`）。
 - 用 `.` 找不到方法時，編譯器會 deref 下去找：`String` 找得到 `str` 的方法，`Vec` 找得到 slice 的方法。
-- 解參照轉換：需要 `&U` 的地方，`&T`（`T: Deref<Target = U>`）自動轉成 `&U`，可以連續轉，例如 `&Box<String>` → `&String` → `&str`；只對參照有效。
-- 前面照抄的 `&String` → `&str`、`&Vec<T>` → `&[T]` 都是它。
+- 解參照轉換：需要 `&U` 的地方，`&T`（`T: Deref<Target = U>`）自動轉成 `&U`，可以連續轉，例如 `&Box<String>` → `&String` → `&str`；只對參照有效。前面照抄的 `&String` → `&str`、`&Vec<T>` → `&[T]` 都是它。
 - 跟 Go 比：嵌入會提升方法，`Deref` 不是拿來模擬繼承的。

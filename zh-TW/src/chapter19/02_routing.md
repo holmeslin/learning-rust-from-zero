@@ -174,7 +174,7 @@ test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 ### 跟 Go 比一比
 
-Go 1.22 之後的 `ServeMux` 也能把方法寫進樣式，方法不對一樣自動回 405 加 `Allow`：
+Go 1.22 之後的 `ServeMux` 也能把方法寫進模式，方法不對一樣自動回 405 加 `Allow`：
 
 ```go
 mux := http.NewServeMux()
@@ -183,7 +183,7 @@ mux.HandleFunc("POST /orders", createOrder)
 mux.Handle("/admin/", http.StripPrefix("/admin", admin))
 ```
 
-- 差在斜線。Go 的樣式以 `/` 結尾（`"/admin/"`）代表整棵子樹，`/admin` 還會被導向 `/admin/`；axum 的 `/admin` 與 `/admin/` 是兩個不相干的路徑，不導向，也沒有子樹的意思。
+- 差在斜線。Go 的模式以 `/` 結尾（`"/admin/"`）代表整棵子樹，`/admin` 還會被導向 `/admin/`；axum 的 `/admin` 與 `/admin/` 是兩個不相干的路徑，不導向，也沒有子樹的意思。
 - 找不到、方法不對時，Go 預設回一行文字（`404 page not found`）；axum 預設是空 body。
 
 ## 重點整理
@@ -191,4 +191,4 @@ mux.Handle("/admin/", http.StripPrefix("/admin", admin))
 - 同一個路徑接多種方法，把 `get(...)`、`post(...)` 串在一起；方法不在其中，axum 自動回 405 並附上 `allow`。
 - `nest("/admin", router)` 把另一個 `Router` 掛在共同的開頭路徑下；`fallback(handler)` 自訂找不到時的回應。
 - `/menu` 與 `/menu/` 是不同的路徑，axum 不轉址；同一路徑、同一方法掛兩次，啟動時就 panic。
-- 跟 Go 比：Go 以 `/` 結尾的樣式是整棵子樹，axum 沒有這個意思，要靠 `nest`。
+- 跟 Go 比：Go 以 `/` 結尾的模式是整棵子樹，axum 沒有這個意思，要靠 `nest`。

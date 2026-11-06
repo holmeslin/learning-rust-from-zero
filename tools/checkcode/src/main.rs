@@ -710,6 +710,23 @@ mod tests {
         }
     }
 
+    /// 結束碼的失敗要說對原因：編譯失敗不是程式的 101，標籤寫錯要指出標籤。
+    #[test]
+    fn exit_label_failures_say_why() {
+        let failures = check_projects(&[project_of("project-fail.md")]);
+        let reason = |label: &str| {
+            let line = block_line_after("project-fail.md", label);
+            &failures.iter().find(|f| f.1 == line).expect("應該失敗").2
+        };
+        assert!(reason("`cargo run` 的輸出（省略編譯進度，結束碼 101）：").contains("編譯失敗"));
+        for label in [
+            "`cargo run` 的輸出（省略編譯進度，結束碼二）：",
+            "`cargo run` 的輸出（省略編譯進度，結束碼：0）：",
+        ] {
+            assert!(reason(label).contains("結束碼 N"), "{label}");
+        }
+    }
+
     /// 通過與失敗的專案放在同一次檢查，各自的判定不能互相影響。
     #[test]
     fn mixed_projects_keep_verdicts_separate() {
