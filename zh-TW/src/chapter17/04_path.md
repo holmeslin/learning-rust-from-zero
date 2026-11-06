@@ -107,7 +107,7 @@ true
 
 ### `impl AsRef<Path>`：字串、`String`、`Path` 都能傳
 
-上一集的 `fs::write("teashop-demo/menu.txt", ...)` 直接傳字串，是因為路徑參數寫成「任何能當成 `&Path` 看的型別」：`impl AsRef<Path>`。`&str`、`String`、`&Path`、`PathBuf` 都實作了 `AsRef<Path>`，函式裡呼叫 `.as_ref()` 拿到 `&Path`：
+上一集的 `fs::write("teashop-menu/menu.txt", ...)` 直接傳字串，是因為路徑參數寫成「任何能當成 `&Path` 看的型別」：`impl AsRef<Path>`。`&str`、`String`、`&Path`、`PathBuf` 都實作了 `AsRef<Path>`，函式裡呼叫 `.as_ref()` 拿到 `&Path`：
 
 ```rust
 use std::path::{Path, PathBuf};
