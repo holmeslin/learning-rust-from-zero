@@ -10,7 +10,7 @@
 
 第 19 章第 5 集的 state 是 `Arc<Mutex<Vec<Order>>>`，伺服器一重開，訂單就清空了。換成資料庫，只要把 `Vec` 換成 `Connection`：`Arc<Mutex<Connection>>`。
 
-為什麼要 `Mutex`？`Connection` 可以搬到另一條執行緒（`Send`），但不能讓好幾條執行緒同時用（不是 `Sync`，第 14 章第 11 集）：`Arc<Connection>` 交給 `thread::spawn` 是 E0277，說 `RefCell<…InnerConnection>` cannot be shared between threads safely。`Mutex<T>` 只要 `T` 是 `Send` 就是 `Sync`，所以 `Arc<Mutex<Connection>>` 能共用：一次只有一個 handler 用那條連線。`Cargo.toml` 比第 19 章第 5 集多一行 rusqlite：
+為什麼要 `Mutex`？`Connection` 可以搬到另一條執行緒（`Send`），但不能讓好幾條執行緒同時用（不是 `Sync`，第 14 章第 11 集）：`Arc<Connection>` 交給 `thread::spawn` 是 E0277，說 `RefCell<…InnerConnection>` 是 `cannot be shared between threads safely`。`Mutex<T>` 只要 `T` 是 `Send` 就是 `Sync`，所以 `Arc<Mutex<Connection>>` 能共用：一次只有一個 handler 用那條連線。`Cargo.toml` 比第 19 章第 5 集多一行 rusqlite：
 
 `Cargo.toml`：
 
