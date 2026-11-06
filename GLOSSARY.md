@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、handler、extractor、middleware、listener、axum 的 `Router`／`State`、tower 的 `Service`／`Layer`、SQL、SQLite、`NULL`、`bundled`、Cargo 與它的指令名稱。
+保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、handler、extractor、middleware、listener、axum 的 `Router`／`State`、tower 的 `Service`／`Layer`、SQL、SQLite、`NULL`、`bundled`、`Pin`、`Unpin`、vtable、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -160,3 +160,14 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 提交 | commit（交易的，`tx.commit()`） | 確認提交、遞交 |
 | 復原 | rollback（交易的，`tx.rollback()`） | 回滾、回退 |
 | 連線池 | connection pool | 連接池 |
+| 對齊 | alignment（`align_of`） | 對準 |
+| 填充 | padding（struct 欄位之間、結尾補的空位元組） | 補白、填塞 |
+| 零大小型別 | zero-sized type（`()`、沒有欄位的 struct） | 零尺寸型別 |
+| 胖指標 | fat pointer（`&str`、`&[T]`、`&dyn Trait`） | 肥指標 |
+| 空位 | niche（讓 `Option<&T>` 不必多一個標記的「不可能的值」） | 利基 |
+| 零成本抽象 | zero-cost abstraction | 零開銷抽象 |
+| 單態化 | monomorphization（泛型替每個型別各編一份） | 單形化 |
+| 內嵌 | inline（編譯器把函式本體放進呼叫的地方） | 內聯 |
+| dyn 相容 | dyn compatible（trait 能做成 `dyn Trait`；舊稱 object safe） | 物件安全 |
+| 基準測試 | benchmark | 跑分 |
+| 效能剖析 | profiling | 性能分析 |
