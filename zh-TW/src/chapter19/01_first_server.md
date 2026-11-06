@@ -77,6 +77,13 @@ async fn main() {
 - `axum::serve` 接手這個 listener，一直收連線、交給 `Router`，所以它不會自己結束。
 - `#[tokio::main]` 是第 15 章第 4 集看過的寫法：`serve` 是 async，`main` 也得是。
 
+`cargo build` 的輸出（省略相依套件的編譯進度）：
+
+```text
+   Compiling teashop v0.1.0 (/home/you/teashop)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.64s
+```
+
 ### 跑起來
 
 `cargo run` 第一次要下載、編譯 axum 與 tokio 等一串套件，要等一陣子。編完之後，程式印出一行就停在那裡等連線。另開一個終端機用 `curl` 打（`-s` 不印進度）：
