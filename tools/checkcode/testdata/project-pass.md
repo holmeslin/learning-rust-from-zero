@@ -238,6 +238,84 @@ error[E0425]: cannot find function `member_price` in crate `teashop`
 27
 ```
 
+## 結束碼：標籤括號裡寫「結束碼 N」，實際要剛好是 N
+
+Linux、macOS 的 `cargo run` 不會印出結束碼，所以寫在標籤裡；輸出區塊不必有 `error` 開頭的行。
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    println!("缺引數");
+    std::process::exit(2);
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 2）：
+
+```text
+     Running `target/debug/teashop`
+缺引數
+```
+
+標了結束碼 0 也可以：
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    println!("好了");
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 0）：
+
+```text
+     Running `target/debug/teashop`
+好了
+```
+
+## 結束碼 101：程式 panic 就是 101，編譯失敗也是，書上要分得清
+
+程式編得過、執行時 panic，結束碼 101：
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    let cups: u32 = "2".parse().expect("不是數字");
+    let price: u32 = "兩".parse().expect("不是數字");
+    println!("{}", cups * price);
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 101）：
+
+```text
+     Running `target/debug/teashop`
+
+thread 'main' panicked at src/main.rs:3:43:
+不是數字: ParseIntError { kind: InvalidDigit }
+```
+
+書上貼的就是編譯錯誤，標籤也寫結束碼 101（編譯失敗的結束碼），這是預期的失敗：
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    let cups: u32 = "兩杯";
+    println!("{cups}");
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 101）：
+
+```text
+error[E0308]: mismatched types
+ --> src/main.rs:2:21
+```
+
 ## `warn`：刻意示範警告的區塊，允許警告
 
 `src/main.rs`：

@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、Cargo 與它的指令名稱。
+保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、handler、extractor、middleware、listener、axum 的 `Router`／`State`、tower 的 `Service`／`Layer`、SQL、SQLite、`NULL`、`bundled`、`Pin`、`Unpin`、vtable、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -77,11 +77,17 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 溢位 | overflow | 溢出 |
 | 預設 | default | 默認 |
 | 複本 | copy | 拷貝 |
-| 程式 | program | 程序 |
+| 程式 | program | 程序（例外：「程序巨集」保留「程序」，因為那裡指的是 procedural，不是 program） |
 | 堆疊（stack） | stack | 棧 |
 | 堆積（heap） | heap | 堆 |
 | 懸置參照 | dangling reference | 懸垂引用、野指標 |
 | 內部可變性 | interior mutability | 內部可變 |
+| 參照計數 | reference counting | 引用計數 |
+| 強參照 | strong reference | 強引用 |
+| 弱參照 | weak reference | 弱引用 |
+| 參照循環 | reference cycle | 循環引用 |
+| 記憶體洩漏 | memory leak | 內存洩漏、記憶體洩露 |
+| 解參照轉換 | deref coercion | 解引用強制轉換 |
 | 關聯函式 | associated function | 靜態方法 |
 | 關聯型別 | associated type | 相關類型 |
 | 預設方法 | default method | 預設實作 |
@@ -100,3 +106,68 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 短路求值 | short-circuit evaluation | 短路運算 |
 | 型別別名 | type alias | 類型別名 |
 | 截斷 | truncation | 截取 |
+| 互斥鎖 | mutex | 互斥體 |
+| 死結 | deadlock | 死鎖 |
+| 背壓 | backpressure | 反壓 |
+| 原子操作 | atomic operation | 原子運算 |
+| 範圍執行緒 | scoped thread | 作用域線程 |
+| 生產者、消費者 | producer、consumer | 生產方、消費方 |
+| 鎖中毒 | poisoned | 鎖污染 |
+| 任務 | task（`tokio::spawn` 開出來的） | 協程、工作項 |
+| 輪詢 | polling（`Future::poll`） | 輪巡 |
+| 取消 | cancellation | 撤銷、終止 |
+| 逾時 | timeout | 超時 |
+| 非同步 | asynchronous | 異步 |
+| 協作式 | cooperative | 合作式 |
+| 搶佔 | preemption | 搶占 |
+| 排程 | scheduling | 調度 |
+| 宣告式巨集 | declarative macro（`macro_rules!`） | 聲明式宏 |
+| 程序巨集 | procedural macro | 過程宏 |
+| 展開 | expand（巨集的） | 擴展 |
+| 片段類型 | fragment specifier（`expr`、`ident`） | 片段指示符 |
+| 衛生 | hygiene（巨集的） | 衛生性 |
+| 原始指標 | raw pointer（`*const T`、`*mut T`） | 裸指標、生指標 |
+| 未定義行為 | undefined behavior | 未定義的行為 |
+| 條件編譯 | conditional compilation（`#[cfg]`） | 條件式編譯 |
+| const 泛型 | const generics | 常數泛型 |
+| 序列化 | serialize | 串行化 |
+| 反序列化 | deserialize | 反串行化 |
+| 緩衝區 | buffer | 緩存（那是 cache） |
+| 環境變數 | environment variable | 環境變量 |
+| 行程 | process（作業系統的） | 進程、程序 |
+| 子行程 | child process | 子進程 |
+| 亂數 | random number | 隨機數 |
+| 種子 | seed（亂數的） | 種籽 |
+| 錯誤鏈 | error chain（`source()` 一層層往下） | 錯誤堆疊 |
+| 引數 | argument（命令列的，也指呼叫函式時傳的值） | 參數（那是 parameter） |
+| 位置引數 | positional argument（`teashop 紅茶` 的 `紅茶`） | 位置參數 |
+| 選項 | option（`--cups 2`、`-c 2`） | 選項參數、開關（`bool` 的那種可以說「開關」） |
+| 子命令 | subcommand（`cargo run` 的 `run`） | 子指令 |
+| 結束碼 | exit code | 退出碼、返回碼、離開碼 |
+| 管線 | pipe（shell 的 `\|`） | 管道 |
+| 訊號 | signal（SIGINT、SIGPIPE） | 信號 |
+| 符號連結 | symbolic link（symlink） | 軟連結、符號鏈接 |
+| 連接埠 | port（`127.0.0.1:3000` 的 3000） | 端口 |
+| 優雅關閉 | graceful shutdown | 平滑關機 |
+| 資料表 | table（資料庫的） | 數據表 |
+| 資料列 | row | 記錄、行 |
+| 資料欄 | column（資料表的） | 列（那是大陸的說法）、字段 |
+| 預備陳述式 | prepared statement（`Statement`） | 預編譯語句、預處理語句 |
+| 佔位符 | placeholder（SQL 裡的 `?1`） | 占位符 |
+| 參數綁定 | parameter binding | 參數繫結 |
+| SQL 注入 | SQL injection | SQL 注射 |
+| 交易 | transaction（資料庫的） | 事務 |
+| 提交 | commit（交易的，`tx.commit()`） | 確認提交、遞交 |
+| 復原 | rollback（交易的，`tx.rollback()`） | 回滾、回退 |
+| 連線池 | connection pool | 連接池 |
+| 對齊 | alignment（`align_of`） | 對準 |
+| 填充 | padding（struct 欄位之間、結尾補的空位元組） | 補白、填塞 |
+| 零大小型別 | zero-sized type（`()`、沒有欄位的 struct） | 零尺寸型別 |
+| 胖指標 | fat pointer（`&str`、`&[T]`、`&dyn Trait`） | 肥指標 |
+| 空位 | niche（讓 `Option<&T>` 不必多一個標記的「不可能的值」） | 利基 |
+| 零成本抽象 | zero-cost abstraction | 零開銷抽象 |
+| 單態化 | monomorphization（泛型替每個型別各編一份） | 單形化 |
+| 內嵌 | inline（編譯器把函式本體放進呼叫的地方） | 內聯 |
+| dyn 相容 | dyn compatible（trait 能做成 `dyn Trait`；舊稱 object safe） | 物件安全 |
+| 基準測試 | benchmark | 跑分 |
+| 效能剖析 | profiling（「效能分析」也可以；附錄二 e 的集名「效能分析工具簡介」沿用大綱，不改） | 性能分析 |
