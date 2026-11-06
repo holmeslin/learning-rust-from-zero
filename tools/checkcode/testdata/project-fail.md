@@ -224,6 +224,59 @@ fn main() {
      Running `target/debug/teashop`
 ```
 
+## 結束碼跟標籤不同
+
+程式以 3 結束，標籤寫 2：
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    println!("缺引數");
+    std::process::exit(3);
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 2）：
+
+```text
+     Running `target/debug/teashop`
+缺引數
+```
+
+程式成功，標籤卻寫了非 0 的結束碼：
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    println!("好了");
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 2）：
+
+```text
+     Running `target/debug/teashop`
+好了
+```
+
+程式以 2 結束，標籤寫結束碼 0：
+
+`src/main.rs`：
+
+```rust,ignore
+fn main() {
+    std::process::exit(2);
+}
+```
+
+`cargo run` 的輸出（省略編譯進度，結束碼 0）：
+
+```text
+     Running `target/debug/teashop`
+```
+
 ## 最後一個檔案沒有任何檢查點
 
 `src/extra.rs`（故意放在最後，之後沒有任何輸出區塊）：
