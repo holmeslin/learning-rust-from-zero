@@ -31,7 +31,7 @@ cd zh-TW && mdbook serve                                             # 本機預
 
 ### 第二部的範例怎麼使用 crate
 
-第一部只用 std。第二部（第 13 章起）的範例可以用 tokio、tokio-util、clap、axum、tower、http-body-util、serde、serde_json、tracing、rand、uuid、thiserror、anyhow、rusqlite（bundled）。範例照常寫 ```` ```rust ````，不必加標註：程式裡出現 `tokio::` 這類 `<crate>::` 路徑，checkcode 就會把區塊放進 `tools/checkcode/deps/` 的共用依賴 package，所有用到 crate 的區塊一次批次編譯與 lint，再逐一執行；上表的標註規則照樣適用。清單以外的 crate 會驗證失敗。
+第一部只用 std。第二部（第 13 章起）的範例可以用 tokio、tokio-util、clap、axum、tower、http-body-util、serde、serde_json、tracing、tracing-subscriber、rand、uuid、thiserror、anyhow、rusqlite（bundled）。範例照常寫 ```` ```rust ````，不必加標註：程式裡出現 `tokio::` 這類 `<crate>::` 路徑，checkcode 就會把區塊放進 `tools/checkcode/deps/` 的共用依賴 package，所有用到 crate 的區塊一次批次編譯與 lint，再逐一執行；上表的標註規則照樣適用。清單以外的 crate 會驗證失敗。
 
 版本統一鎖在 `tools/checkcode/deps/Cargo.toml`，`Cargo.lock` 一併提交。升級版本時改該檔，再執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`。第一次驗證會花幾分鐘編譯所有 crate，之後使用 `tools/checkcode/deps/target` 的快取，CI 也會快取這個目錄。
 

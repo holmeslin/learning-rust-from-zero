@@ -2,20 +2,21 @@
 
 ## 本集目標
 
-用 `tracing` 記錄程式的事件與工作範圍：`info!`、`warn!` 等巨集、帶欄位的事件、`span` 與 `#[instrument]`；並知道 `tracing` 只負責「發出」，要有 subscriber 才看得到。
+用 `tracing` 記錄程式的事件與工作範圍：`info!`、`warn!` 等巨集、帶欄位的事件、`span` 與 `#[instrument]`；並知道 `tracing` 只負責「發出」，要裝上 `tracing-subscriber` 才看得到。
 
 ## 正文
 
 ### 為什麼不只用 `println!`
 
-`println!` 沒辦法依層級篩選（正式上線只留警告）、沒辦法附上結構化的欄位、也不知道這行是在哪個請求裡印的。`tracing` 把「記錄」拆成兩邊：程式碼用巨集**發出**事件，另一個叫 subscriber 的東西決定要**留下**哪些、**怎麼印**。這是跟第 8 集 `serde` 一樣的分工：
+`println!` 沒辦法依層級篩選（正式上線只留警告）、沒辦法附上結構化的欄位、也不知道這行是在哪個請求裡印的。`tracing` 把「記錄」拆成兩邊：程式碼用巨集**發出**事件，另一個叫 subscriber 的東西決定要**留下**哪些、**怎麼印**。這是跟第 8 集 `serde` 一樣的分工，`tracing-subscriber` 就是最常用的 subscriber：
 
 ```toml
 [dependencies]
 tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
 ```
 
-最容易讓人以為壞掉的地方：**沒有 subscriber，什麼都不會印**。
+最容易讓人以為壞掉的地方：**沒有裝 subscriber，什麼都不會印**。
 
 ```rust
 use tracing::info;
@@ -34,14 +35,9 @@ fn main() {
 
 ### 事件、層級、欄位、span
 
-下面是完整的程式，最上面是你要學的使用端，最下面的 subscriber 先照抄（實務上用 `tracing-subscriber` 這個 crate 一行搞定，本書的 crate 清單沒有它，所以這裡自己寫一個很短的）：
+在 `main` 的第一行裝上 `tracing_subscriber::fmt()` 做出來的 subscriber，之後整個程式發出的事件都會被它印出來：
 
 ```rust
-use std::fmt::Debug;
-use std::sync::Mutex;
-use tracing::field::{Field, Visit};
-use tracing::span::{Attributes, Id, Record};
-use tracing::{Event, Level, Metadata, Subscriber};
 use tracing::{debug, info, info_span, instrument, warn};
 
 #[instrument]
@@ -54,7 +50,11 @@ fn brew(drink: &str, cups: u32) {
 }
 
 fn main() {
-    tracing::subscriber::set_global_default(Printer::default()).expect("只能設定一次");
+    tracing_subscriber::fmt()
+        .with_ansi(false)
+        .without_time()
+        .with_target(false)
+        .init();
 
     info!(drink = "紅茶", price = 30, "收到訂單");
     let span = info_span!("closing", shop = "信義店");
@@ -62,79 +62,22 @@ fn main() {
     brew("紅茶", 2);
     brew("咖啡", 8);
 }
-
-// 以下是 subscriber：決定留下哪些事件、怎麼印。先照抄，不用看懂。
-#[derive(Default)]
-struct Fields(String);
-
-impl Visit for Fields {
-    fn record_debug(&mut self, field: &Field, value: &dyn Debug) {
-        if !self.0.is_empty() {
-            self.0.push(' ');
-        }
-        if field.name() == "message" {
-            self.0.push_str(&format!("{value:?}"));
-        } else {
-            self.0.push_str(&format!("{}={value:?}", field.name()));
-        }
-    }
-}
-
-#[derive(Default)]
-struct Printer {
-    spans: Mutex<Vec<String>>,
-    stack: Mutex<Vec<String>>,
-}
-
-impl Subscriber for Printer {
-    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
-        *metadata.level() <= Level::INFO
-    }
-
-    fn new_span(&self, attrs: &Attributes<'_>) -> Id {
-        let mut fields = Fields::default();
-        attrs.record(&mut fields);
-        let mut spans = self.spans.lock().expect("鎖中毒");
-        spans.push(format!("{}({})", attrs.metadata().name(), fields.0));
-        Id::from_u64(spans.len() as u64)
-    }
-
-    fn record(&self, _: &Id, _: &Record<'_>) {}
-
-    fn record_follows_from(&self, _: &Id, _: &Id) {}
-
-    fn event(&self, event: &Event<'_>) {
-        let mut fields = Fields::default();
-        event.record(&mut fields);
-        let path = self.stack.lock().expect("鎖中毒").join(" > ");
-        println!("{:5} [{path}] {}", event.metadata().level(), fields.0);
-    }
-
-    fn enter(&self, id: &Id) {
-        let span = self.spans.lock().expect("鎖中毒")[id.into_u64() as usize - 1].clone();
-        self.stack.lock().expect("鎖中毒").push(span);
-    }
-
-    fn exit(&self, _: &Id) {
-        self.stack.lock().expect("鎖中毒").pop();
-    }
-}
 ```
 
 執行結果：
 
 ```text
-INFO  [] 收到訂單 drink="紅茶" price=30
-INFO  [closing(shop="信義店") > brew(drink="紅茶" cups=2)] 開始沖泡 紅茶
-INFO  [closing(shop="信義店") > brew(drink="咖啡" cups=8)] 開始沖泡 咖啡
-WARN  [closing(shop="信義店") > brew(drink="咖啡" cups=8)] 一次超過 5 杯 cups=8
+ INFO 收到訂單 drink="紅茶" price=30
+ INFO closing{shop="信義店"}:brew{drink="紅茶" cups=2}: 開始沖泡 紅茶
+ INFO closing{shop="信義店"}:brew{drink="咖啡" cups=8}: 開始沖泡 咖啡
+ WARN closing{shop="信義店"}:brew{drink="咖啡" cups=8}: 一次超過 5 杯 cups=8
 ```
 
-- **事件**：`info!`、`warn!`，還有 `error!`、`debug!`、`trace!`，用法像 `println!`，最後一個字串是訊息（跟 `println!` 一樣能帶 `{drink}` 這種格式引數），前面可以放 `名稱 = 值` 的欄位（結構化資料）。`warn!(cups, "…")` 是 `cups = cups` 的簡寫。層級由嚴重到瑣碎是 `error`、`warn`、`info`、`debug`、`trace`。
-- **篩選**：subscriber 的 `enabled` 說「INFO 以上才留」，所以 `debug!` 那一行沒有出現。換一個 subscriber，不必改任何 `info!`。
-- **span**：一段有開始有結束的工作。`info_span!("closing", shop = …)` 建立，`span.enter()` 進入，回傳的 guard 離開作用域就離開（第 13 章第 4 集的 `Drop`）。在 span 裡發出的事件會帶著這個 span 的上下文：輸出中括號裡就是目前所在的 span，最外層沒有 span 所以是 `[]`。
-- **`#[instrument]`**：加在函式上，每次呼叫自動建立一個以函式名稱命名的 span，並把參數記成欄位（參數要能用 `{:?}` 印），所以不用手動寫 `info_span!`。
-- `set_global_default` 只能呼叫一次，通常放在 `main` 的第一行。
+- subscriber：`tracing_subscriber::fmt()` 回傳設定用的建構者，最後 `.init()` 把它裝成全域的 subscriber，只能裝一次（再裝會 panic）。最省事的寫法是 `tracing_subscriber::fmt::init()`，輸出會帶時間、彩色層級與來源的模組路徑，每次都不同；這裡用 `with_ansi(false)`、`without_time()`、`with_target(false)` 關掉顏色、時間與模組路徑，書上的輸出才固定，平常不必關。
+- 事件：`info!`、`warn!`，還有 `error!`、`debug!`、`trace!`，用法像 `println!`，最後一個字串是訊息（跟 `println!` 一樣能帶 `{drink}` 這種格式引數），前面可以放 `名稱 = 值` 的欄位（結構化資料）。`warn!(cups, "…")` 是 `cups = cups` 的簡寫。層級由嚴重到瑣碎是 `error`、`warn`、`info`、`debug`、`trace`。
+- 篩選：`fmt()` 預設只留 INFO 以上，所以 `debug!` 那一行沒有出現。`.with_max_level(tracing::Level::DEBUG)` 就看得到它（實測）；用環境變數 `RUST_LOG` 篩選要另開 `env-filter` feature，本書不展開。換不同的 subscriber 或篩選條件，不必改任何 `info!`。
+- span：一段有開始有結束的工作。`info_span!("closing", shop = …)` 建立，`span.enter()` 進入，回傳的 guard 離開作用域就離開（第 13 章第 4 集的 `Drop`）。在 span 裡發出的事件會帶著這個 span 的上下文：輸出裡事件前面的 `closing{…}:brew{…}:` 就是目前所在的 span，由外而內；最外層沒有 span，所以第一行什麼都沒有。
+- `#[instrument]`：加在函式上，每次呼叫自動建立一個以函式名稱命名的 span，並把參數記成欄位（參數要能用 `{:?}` 印），所以不用手動寫 `info_span!`。
 
 ### 跟 Go 比一比
 
@@ -149,7 +92,7 @@ slog.Info("收到訂單", "drink", "紅茶", "price", 30)
 
 ## 重點整理
 
-- `tracing` 負責發出事件與 span，subscriber 決定留下哪些、怎麼印；沒有 subscriber 什麼都不會印；`set_global_default` 只能設定一次。
-- `info!`、`warn!`、`error!`、`debug!`、`trace!` 發出事件，用 `名稱 = 值` 附欄位；層級由 subscriber 篩選。
+- `tracing` 負責發出事件與 span，subscriber 決定留下哪些、怎麼印；沒有 subscriber 什麼都不會印。`tracing = "0.1.44"` 加 `tracing-subscriber = "0.3.23"`。
+- `tracing_subscriber::fmt().init()`（或最簡的 `fmt::init()`）在 `main` 第一行裝上 subscriber，只能裝一次；預設印時間、顏色、模組路徑，只留 INFO 以上，`with_ansi`、`without_time`、`with_target`、`with_max_level` 調整。
+- `info!`、`warn!`、`error!`、`debug!`、`trace!` 發出事件，用 `名稱 = 值` 附欄位。
 - `info_span!` 加 `span.enter()` 建立並進入 span，guard 離開作用域就離開；`#[instrument]` 讓函式每次呼叫自動成為一個 span，參數記成欄位。
-- 實務上用 `tracing-subscriber` 當 subscriber，本書不展開，這集的 subscriber 是為了讓範例能執行。
