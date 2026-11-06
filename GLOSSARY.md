@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、Cargo 與它的指令名稱。
+保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、stdin、stdout、stderr、SIGINT、SIGPIPE、handler、extractor、middleware、listener、axum 的 `Router`／`State`、tower 的 `Service`／`Layer`、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -147,3 +147,5 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 管線 | pipe（shell 的 `\|`） | 管道 |
 | 訊號 | signal（SIGINT、SIGPIPE） | 信號 |
 | 符號連結 | symbolic link（symlink） | 軟連結、符號鏈接 |
+| 連接埠 | port（`127.0.0.1:3000` 的 3000） | 端口 |
+| 優雅關閉 | graceful shutdown | 平滑關機 |

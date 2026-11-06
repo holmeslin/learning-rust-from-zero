@@ -33,7 +33,7 @@
 - 3～5 條，條列本集真正教了什麼（AI 助教靠這段判斷進度）。
 ```
 
-- 一集只教**一個**小概念。篇幅大約 40～150 行 markdown；第 1 章偏短。
+- 一集只教**一個**小概念。篇幅大約 40～150 行 markdown；第 1 章偏短。實戰章（第 18～20 章）每集是一個完整的小專案，要貼好幾個檔案與輸出，上限放寬到約 200 行（作者決定）；章內仍然只教一個零件，超過時先拿掉靠散文與離線驗證就夠的內容，不要硬塞。
 - 每章的 `README.md` 只有 `# <章名>` 加一兩段導言，說明這章要學什麼、為什麼重要，不列目錄。
 
 ### 跟 Go 比一比
@@ -82,6 +82,7 @@
 | 第 12 章第 15 集 | `#[cfg(feature = "名字")]`，照抄 | `cfg` 第 16 章第 10 集 |
 | 第 14 章第 1 集 | `thread::sleep(Duration::from_millis(n))`（睡 `n` 毫秒，搭配檔案最上面的 `use std::thread;`、`use std::time::Duration;`，照抄） | `Duration` 第 17 章第 6 集 |
 | 第 15 章第 2 集 | `#[tokio::main]` 加 `async fn main() { ... }`（照抄）；`tokio::time::sleep(Duration::from_millis(n)).await`（async 版的睡眠，搭配 `use std::time::Duration;`、`use tokio::time::sleep;`） | `#[tokio::main]` 第 15 章第 4 集（`.await` 與 `sleep` 在第 2 集就說明） |
+| 第 19 章第 1 集 | Web 測試檔：library 的 `lib.rs` 最後 `#[cfg(test)] mod tests;`，測試檔 `src/tests.rs` 開頭的 `use`、`async fn send(app: &Router, method: &str, path: &str, body: &str) -> (u16, String)`（`Request::builder()`、`app.clone().oneshot(request)`、`BodyExt::collect()`）、`#[tokio::test]`，`Cargo.toml` 的 `[dev-dependencies]` 放 `http-body-util`、`tower`（features `util`）；整份照抄，每集只換測試案例；測試用 `cargo test --lib` | `oneshot`、`Request`、`collect` 第 19 章第 9 集；`#[cfg(test)]` 第 16 章第 10 集 |
 
 讀一行輸入（每次要讀一行就重複這三行）：
 
@@ -345,7 +346,20 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 實測過的標準函式庫行為：`main` 回傳 `Result<ExitCode, String>`，`Err` 印 `Error: "boom"`、結束碼 1；`std::process::exit` 不執行 `main` 裡的 drop，回傳 `ExitCode` 會；`DirEntry::file_type().is_dir()` 不跟符號連結，`path.is_dir()` 會（指回上層的連結讓總數從 4 變成 164，沒有報錯）。Go 1.27 都跑過：`flag` 遇到第一個非旗標引數就停止解析（`./prog 紅茶 --cups 2` 的 `flag.Args()` 是 `[紅茶 --cups 2]`），錯誤值的旗標結束碼 2，`-h` 結束碼 0；`panic` 結束碼 2、`os.Exit(3)` 不執行 `defer`。
   - clippy 與 rustfmt 沒有新的地雷；rustfmt 會把 `.and_then(|(a, b)| Some(...))` 的鏈拆成每個呼叫一行，先照 checkcode 的結果寫。`Option` 的 `?` 比 `and_then` 加 `Some(...)` 的閉包短，也不會觸發 `bind_instead_of_map`，`parse_order` 這類函式優先這樣寫。
   - 「跟 Go 比一比」第 18 章用在：01（`flag` 套件、`os.Args` 不會因編碼出事）、02（`flag` 遇到第一個非旗標就停止解析）、03（子命令要自己 `switch`，漏掉的 `case` 編譯器看不出）、04（`os.Exit` 不執行 `defer`、panic 結束碼 2）、05（`Stat` 判斷終端機、SIGPIPE）、06（`filepath.WalkDir`）、07（`signal.NotifyContext`）；08 沒有加。
-  - 篇幅：每集 127～232 行（第 8 集最長，因為是完整專案，含五個檔案與測試；其餘都在 175 行以內，比前面章節的 162 行上限略長，因為每個專案都要貼檔案與 `cargo run` 的輸出，作者若要壓回 150 行，最先拿掉的是檢查點的輸出區塊）。省行數的辦法：第 4 集的 `price_of` 內嵌成 `match`、第 3 集的菜單內嵌在 `main.rs`、拿掉 `--version`、`price --help`、沒給子命令這幾個檢查點（改成文字，行為已實測）、第 8 集不放單元測試與 `scan`。
+  - 篇幅：每集 127～200 行（第 8 集最長，因為是完整專案，含四個檔案與測試；其餘都在 175 行以內，比前面章節的 162 行上限略長，因為每個專案都要貼檔案與 `cargo run` 的輸出；作者決定實戰章放寬到約 200 行，第 8 集原本 232 行，已刪掉與第 3 集重複的 `price` 輸出與只在第 4、6 集說明過的 `no-such.txt` 輸出，`cargo test` 改用 `--test cli`，再拿掉幾則不影響程式的 `///` 註解與 `use`）。省行數的辦法：第 4 集的 `price_of` 內嵌成 `match`、第 3 集的菜單內嵌在 `main.rs`、拿掉 `--version`、`price --help`、沒給子命令這幾個檢查點（改成文字，行為已實測）、第 8 集不放單元測試與 `scan`。
+
+- 實戰 Web 相關的範例（第 19 章）：
+  - 領域沿用飲料店：package 叫 `teashop`；飲料的 id 用 ASCII（`tea`、`coffee`、`milk-tea`，顯示名稱紅茶、咖啡、奶茶，價格 30、45、38），因為 URL 與測試裡的路徑不必百分比編碼；路徑 `/menu`、`/orders`、`/drinks/{id}`、`/total/{id}/{cups}`、`/admin/stats`。杯數一律 `u8`（`u32` 乘價錢遇到很大的杯數會在 handler 裡溢位 panic）。避開 axum README 與文件的 `root`、`create_user`、`User`、`CreateUser`、`/users/{id}`，也避開 tokio 教學的 mini-redis。
+  - **每集一個專案，結構固定**：`Cargo.toml`、`src/lib.rs`（放 handler 與 `pub fn app() -> Router`，最後一行 `#[cfg(test)] mod tests;`）、`src/tests.rs`；`src/main.rs` 只在第 1 集（開伺服器）與第 8 集（`ctrl_c` 與 `serve`）貼出，第 2～7、9 集寫「`src/main.rs` 照舊」，不重貼。因為這樣，檢查點是 `cargo test --lib`（不編譯 bin），所以第 1、8 集在 `main.rs` 之後另有一個 `cargo build` 檢查點把它編過（輸出標籤寫「（省略相依套件的編譯進度）」）。`.rs` 一律 `rust,ignore` 加路徑標籤。專案的 `Cargo.toml` 與 `deps/Cargo.toml` 一致：axum 0.8.9（預設 feature，沒開 `macros`，所以沒有 `#[debug_handler]`）、tokio 1.54.1（`full`）、serde 1.0.229（`derive`）、thiserror 2.0.21（第 6 集），`[dev-dependencies]` 放 `http-body-util` 0.1.5、`tower` 0.5.3（`util`）、`tokio-util` 0.7.20（第 8 集）、`serde_json` 1.0.154（第 9 集）。沒有新增 crate 或 feature，`deps/` 沒有改。
+  - **測試固定句型**（第 1 集起照抄，第 9 集解釋，已寫進上面的固定句型表）：每集 `src/tests.rs` 開頭的 `use` 與 `async fn send(app: &Router, method: &str, path: &str, body: &str) -> (u16, String)` 一字不改（第 9 集因為比對 JSON，多一行 `use serde_json::Value;`），每集只換測試案例。`send` 一律帶 `content-type: application/json`；測試只比對（狀態碼，文字）。`send` 做不到的才另寫輔助函式（第 7 集要帶 `x-api-key` 標頭的 `admin_stats`、第 8 集手寫 `TcpStream` 請求的 `raw_get`），並在文中交代。測試不綁固定連接埠：只有第 8 集的測試自己開伺服器，綁 `127.0.0.1:0`。`send` 的寫法是 rustfmt 的結果：回應轉成文字要拆成 `collected` 與 `text` 兩個 `let`，最後回傳 `(status, text)`，寫成一行會被 rustfmt 拆成好幾行；測試裡太長的 `assert_eq!` 也先用 `let` 起來再比。
+  - **不貼 `cargo run` 的輸出區塊**（伺服器不會結束，checkcode 會逾時）。書上的終端機對話寫成 `$ ` 開頭的 ```` ```text ```` 區塊，**前面不能加「`cargo …` 的輸出：」這種標籤**（會被當成檢查點）：`$ cargo run` 區塊的第二行是 `     Running `target/debug/teashop``（編譯進度省略，文中說明第一次要編譯一陣子），第三行是程式印的第一行；`$ curl …` 區塊每個 `$ ` 行是一條指令，後面是它的輸出；伺服器自己印的行（第 7、8 集）用「伺服器那邊的終端機…：」開頭的一行說明接一個 `text` 區塊，Ctrl-C 之後的區塊第一行寫 `^C`。`curl` 的選項：`-s`、`-i`（`date` 標頭每次不同，文中說明）、`-w '\n[%{http_code}]\n'`（狀態碼）、`-o /dev/null -w '%{http_code}\n'`。這些區塊 checkcode 不驗證，**撰寫者必須對真的伺服器逐條重播**（做法：啟動編好的程式、等連接埠、逐條執行 `curl`、比對，`date` 標頭除外；第 8 集在 `/slow` 進行中送 SIGINT）。本機的 3000 若被別的程式佔用（OrbStack 就會），重播時改用別的連接埠，貼回書上再換成 3000。
+  - **`cargo build` 的輸出標籤寫「（省略相依套件的編譯進度）」**：拿掉相依套件的 `Compiling tokio v1.54.1` 這類行，保留 `Compiling teashop v0.1.0 (/home/you/teashop)` 與 `Finished` 行。checkcode 只看「結束碼 N」，不受影響；`projfill.py` 實作這個說明，而且**現在會替用到 `deps/` 這些 crate 的專案種入 `deps/Cargo.lock`**（從 md 路徑往上找 repo，不寫死路徑），設了環境變數 `PROJFILL_TARGET` 時每個 md 用自己的持久 target 目錄（相依套件只編一次，路徑顯示成 `target/`）。
+  - 單檔的 axum 區塊（只有第 5 集的 `rust,compile_fail=E0308,noplayground`）要加 `noplayground`（Playground 沒有 axum）；專案檔案是 `rust,ignore`，本來就沒有執行按鈕。
+  - 1.99 + axum 0.8.9 的訊息（實測）：`Json` 不在最後一個參數是 E0277 ``the trait bound `fn(Json<…>, Query<…>) -> _ {create_order}: Handler<_, _>` is not satisfied``，後面有 `Consider using #[axum::debug_handler]` 與 `~/.cargo/registry/src/…`、`long-type-….txt` 的路徑，書上只用文字說明；少了 `with_state` 是 E0308（``expected `MethodRouter`, found `MethodRouter<AppState>` ``），貼前 10 行（到 `found struct …`），後面的 `note: method defined here` 夾 registry 路徑，要節錄掉（`fill.py --check` 接受前綴節錄）。
+  - axum 行為（實測）：沒掛的方法回 405 加 `allow: GET,HEAD,POST`（`get` 自動帶 `HEAD`）；`/menu/` 與 `/menu` 是不同的路徑；`Path` 轉型失敗是 400 `Invalid URL: Cannot parse value at index 1 with value `abc` to a `u8``，`Query` 失敗是 400 `Failed to deserialize query string: sugar: invalid digit found in string`；`Json` 缺欄位是 422（`Failed to deserialize the JSON body into the target type: missing field `cups` at line 1 column 15`），不是 JSON 是 400（`Failed to parse the request body as JSON: expected ident at line 1 column 2`），缺 `content-type` 是 415（``Expected request with `Content-Type: application/json` ``）；路徑寫 `:id` 在 axum 0.8 是 panic（``Path segments must not start with `:`. For capture groups, use `{capture}`…``），同路徑同方法掛兩次是 panic（`` Overlapping method route. Handler for `GET /menu` already exists ``，位置指向呼叫 `route` 的那一行）；handler 裡 panic 不會變成 500，連線被切斷（`curl` 結束碼 52），伺服器繼續服務；`layer` 包整個 `Router`（含 `fallback`），只包它之前加的路由；`route_layer` 不含 `fallback`；`.layer(a).layer(b)` 的請求先經過 `b`，`ServiceBuilder::new().layer(a).layer(b)` 先經過 `a`；`serve(..).with_graceful_shutdown(..)` 等到進行中的請求做完才回來，之後再連是被拒絕；`oneshot` 的錯誤型別是 `Infallible`。
+  - Go（1.27，要有 `go.mod`：沒有 `go.mod` 的 GOPATH 模式用舊的 `ServeMux`，`"GET /menu"` 會被當成字面路徑）都實測過：`"/"` 兜底所有路徑；方法樣式 `"GET /orders"` 方法不對回 405 加 `Allow: GET, HEAD, POST`，預設 404 是文字 `404 page not found`；`"/docs/"` 是整棵子樹，`/docs` 被 307 導向 `/docs/`；`http.Error` 之後沒 `return`，body 是兩段（404 加上多寫的內容）；`Shutdown` 一被呼叫，`ListenAndServe` 就立刻回傳 `http.ErrServerClosed`，`main` 就此結束會切斷進行中的請求（`curl` 結束碼 52），等的是 `Shutdown`。
+  - 「跟 Go 比一比」第 19 章每集都有：01（`"/"` 兜底、handler 寫 `w` vs 回傳值）、02（斜線與子樹、預設 body）、03（路徑與查詢都是字串、要自己轉型）、04（缺欄位悄悄是零值）、05（共用資料與鎖、`-race`）、06（`http.Error` 後忘了 `return`）、07（巢狀順序、`ResponseWriter` 沒有狀態碼）、08（`ListenAndServe` 先回傳、等的是 `Shutdown`）、09（`httptest`）。
+  - 篇幅：每集 193～208 行（作者決定：實戰章放寬到約 200 行）。省行數的辦法：領域資料縮到最小（第 3 集只留 `sugar`、第 4 集的 `Order` 同時 derive 兩個方向、第 5 集不放 id）、`main.rs` 只在需要時貼、Go 對照只留會踩坑的那一段、把編譯錯誤節錄成前 10 行。
 
 ## 多檔案專案
 
@@ -358,7 +372,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 | 標籤 | 後面的區塊 | 意思 |
 | --- | --- | --- |
 | `` `src/lib.rs`： `` | 任何語言，通常是 `rust,ignore`、`toml` | 專案裡這個檔案現在的內容。路徑只能有英數與 `_ . / -`，檔名要有副檔名，不能是絕對路徑或含 `..`，相對於專案根目錄（workspace 成員寫 `teashop/src/lib.rs`） |
-| `` `cargo run` 的輸出（省略編譯進度）： `` | `text` | 檢查點。這一刻把所有檔案寫進暫時專案，執行這條指令，結果要跟區塊相符。指令要是 `cargo` 開頭，可以帶 `--features`、`-p` 之類的參數；括號裡的說明不影響驗證，只有「結束碼 N」例外（見下） |
+| `` `cargo run` 的輸出（省略編譯進度）： `` | `text` | 檢查點。這一刻把所有檔案寫進暫時專案，執行這條指令，結果要跟區塊相符。指令要是 `cargo` 開頭，可以帶 `--features`、`-p` 之類的參數；括號裡的說明不影響驗證，只有「結束碼 N」例外（見下）；`cargo build` 的輸出可以寫「（省略相依套件的編譯進度）」，只拿掉相依套件的 `Compiling` 行（第 19 章，`projfill.py` 實作） |
 | `` `cargo fmt` 之後的 `src/main.rs`： `` | `rust` | 前一個版本排版亂掉的示範（見下）：這個檔案接著變成區塊的內容 |
 
 標籤拼錯（例如半形冒號、少了反引號）不會報錯，那一行就只是普通文字，後面的區塊也就不會進專案。改完標籤要看 checkcode 最後印出的專案、檔案、檢查點數量有沒有變。
@@ -396,7 +410,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - **照常寫 ```` ```rust ````，不用加標註。** checkcode 看程式裡有沒有出現 `<crate>::`（連字號換成底線，例如 `tokio::`、`serde_json::`、`http_body_util::`；`use tokio::time::sleep;` 和 `#[tokio::main]` 都算）：有的話，這個區塊就放進共用依賴 package 一起編譯，沒有的話照第一部的方式單檔編譯。清單外的 crate（例如 `reqwest::`）不會被認出來，單檔編譯時找不到 crate，區塊直接失敗。
 - 區塊要用到 crate 的名字，一定要寫成 `crate名::` 的路徑形式（`use tokio::spawn;` 或 `tokio::spawn(...)`）。`use tokio as t;` 這種別名寫法不會被認出來。
 - rustfmt、clippy（`-D warnings` 與 `clippy-allow.txt` 放行清單）、結束碼、`stdin`、`no_run`、`warn`、`test`、`compile_fail=E....` 的規則跟 std 區塊完全相同；一個區塊失敗不會影響其他區塊。
-- Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。2026-11 查過 rust-lang/rust-playground 的 `compiler/base/Cargo.toml`：`tokio`（1.54.1，含 `full`）、`tokio-util`（0.7.20）、`tower`、`http-body-util`、`serde`、`serde_json`、`tracing`、`tracing-subscriber`（0.3.23）、`rand`、`uuid`、`thiserror`、`anyhow` 都有，版本跟 `deps/Cargo.toml` 相同；`clap` 有（4.6.7，清單裡開了 `unstable-doc`，`clap_derive` 也單獨列在清單裡，但沒有實際在 Playground 上跑過 derive）；`axum` 與 `rusqlite` 沒有，用到它們的區塊要加 `noplayground`。第 15 章只用 tokio 與 tokio-util，所以不加 `noplayground`（只比對了 crate 清單與版本，沒有逐一在 Playground 上執行）。第 18 章的 `clap`、`tokio` 都在專案的 `rust,ignore` 檔案裡，本來就沒有執行按鈕；單檔區塊只用 std（第 5 集），不受影響。
+- Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。2026-11 查過 rust-lang/rust-playground 的 `compiler/base/Cargo.toml`：`tokio`（1.54.1，含 `full`）、`tokio-util`（0.7.20）、`tower`、`http-body-util`、`serde`、`serde_json`、`tracing`、`tracing-subscriber`（0.3.23）、`rand`、`uuid`、`thiserror`、`anyhow` 都有，版本跟 `deps/Cargo.toml` 相同；`clap` 有（4.6.7，清單裡開了 `unstable-doc`，`clap_derive` 也單獨列在清單裡，但沒有實際在 Playground 上跑過 derive）；`axum` 與 `rusqlite` 沒有，用到它們的區塊要加 `noplayground`。第 15 章只用 tokio 與 tokio-util，所以不加 `noplayground`（只比對了 crate 清單與版本，沒有逐一在 Playground 上執行）。第 18 章的 `clap`、`tokio` 都在專案的 `rust,ignore` 檔案裡，本來就沒有執行按鈕；單檔區塊只用 std（第 5 集），不受影響。第 19 章同樣：專案檔案都是 `rust,ignore`，只有第 5 集一個單檔的 `compile_fail` 區塊用到 axum，已加 `noplayground`。
 - 多檔案專案（第 18～20 章的實戰章）的 `Cargo.toml` 也只能用這份清單，版本要與 `deps/Cargo.toml` 一致，規則見上一節「多檔案專案」。
 - 版本統一鎖在 `tools/checkcode/deps/Cargo.toml`，`Cargo.lock` 一併提交。新增 feature 或升級版本：改該檔，執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`，再把 `Cargo.lock` 一起提交。不得在書中另外加清單外的 crate。
 - 該檔的 `[lints.clippy]` 必須與 `tools/checkcode/clippy-allow.txt` 一致；改放行清單時兩邊一起改（checkcode 的測試會檢查）。
