@@ -50,7 +50,7 @@ async fn main() {
 
 會卡住執行緒的常見東西：
 
-- `std::thread::sleep`，標準函式庫的同步 I/O（第 17 章的讀寫檔案，以及 `std::sync::mpsc` 的 `recv`）。
+- `std::thread::sleep`，標準函式庫的同步 I/O（第 17 章第 3 集的讀寫檔案，以及 `std::sync::mpsc` 的 `recv`）。
 - 拿不到的 `std::sync::Mutex`。
 - 純計算但要算很久的程式（壓縮、加密、大量運算）。
 

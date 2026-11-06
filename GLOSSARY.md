@@ -39,7 +39,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 
 原則：跟 Rust 關鍵字或生態系名稱相同的詞保留英文；其他翻成台灣用語，第一次出現時附英文。
 
-保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、Cargo 與它的指令名稱。
+保留英文：`unsafe`、FFI、`const fn`、`build.rs`、`trait`、trait bound、newtype、crate、package、workspace、feature、profile、prelude、`struct`、`enum`、`match`、slice、`Future`、`async`、variant、move、drop、adapter、consumer、lint、clone-on-write、channel、data race、race condition、atomic、worker pool、runtime、`await`（寫成 `.await`）、span、subscriber、Cargo 與它的指令名稱。
 
 | 書中用語 | 英文 | 不要用 |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 溢位 | overflow | 溢出 |
 | 預設 | default | 默認 |
 | 複本 | copy | 拷貝 |
-| 程式 | program | 程序 |
+| 程式 | program | 程序（例外：「程序巨集」保留「程序」，因為那裡指的是 procedural，不是 program） |
 | 堆疊（stack） | stack | 棧 |
 | 堆積（heap） | heap | 堆 |
 | 懸置參照 | dangling reference | 懸垂引用、野指標 |
@@ -130,3 +130,12 @@ AI 助教依讀者目前進度現場出的題目，必須明說不是固定題�
 | 未定義行為 | undefined behavior | 未定義的行為 |
 | 條件編譯 | conditional compilation（`#[cfg]`） | 條件式編譯 |
 | const 泛型 | const generics | 常數泛型 |
+| 序列化 | serialize | 串行化 |
+| 反序列化 | deserialize | 反串行化 |
+| 緩衝區 | buffer | 緩存（那是 cache） |
+| 環境變數 | environment variable | 環境變量 |
+| 行程 | process（作業系統的） | 進程、程序 |
+| 子行程 | child process | 子進程 |
+| 亂數 | random number | 隨機數 |
+| 種子 | seed（亂數的） | 種籽 |
+| 錯誤鏈 | error chain（`source()` 一層層往下） | 錯誤堆疊 |
