@@ -19,7 +19,7 @@
 
 | 種類 | 怎麼用 | 定義時的標記 | 例子 |
 | --- | --- | --- | --- |
-| derive | `#[derive(名字)]` 加在 struct、enum 上，替它產生 `impl` | `#[proc_macro_derive(名字)]` | `Debug`、`Clone`（編譯器內建）、第 17 章的 `Serialize` |
+| derive | `#[derive(名字)]` 加在 struct、enum 上，替它產生 `impl` | `#[proc_macro_derive(名字)]` | `Debug`、`Clone`（編譯器內建）、第 17 章第 9 集的 `Serialize` |
 | 屬性 | `#[名字]` 加在函式、型別上，可以改寫整個項目 | `#[proc_macro_attribute]` | 第 15 章的 `#[tokio::main]` |
 | 像函式 | `名字!(...)`，用起來像 `macro_rules!` | `#[proc_macro]` | 這本書沒有用到 |
 
@@ -110,7 +110,7 @@ Coffee
 
 上面靠「找 `struct` 後面那個 token」過日子，遇到 `pub struct`、泛型、欄位上的屬性就會出錯。實務上，寫程序巨集的人會用 `syn`（把 token 解析成語法樹）和 `quote`（用範本產生 token）這兩個 crate，它們不在這本書的清單裡，所以不展開。
 
-身為使用者，你只要會用別人寫好的：第 17 章的 `serde` 用 `#[derive(Serialize, Deserialize)]` 替型別產生轉成 JSON 的程式，第 18 章的 `clap` 用 `#[derive(Parser)]` 替型別產生解析命令列的程式。
+身為使用者，你只要會用別人寫好的：第 17 章第 9 集的 `serde` 用 `#[derive(Serialize, Deserialize)]` 替型別產生轉成 JSON 的程式，第 18 章的 `clap` 用 `#[derive(Parser)]` 替型別產生解析命令列的程式。
 
 ### 跟 Go 比一比
 

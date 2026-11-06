@@ -43,7 +43,7 @@ Rust 1.99 · edition 2024 · 繁中 · 給會寫 Go 的 Rust 新手 · 一集一
 ## 第 9 章 錯誤處理
 01 `panic!` · 02 `Result<T, E>` · 03 用 `match` 處理 `Result` · 04 `unwrap` 與 `expect`（揭曉固定句型）· 05 `?` 運算子 · 06 `?` 也能用在 `Option` · 07 用 enum 當錯誤型別（含自己實作 `FromStr`，兌現第 8 章第 14 集）· 08 實作 `Display` 與 `Error` · 09 `?` 會自動呼叫 `From` · 10 `Box<dyn Error>` · 11 `main` 回傳 `Result` · 12 什麼時候 panic、什麼時候回傳 `Result`（跟 Go 的 `if err != nil` 比一比）
 
-邊界：`Option` / `Result` 的組合子（`map`、`and_then`…）用到閉包，留到第 11 章；`unwrap_or`、`ok_or`、`map_err` 等方法也一併留到第 11 章。不用 `std::fs`（第 17 章），錯誤來源只有 `parse` 與 `read_line`。
+邊界：`Option` / `Result` 的組合子（`map`、`and_then`…）用到閉包，留到第 11 章；`unwrap_or`、`ok_or`、`map_err` 等方法也一併留到第 11 章。不用 `std::fs`（第 17 章第 3 集），錯誤來源只有 `parse` 與 `read_line`。
 
 ## 第 10 章 生命週期
 01 為什麼需要生命週期 · 02 標註語法 `'a` · 03 函式的生命週期 · 04 省略規則 · 05 struct 持有參照 · 06 方法的生命週期 · 07 `'static` · 08 常見錯誤：改成擁有資料就好
@@ -77,10 +77,12 @@ a 數字字面值（`1_000`、`0x`、`0b`、`10u8`）· b 標籤 `'outer` · c �
 ## 第 16 章 進階語言功能
 01 巨集是什麼（揭曉 `println!`）· 02 `macro_rules!` · 03 重複 `$(...)*` · 04 程序巨集與 derive 簡介 · 05 `unsafe` · 06 原始指標 · 07 FFI 與 `unsafe extern "C"` · 08 const 泛型 · 09 `const fn` · 10 `#[cfg]` 條件編譯 · 11 `build.rs` 簡介 · 12 `include_str!`（跟 Go 的 `//go:embed` 比一比）· 13 `TryFrom` 與 `TryInto`
 
-邊界：第一部全部與第 13～15 章都可用；不用清單外的 crate（`syn`、`quote`、`cc`、`bindgen` 最多一句話帶過、標明「這本書不展開」）。第 4 集的程序巨集只用標準函式庫的 `proc_macro`，做成 `path` 相依的獨立 crate（多檔案專案）。`unsafe` 範例（第 5～7 集）都要有安全的包裝，不執行會造成未定義行為的程式；edition 2024：`unsafe fn` 本體仍要包 `unsafe { }`、不取 `static mut` 的參照、`extern` 區塊要寫 `unsafe extern`、`no_mangle` 要寫 `#[unsafe(no_mangle)]`。FFI 只呼叫每個平台的 C 標準函式庫都有的 `toupper`、`strlen`、`atoi`。第 10 集的單檔輸出只依賴所有平台都相同的條件（`debug_assertions`、`target_pointer_width = "64"`）；`unexpected_cfgs` 只有 cargo 會檢查，用專案展示。`build.rs` 的輸出只用寫死的值（`std::env`、`std::fs` 是第 17 章）。第 13 集 `TryFrom`／`TryInto` 是寫第 16 章時，由作者決定補上的（附錄一 i 指向它）。
+邊界：第一部全部與第 13～15 章都可用；不用清單外的 crate（`syn`、`quote`、`cc`、`bindgen` 最多一句話帶過、標明「這本書不展開」）。第 4 集的程序巨集只用標準函式庫的 `proc_macro`，做成 `path` 相依的獨立 crate（多檔案專案）。`unsafe` 範例（第 5～7 集）都要有安全的包裝，不執行會造成未定義行為的程式；edition 2024：`unsafe fn` 本體仍要包 `unsafe { }`、不取 `static mut` 的參照、`extern` 區塊要寫 `unsafe extern`、`no_mangle` 要寫 `#[unsafe(no_mangle)]`。FFI 只呼叫每個平台的 C 標準函式庫都有的 `toupper`、`strlen`、`atoi`。第 10 集的單檔輸出只依賴所有平台都相同的條件（`debug_assertions`、`target_pointer_width = "64"`）；`unexpected_cfgs` 只有 cargo 會檢查，用專案展示。`build.rs` 的輸出只用寫死的值（`std::env` 是第 17 章第 5 集、`std::fs` 是第 3 集）。第 13 集 `TryFrom`／`TryInto` 是寫第 16 章時，由作者決定補上的（附錄一 i 指向它）。
 
 ## 第 17 章 進階 std 與常用 crate
 01 `Read` 與 `Write` · 02 `BufRead` 與 `BufReader` · 03 `std::fs` 檔案操作 · 04 `Path` 與 `PathBuf` · 05 `std::env` · 06 `std::time` · 07 `std::process::Command` · 08 `serde` 與 `serde_json` · 09 derive `Serialize` / `Deserialize` · 10 `tracing` · 11 `rand` · 12 `uuid` · 13 `thiserror` · 14 `anyhow`
+
+邊界：第一部全部與第 13～16 章都可用。第 1～7 集只用 std；第 8～14 集用書中固定的 crate 版本（`tools/checkcode/deps/Cargo.toml`：`serde`（`derive`）、`serde_json`、`tracing`、`tracing-subscriber`、`rand`、`uuid`（`v4`）、`thiserror`、`anyhow`），不加清單外的 crate（`chrono`、`walkdir`、`regex` 最多一句話帶過、標明「這本書不展開」；`tracing-subscriber` 的 `env-filter`、`json` 等 feature 沒開，也不教）。第 10 集的 subscriber 一律關掉時間、顏色與模組路徑，輸出才固定。輸出要固定、不依賴平台：不印路徑、環境變數全集、時間值、作業系統的錯誤訊息（改印 `ErrorKind`）；檔案範例在工作目錄建 `teashop-…` 資料夾再刪掉（每個範例的名稱都不同，因為 checkcode 平行執行、工作目錄共用）；`Command` 只用 `echo`、`sh`、`cat`。`env::set_var` 在 edition 2024 是 `unsafe`（第 5 集）；`env::args` 留給第 18 章第 1 集；第 6 集兌現第 14 章第 1 集的 `Duration`。`rand` 與 `Command` 的區塊加 `noplayground`。
 
 ## 第 18 章 實戰：CLI 工具
 01 `std::env::args` · 02 `clap` derive · 03 子命令 · 04 結束碼 `ExitCode` · 05 stdin/stdout 管線 · 06 走訪目錄 · 07 處理 Ctrl-C · 08 完整範例
