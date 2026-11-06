@@ -72,6 +72,8 @@ a 數字字面值（`1_000`、`0x`、`0b`、`10u8`）· b 標籤 `'outer` · c �
 ## 第 15 章 async
 01 為什麼需要 async（跟 goroutine 比一比）· 02 `async fn` 與 `.await` · 03 `Future` 是惰性的 · 04 tokio 與 `#[tokio::main]` · 05 `tokio::spawn` · 06 `JoinSet` · 07 `tokio::sync::mpsc` · 08 `select!` · 09 `timeout` · 10 `CancellationToken`（跟 Go 的 context 比一比）· 11 async 裡的 `Mutex` · 12 不要阻塞 runtime：`spawn_blocking` · 13 async 閉包 · 14 跨 `.await` 的 `Send` 限制
 
+邊界：第一次用 crate，只用 `tokio` 與 `tokio-util`（第 10 集的 `CancellationToken`），版本以 `tools/checkcode/deps/Cargo.toml` 為準。第 1 集只用 std，不寫 async；`#[tokio::main]` 加 `async fn main()`、`tokio::time::sleep(Duration::from_millis(n)).await` 是固定句型，第 2 集起照抄，第 4 集解釋。`async { }` 區塊第 3 集教、`tokio::spawn` 第 5 集教，之前不用。不用 `futures` crate、`async-trait`、`join!`、`Pin`（附錄二 d）、`LocalSet`、`unbounded_channel`、`select!` 的 `biased;`，最多一句話帶過、標明「這本書不展開」。範例的輸出要固定：任務之間用 `sleep` 隔開至少 100 毫秒，順序重要的示範用 `flavor = "current_thread"`；任務 panic 一律用 `handle.await` 或 `join_next` 接住；會永遠卡住的範例用 `rust,no_run`。
+
 ## 第 16 章 進階語言功能
 01 巨集是什麼（揭曉 `println!`）· 02 `macro_rules!` · 03 重複 `$(...)*` · 04 程序巨集與 derive 簡介 · 05 `unsafe` · 06 原始指標 · 07 FFI 與 `unsafe extern "C"` · 08 const 泛型 · 09 `const fn` · 10 `#[cfg]` 條件編譯 · 11 `build.rs` 簡介 · 12 `include_str!`（跟 Go 的 `//go:embed` 比一比）
 

@@ -81,6 +81,7 @@
 | 第 12 章第 10 集 | `#[cfg(test)]`，只加在 `mod tests { use super::*; ... }` 上，照抄 | `cfg` 第 16 章第 10 集 |
 | 第 12 章第 15 集 | `#[cfg(feature = "名字")]`，照抄 | `cfg` 第 16 章第 10 集 |
 | 第 14 章第 1 集 | `thread::sleep(Duration::from_millis(n))`（睡 `n` 毫秒，搭配檔案最上面的 `use std::thread;`、`use std::time::Duration;`，照抄） | `Duration` 第 17 章第 6 集 |
+| 第 15 章第 2 集 | `#[tokio::main]` 加 `async fn main() { ... }`（照抄）；`tokio::time::sleep(Duration::from_millis(n)).await`（async 版的睡眠，搭配 `use std::time::Duration;`、`use tokio::time::sleep;`） | `#[tokio::main]` 第 15 章第 4 集（`.await` 與 `sleep` 在第 2 集就說明） |
 
 讀一行輸入（每次要讀一行就重複這三行）：
 
@@ -266,6 +267,26 @@ let n: i32 = line.parse().expect("請輸入整數");
   - 「跟 Go 比一比」第 14 章用在：01（goroutine 很輕、`thread::spawn` 是作業系統執行緒）、02（沒 `recover` 的 goroutine panic 讓整個程式結束；`WaitGroup` 帶不回結果）、03（Go 閉包共用變數）、05（`close` vs drop 最後一個 `Sender`；送指標兩邊共用）、06（誰來 `close`）、07（`sync.Mutex` 跟資料分開）、12（`Add` 回傳新值、沒有 `Ordering`）、13（`init()`、`sync.OnceValue`）、14（runtime 的 `all goroutines are asleep - deadlock!`）、15（`-race`）、16（`make(chan T, n)` 對應 `sync_channel`，`channel()` 是無限的）、17（多個消費者直接 `range` 同一個 channel）。04、08、09、10、11 沒有值得單獨成節的差異。Go 版的行為都在 Go 1.27 跑過：`go run -race` 對計數器印 `WARNING: DATA RACE`、`Found 2 data race(s)`、`exit status 66`；兩把鎖相反順序加 `WaitGroup` 印 `fatal error: all goroutines are asleep - deadlock!`、`exit status 2`；`make(chan int, 2)` 讓送的人在第 3 筆卡住。
   - 篇幅：每集 89～153 行（第 15 集 153 行最長）。省行數的辦法：編譯錯誤只貼前半段（用 `tr.sh` 節錄，`fill.py --check` 接受前綴節錄）、「規則照舊」的錯誤（`join` 兩次、`move` 之後再用）改成一句話。
 
+- async 相關的範例（第 15 章，第一次用 crate）：
+  - 領域沿用飲料店：`brew`、`serve_set`、`tea_price`、`Cup`（`Drop`，印「杯子收走了」，用來展示取消）、`machine`／`till`／`orders`（共用資料）、`sent`（計數）。避開 Tokio 官方教學的 mini-redis、`say_world`、`hello`、`count`，以及 The Rust Book 的 async 章節（`trpl`、`page_title`、`slow`、`race`、`hello from task`）。
+  - 用到的 crate 只有 `tokio`（`features = ["full"]`）與 `tokio-util`（第 10 集的 `CancellationToken`），路徑照「第二部使用 crate」寫成 `tokio::...`、`tokio_util::...`；`tokio::select!`、`tokio::spawn` 這類路徑也算。不用 `futures`、`async-trait`；`join!`、`Pin`、`LocalSet`、`unbounded_channel`、`select!` 的 `biased;` 最多一句話帶過。`use tokio::time::sleep;`、`use tokio::task::JoinSet;`、`use tokio::sync::mpsc;` 放檔案最上面，跟其他 `use` 依字母排序（rustfmt 會檢查）。
+  - 第 1 集不寫 async；`#[tokio::main]` 加 `async fn main()` 與 `tokio::time::sleep(Duration::from_millis(n)).await` 是固定句型（見上表），第 2 集起照抄，第 4 集解釋；`async { }` 區塊第 3 集教，`tokio::spawn` 第 5 集教。
+  - **輸出要固定**（比照第 14 章，但 async 多幾個陷阱）：
+    - 任務之間靠 `sleep` 拉開至少 100 毫秒再比先後（`select!` 兩個分支不要同時就緒，預設會隨機挑）；整個區塊的睡眠總和不超過約 1 秒。不印經過時間、不用 `Instant`、不印執行緒編號。
+    - 任務可以在裡面 `println!`，但要靠上面的時間差決定順序；一次要收好幾個結果時，依 `JoinHandle` 的順序等，或收進 `Vec` 再 `sort`。
+    - 順序要靠排程決定的示範（`Mutex` 排隊、單執行緒卡住、`mpsc` 背壓），用 `#[tokio::main(flavor = "current_thread")]`：任務依開出來的順序排程，連跑 20 次都固定。
+    - 任務 panic 一律用 `handle.await`、`join_next` 的 `Err` 接住（`JoinError::is_panic()`）。panic 訊息的執行緒名稱是 `thread 'tokio-rt-worker' (數字)`（tokio 1.54.1），印在 stderr，`fill.py` 在結束碼 0 時只貼 stdout，所以不會進「執行結果」；要在文中提到它，只用行內程式碼，並說明數字與名稱會變。
+    - 每個範例寫完，用 `fill.py --check` 連跑兩次以上（任務的順序不能時好時壞）。`fill.py` 對用到 crate 的區塊也有效：它把區塊放進跟 checkcode 同一份 `deps` 設定（同一份 `Cargo.toml`、`Cargo.lock` 與 `deps/target` 快取）的暫時 package 裡，用 `cargo build` 編譯執行，所以訊息的路徑一樣是 `src/main.rs`。
+  - 會永遠卡住的範例（忘了 `drop(tx)`、同一個任務 `lock().await` 兩次）用文字說明，已實測：程式不會結束、沒有錯誤訊息（要貼成區塊就用 `rust,no_run`）。
+  - `rust,warn`：只呼叫 async 函式、沒有 `.await`，是 rustc 的 `unused_must_use`（`unused implementer of Future that must be used`，`futures do nothing unless you .await or poll them`）。`fill.py` 的「編譯警告：」與「執行結果：」可以接在同一個 `rust,warn` 區塊後面。
+  - rustfmt：`.await` 串了好幾層的方法鏈（`set.join_next().await.expect(..).expect(..)`）超過寬度就拆成每行一個，先拆成兩個 `let`；`timeout(Duration::from_millis(100), sleep(Duration::from_millis(300)))` 這類引數太長會被拆開，先把引數放進變數；`println!` 引數多的時候用小函式或 `Vec` 整理。
+  - clippy 實測：本章寫出來的範例沒有觸發新的 lint（`let` chains、`while let Some(x) = set.join_next().await`、`std::thread::sleep` 放在 async 區塊裡、`Vec::new()` 加 `push` 都不擋）。
+  - 1.99、tokio 1.54.1 的訊息形狀（實測）：把 `async fn` 的結果當成 `u32` 用是 E0308（`expected u32, found future`，整段很短）；普通函式裡的 `.await` 是 E0728；`async fn main` 沒有 `#[tokio::main]` 是 E0752；`tokio::spawn(async { 借區域變數 })` 是 E0373（`async block may outlive the current function`，`help` 建議 `async move`，整段貼）；同一個 `Future` `.await` 兩次是 E0382（`note` 夾 `/rustc/<雜湊>/library/core/src/future/into_future.rs`，文中只用一句話）；`JoinSet` 的任務結果型別不同是 E0271（只貼前 8 行，後面的 `note` 夾 `~/.cargo/registry/src/.../tokio-1.54.1/...` 路徑）；舊式閉包（`|n| async move { 改外面的變數 }`）是 E0507（貼前 15 行；後面還有 E0382 與 `help`），去掉 `move` 是 E0373 加一個沒有錯誤碼的 `captured variable cannot escape FnMut closure body`；任務不是 `Send`（`Rc` 或 std 的 `MutexGuard` 跨過 `.await`）是沒有錯誤碼的 `future cannot be sent between threads safely`，要用不帶碼的 `compile_fail`，只貼到第二則 `note`（`note: future is not Send as this value is used across an await`），後面的 `note: required by a bound in tokio::spawn` 夾 `~/.cargo/registry/src/...` 的絕對路徑。
+  - 執行時的行為（都實測過）：`rx.recv().await` 通道關閉後回傳 `None`；`mpsc::channel(0)` panic（`mpsc bounded channel requires buffer > 0`）；`select!` 所有分支都停用又沒寫 `else` 會 panic（`all branches are disabled and there is no else branch`）；`timeout` 逾時是 `Err(Elapsed)`，Display 是 `deadline has elapsed`、Debug 是 `Elapsed(())`；`tokio::sync::Mutex` 的 `lock()` 沒有 `Result`，任務拿著鎖 panic 之後下一個 `lock().await` 照樣拿得到；同一個任務連續 `lock().await` 兩次會永遠等；`spawn_blocking` 已經開始跑的閉包，`abort()` 沒有用（`.await` 照樣拿到 `Ok`）；丟掉 `JoinSet` 取消還沒做完的任務；`join_all()` 回傳完成順序，任何一個任務 panic 它也 panic（結束碼 101）；在 async 裡對另一個 runtime 呼叫 `block_on` 會 panic（`Cannot start a runtime from within a runtime`，訊息夾 `~/.cargo/registry/src/...` 的路徑，所以不貼成區塊）；`#[tokio::main]` 底下 `main` 本體是 `block_on` 在目前執行緒跑，不需要 `Send`，只有 `tokio::spawn` 才有。
+  - Go 的輸出區塊：本章沒有貼 Go 的輸出（Go 區塊只當程式對照，都在 Go 1.27 跑過：三杯飲料 `go` 加 channel 的順序是咖啡、奶茶、紅茶；`runtime.GOMAXPROCS(1)` 加一個空迴圈 goroutine，主程式照樣醒來；`WithTimeout` 逾時的 `err` 是 `context deadline exceeded`；`WithCancel` 之後 `ctx.Err()` 是 `context canceled`）。
+  - 「跟 Go 比一比」第 15 章用在：01（runtime 內建、可搶佔、`go f()` 立刻開跑）、02（函式沒有顏色）、03（`go f()` 立刻開跑、丟掉 `Future` 就取消）、05（`JoinHandle`、goroutine panic 讓整個程式結束）、06（goroutine 沒有人能丟掉，`JoinSet` 丟掉就取消）、07（`make(chan T, n)` 對應 `channel(n)`、沒有 `close`、`channel(0)` panic）、08（`select` 的 `case` 是 channel 操作，Rust 的分支是整個 `Future`）、09（`context.WithTimeout` 要函式配合）、10（`context` 對照表）、11（Go 只有一種鎖）、12（Go 的 runtime 自動處理卡住的 goroutine）。04、13、14 沒有 Go 直覺會錯的地方。
+  - 篇幅：每集 110～149 行。省行數的辦法：靠散文加離線驗證就夠的行為（一萬個任務、`try_send`、`spawn` 之後就開跑、`MutexGuard` 版的 `Send` 錯誤）不貼成區塊；同一種錯誤只貼一次；`compile_fail` 的訊息只貼前半段。
+
 ## 多檔案專案
 
 第 12 章起，有些範例分散在好幾個檔案，要靠 `cargo` 才能展示。checkcode 依「路徑標籤」把一集裡的區塊組成暫時的 Cargo 專案，驗證它們編譯得過、clippy 沒警告、rustfmt 通過，書上有 `cargo test` 的地方測試真的會跑。第 18～20 章的 CLI、Web、SQLite 專案用同一套標籤。
@@ -314,7 +335,7 @@ let n: i32 = line.parse().expect("請輸入整數");
 - **照常寫 ```` ```rust ````，不用加標註。** checkcode 看程式裡有沒有出現 `<crate>::`（連字號換成底線，例如 `tokio::`、`serde_json::`、`http_body_util::`；`use tokio::time::sleep;` 和 `#[tokio::main]` 都算）：有的話，這個區塊就放進共用依賴 package 一起編譯，沒有的話照第一部的方式單檔編譯。清單外的 crate（例如 `reqwest::`）不會被認出來，單檔編譯時找不到 crate，區塊直接失敗。
 - 區塊要用到 crate 的名字，一定要寫成 `crate名::` 的路徑形式（`use tokio::spawn;` 或 `tokio::spawn(...)`）。`use tokio as t;` 這種別名寫法不會被認出來。
 - rustfmt、clippy（`-D warnings` 與 `clippy-allow.txt` 放行清單）、結束碼、`stdin`、`no_run`、`warn`、`test`、`compile_fail=E....` 的規則跟 std 區塊完全相同；一個區塊失敗不會影響其他區塊。
-- Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。
+- Playground 沒有的 crate 要加 `noplayground`；不確定某個 crate 在 Playground 上能不能跑，先到 Playground 試一次。checkcode 不檢查這件事。2026-11 查過 rust-lang/rust-playground 的 `compiler/base/Cargo.toml`：`tokio`（1.54.1，含 `full`）、`tokio-util`（0.7.20）、`tower`、`http-body-util`、`serde`、`serde_json`、`tracing`、`rand`、`uuid`、`thiserror`、`anyhow` 都有，版本跟 `deps/Cargo.toml` 相同；`clap` 有（4.6.7，清單裡開了 `unstable-doc`，`clap_derive` 也單獨列在清單裡，但沒有實際在 Playground 上跑過 derive）；`axum` 與 `rusqlite` 沒有，用到它們的區塊要加 `noplayground`。第 15 章只用 tokio 與 tokio-util，所以不加 `noplayground`（只比對了 crate 清單與版本，沒有逐一在 Playground 上執行）。
 - 多檔案專案（第 18～20 章的實戰章）的 `Cargo.toml` 也只能用這份清單，版本要與 `deps/Cargo.toml` 一致，規則見上一節「多檔案專案」。
 - 版本統一鎖在 `tools/checkcode/deps/Cargo.toml`，`Cargo.lock` 一併提交。新增 feature 或升級版本：改該檔，執行 `cargo update --manifest-path tools/checkcode/deps/Cargo.toml`，再把 `Cargo.lock` 一起提交。不得在書中另外加清單外的 crate。
 - 該檔的 `[lints.clippy]` 必須與 `tools/checkcode/clippy-allow.txt` 一致；改放行清單時兩邊一起改（checkcode 的測試會檢查）。
